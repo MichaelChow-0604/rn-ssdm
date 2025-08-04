@@ -46,7 +46,7 @@ function DialogOverlayNative({
     <DialogPrimitive.Overlay
       style={StyleSheet.absoluteFill}
       className={cn(
-        "flex bg-black/80 justify-center items-center p-2",
+        "flex bg-black/60 justify-center items-center p-2",
         className
       )}
       {...props}
@@ -82,7 +82,7 @@ function DialogContent({
       <DialogOverlay>
         <DialogPrimitive.Content
           className={cn(
-            "max-w-lg gap-4 border border-border web:cursor-default bg-background p-6 shadow-lg web:duration-200 rounded-lg",
+            "max-w-lg gap-4 border border-border web:cursor-default bg-background p-6 shadow-lg web:duration-200 rounded-2xl",
             open
               ? "web:animate-in web:fade-in-0 web:zoom-in-95"
               : "web:animate-out web:fade-out-0 web:zoom-out-95",

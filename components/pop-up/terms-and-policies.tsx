@@ -23,23 +23,29 @@ interface TermsAndPoliciesProps {
 export const TermsAndPolicies = ({ open, setOpen }: TermsAndPoliciesProps) => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="mx-4">
+      <DialogContent className="mx-4 bg-white">
         <DialogHeader>
-          <DialogTitle className="text-center">Terms of use</DialogTitle>
+          <DialogTitle className="text-center text-black">
+            Terms of use
+          </DialogTitle>
         </DialogHeader>
         <DialogDescription className="text-center">
           <Text>{TERMS_OF_USE}</Text>
         </DialogDescription>
 
         <DialogHeader>
-          <DialogTitle className="text-center">Disclaimer</DialogTitle>
+          <DialogTitle className="text-center text-black">
+            Disclaimer
+          </DialogTitle>
         </DialogHeader>
         <DialogDescription className="text-center">
           <Text>{DISCLAIMER}</Text>
         </DialogDescription>
 
         <DialogHeader>
-          <DialogTitle className="text-center">Privacy Policy</DialogTitle>
+          <DialogTitle className="text-center text-black">
+            Privacy Policy
+          </DialogTitle>
         </DialogHeader>
         <DialogDescription className="text-center">
           <Text>{PRIVACY_POLICY}</Text>

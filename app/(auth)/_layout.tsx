@@ -6,7 +6,7 @@ export default function AuthLayout() {
     <>
       <Stack>
         <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen name="forget-password" options={{ headerShown: true }} />
+        <Stack.Screen name="forget-password" options={{ headerShown: false }} />
       </Stack>
       <PortalHost />
     </>

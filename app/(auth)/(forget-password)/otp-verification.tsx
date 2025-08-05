@@ -20,7 +20,7 @@ export default function OTPVerificationPage() {
         <View className="flex flex-col gap-4">
           <Text className="text-2xl font-semibold">Check your email</Text>
           <Text className="font-semibold text-subtitle">
-            We sent a reset link to {email}
+            We sent a verification code to {email}
             {"\n"}
             Please enter the 5-digit code that mentioned in the email
           </Text>
@@ -48,7 +48,7 @@ export default function OTPVerificationPage() {
           <Button
             className="bg-button text-buttontext"
             disabled={otp.length !== 5}
-            onPress={() => router.push("/new-password")}
+            onPress={() => router.replace("/new-password")}
           >
             <Text className="text-white text-lg font-bold">Verify Code</Text>
           </Button>

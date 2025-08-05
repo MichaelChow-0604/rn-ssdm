@@ -1,16 +1,45 @@
 import { useRouter } from "expo-router";
-import { useState } from "react";
 import { Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { BackButton } from "~/components/back-button";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { forgetPasswordSchema } from "~/schema/auth-schema";
+
+type ForgetPasswordFormFields = z.infer<typeof forgetPasswordSchema>;
 
 export default function ForgetPasswordPage() {
-  const [isFilled, setIsFilled] = useState(false);
-  const [email, setEmail] = useState("");
   const router = useRouter();
+
+  const {
+    control,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      email: "",
+    },
+    resolver: zodResolver(forgetPasswordSchema),
+  });
+
+  // Check if email is filled
+  const emailValue = watch("email");
+  const isEmailFilled = emailValue.trim().length > 0;
+
+  const onSubmit = (data: ForgetPasswordFormFields) => {
+    console.log(data);
+    router.push({
+      pathname: "/otp-verification",
+      params: {
+        email: data.email,
+      },
+    });
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -26,31 +55,35 @@ export default function ForgetPasswordPage() {
         </View>
 
         {/* Input */}
-        <View className="flex flex-col gap-4 pt-12 w-full">
+        <View className="flex flex-col gap-2 pt-12 w-full">
           <Label className="text-black font-semibold">Your Email</Label>
-          <Input
-            placeholder="Enter your email"
-            className="border-[#E1E1E1] border-2 bg-white placeholder:text-placeholder"
-            onChangeText={(text) => {
-              setIsFilled(text.length > 0);
-              setEmail(text);
-            }}
+          {/* Email input validation */}
+          <Controller
+            name="email"
+            control={control}
+            rules={{ required: true }}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <Input
+                placeholder="Enter your email"
+                className="border-[#E1E1E1] border-2 bg-white placeholder:text-placeholder"
+                onChangeText={onChange}
+                onBlur={onBlur}
+                value={value}
+              />
+            )}
           />
+          {/* Email validation error */}
+          {errors.email && (
+            <Text className="text-redtext text-sm">{errors.email.message}</Text>
+          )}
         </View>
 
         {/* Button */}
         <View className="flex flex-col gap-4 pt-8 w-full">
           <Button
             className="bg-button text-buttontext"
-            disabled={!isFilled}
-            onPress={() =>
-              router.push({
-                pathname: "/otp-verification",
-                params: {
-                  email,
-                },
-              })
-            }
+            disabled={!isEmailFilled}
+            onPress={handleSubmit(onSubmit)}
           >
             <Text className="text-white text-lg font-bold">Reset Password</Text>
           </Button>

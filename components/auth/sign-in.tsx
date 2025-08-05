@@ -3,13 +3,35 @@ import { Link } from "expo-router";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Button } from "../ui/button";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import "~/global.css";
+import { signInSchema } from "~/schema/auth-schema";
 
 interface SignInProps {
   setIsSignIn: (isSignIn: boolean) => void;
 }
 
+type SignInFormFields = z.infer<typeof signInSchema>;
+
 export default function SignIn({ setIsSignIn }: SignInProps) {
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+    resolver: zodResolver(signInSchema),
+  });
+
+  const onSubmit = (data: SignInFormFields) => {
+    console.log(data);
+  };
+
   return (
     <View className="w-[80%]">
       {/* Header */}
@@ -26,19 +48,51 @@ export default function SignIn({ setIsSignIn }: SignInProps) {
         {/* Email */}
         <View className="flex-col gap-2">
           <Label className="text-subtitle">Email</Label>
-          <Input
-            className="bg-textfield border-0 placeholder:text-placeholder"
-            placeholder="eg: jon.smith@email.com"
+          {/* Email input with validation */}
+          <Controller
+            name="email"
+            control={control}
+            rules={{ required: true }}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <Input
+                onChangeText={onChange}
+                onBlur={onBlur}
+                value={value}
+                placeholder="eg: jon.smith@email.com"
+                className="bg-textfield border-0 placeholder:text-placeholder"
+              />
+            )}
           />
+          {/* Email validation error */}
+          {errors.email && (
+            <Text className="text-redtext text-sm">{errors.email.message}</Text>
+          )}
         </View>
 
         {/* Password */}
         <View className="flex-col gap-2">
           <Label className="text-subtitle">Password</Label>
-          <Input
-            className="bg-textfield border-0 placeholder:text-placeholder"
-            placeholder="**********"
+          {/* Password input with validation */}
+          <Controller
+            name="password"
+            control={control}
+            rules={{ required: true }}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <Input
+                onChangeText={onChange}
+                onBlur={onBlur}
+                value={value}
+                className="bg-textfield border-0 placeholder:text-placeholder"
+                placeholder="**********"
+              />
+            )}
           />
+          {/* Password validation error */}
+          {errors.password && (
+            <Text className="text-redtext text-sm">
+              {errors.password.message}
+            </Text>
+          )}
         </View>
       </View>
 
@@ -48,7 +102,10 @@ export default function SignIn({ setIsSignIn }: SignInProps) {
       </Link>
 
       {/* Sign in Button */}
-      <Button className="bg-button mt-4 rounded-xl">
+      <Button
+        className="bg-button mt-4 rounded-xl"
+        onPress={handleSubmit(onSubmit)}
+      >
         <Text className="text-white font-semibold">SIGN IN</Text>
       </Button>
 

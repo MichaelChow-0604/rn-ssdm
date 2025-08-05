@@ -4,7 +4,7 @@ import { PortalHost } from "@rn-primitives/portal";
 export default function AuthLayout() {
   return (
     <>
-      <Stack>
+      <Stack initialRouteName="index">
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen
           name="(forget-password)"

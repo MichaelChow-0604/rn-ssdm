@@ -102,7 +102,7 @@ export default function SignUp({ setIsSignIn }: SignUpProps) {
           className="flex flex-row items-center"
           onPress={() => setIsSignIn(true)}
         >
-          <Text className="text-buttontext text-lg">SIGN IN</Text>
+          <Text className="text-buttontext text-lg font-bold">SIGN IN</Text>
         </Pressable>
       </View>
     </View>

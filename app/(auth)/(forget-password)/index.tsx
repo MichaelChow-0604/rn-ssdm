@@ -1,3 +1,4 @@
+import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -6,8 +7,10 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 
-export default function ForgetPassword() {
+export default function ForgetPasswordPage() {
   const [isFilled, setIsFilled] = useState(false);
+  const [email, setEmail] = useState("");
+  const router = useRouter();
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -24,17 +27,31 @@ export default function ForgetPassword() {
 
         {/* Input */}
         <View className="flex flex-col gap-4 pt-12 w-full">
-          <Label className="text-black font-semibold">Email</Label>
+          <Label className="text-black font-semibold">Your Email</Label>
           <Input
             placeholder="Enter your email"
-            className="border-[#E1E1E1] border-2 placeholder:text-placeholder bg-white text-black"
-            onChangeText={(text) => setIsFilled(text.length > 0)}
+            className="border-[#E1E1E1] border-2 bg-white placeholder:text-placeholder"
+            onChangeText={(text) => {
+              setIsFilled(text.length > 0);
+              setEmail(text);
+            }}
           />
         </View>
 
         {/* Button */}
         <View className="flex flex-col gap-4 pt-8 w-full">
-          <Button className="bg-button text-buttontext" disabled={!isFilled}>
+          <Button
+            className="bg-button text-buttontext"
+            disabled={!isFilled}
+            onPress={() =>
+              router.push({
+                pathname: "/otp-verification",
+                params: {
+                  email,
+                },
+              })
+            }
+          >
             <Text className="text-white text-lg font-bold">Reset Password</Text>
           </Button>
         </View>

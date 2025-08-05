@@ -13,6 +13,7 @@ module.exports = {
         button: "#438BF7",
         redtext: "#E42D2D",
         placeholder: "#888888",
+        passwordRequirements: "#898888",
         subtitle: "#6f6f6f",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

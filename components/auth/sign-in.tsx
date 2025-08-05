@@ -43,7 +43,7 @@ export default function SignIn({ setIsSignIn }: SignInProps) {
       </View>
 
       {/* Forget Password */}
-      <Link href="/(auth)/forget-password" className="text-right mt-1">
+      <Link href="/(auth)/(forget-password)" className="text-right mt-1">
         <Text className="text-redtext">Forget Password?</Text>
       </Link>
 
@@ -59,7 +59,7 @@ export default function SignIn({ setIsSignIn }: SignInProps) {
           className="flex flex-row items-center"
           onPress={() => setIsSignIn(false)}
         >
-          <Text className="text-buttontext text-lg">SIGN UP</Text>
+          <Text className="text-buttontext text-lg font-bold">SIGN UP</Text>
         </Pressable>
       </View>
     </View>

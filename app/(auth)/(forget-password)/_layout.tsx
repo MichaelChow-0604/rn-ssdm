@@ -4,14 +4,10 @@ import { PortalHost } from "@rn-primitives/portal";
 export default function ForgetPasswordLayout() {
   return (
     <>
-      <Stack initialRouteName="index">
-        <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="otp-verification"
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen name="new-password" options={{ headerShown: false }} />
-        <Stack.Screen name="return-message" options={{ headerShown: false }} />
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="otp-verification" />
+        <Stack.Screen name="new-password" />
+        <Stack.Screen name="return-message" />
       </Stack>
       <PortalHost />
     </>

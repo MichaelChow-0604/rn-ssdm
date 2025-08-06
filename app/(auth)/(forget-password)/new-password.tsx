@@ -77,7 +77,8 @@ const PasswordInput = ({
           render={({ field: { onChange, onBlur, value } }) => (
             <Input
               placeholder={placeholder}
-              className="border-[#E1E1E1] border-2 bg-white placeholder:text-placeholder pr-12"
+              placeholderClassName="text-placeholder"
+              className="border-[#E1E1E1] border-2 bg-white text-black pr-12"
               secureTextEntry={!isPasswordVisible}
               onChangeText={onChange}
               onBlur={onBlur}
@@ -112,7 +113,6 @@ export default function NewPasswordPage() {
     formState: { errors },
   } = useForm<NewPasswordFormFields>({
     resolver: zodResolver(newPasswordSchema),
-    mode: "onChange",
   });
 
   const watchedPassword = watch("password");
@@ -169,7 +169,7 @@ export default function NewPasswordPage() {
         </View>
 
         {/* New credentials requirements */}
-        <View className="flex flex-col gap-4">
+        <View className="flex flex-col gap-4 mr-8">
           <Text className="text-xl font-semibold">New Credentials</Text>
 
           {/* Password requirements checkboxes */}
@@ -228,6 +228,17 @@ export default function NewPasswordPage() {
             <Text className="text-white text-lg font-bold">
               Update Password
             </Text>
+          </Button>
+        </View>
+
+        {/* Cancel Button */}
+        <View className="flex flex-col w-full">
+          <Button
+            className="bg-white border-button active:bg-slate-100"
+            variant="outline"
+            onPress={() => router.replace("/")}
+          >
+            <Text className="text-button font-bold">Cancel</Text>
           </Button>
         </View>
       </View>

@@ -22,8 +22,21 @@ export const signUpSchema = z
     path: ["confirmPassword"],
   });
 
-export const forgetPasswordSchema = z.object({
-  email: z.email({ message: "Invalid email address" }),
+export const forgetPasswordValidationSchema = z.object({
+  email: z
+    .string()
+    .refine((val) => val.length > 0, {
+      message: "Please enter the email first",
+    })
+    .refine(
+      (val) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(val);
+      },
+      {
+        message: "Invalid email address",
+      }
+    ),
 });
 
 export const newPasswordSchema = z

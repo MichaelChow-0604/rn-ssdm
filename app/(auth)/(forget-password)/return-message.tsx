@@ -2,10 +2,11 @@ import { Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Feather from "@expo/vector-icons/Feather";
 import { Button } from "~/components/ui/button";
-import { useRouter } from "expo-router";
+import { Link, useRouter, useSegments } from "expo-router";
 
 export default function ReturnMessagePage() {
   const router = useRouter();
+  const segments = useSegments();
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -21,7 +22,7 @@ export default function ReturnMessagePage() {
         </View>
 
         <Text className="text-2xl font-bold my-4">Successful</Text>
-        <Text className="text-xl text-center">
+        <Text className="text-lg text-center">
           Congratulations! Your password has been changed. Click the button
           below to login.
         </Text>

@@ -22,13 +22,13 @@ export default function OTPVerificationPage() {
           <Text className="font-semibold text-subtitle">
             We sent a verification code to {email}
             {"\n"}
-            Please enter the 5-digit code that mentioned in the email
+            Please enter the 4-digit code that mentioned in the email
           </Text>
         </View>
 
         {/* OTP Input */}
         <OtpInput
-          numberOfDigits={5}
+          numberOfDigits={4}
           focusColor="#438BF7"
           theme={{
             containerStyle: { paddingBlock: 40 },
@@ -47,19 +47,19 @@ export default function OTPVerificationPage() {
         <View className="flex flex-col gap-4 w-full">
           <Button
             className="bg-button text-buttontext"
-            disabled={otp.length !== 5}
+            disabled={otp.length !== 4}
             onPress={() => router.replace("/new-password")}
           >
-            <Text className="text-white text-lg font-bold">Verify Code</Text>
+            <Text className="text-white font-bold">Verify Code</Text>
           </Button>
 
           {/* Resend Code Button */}
           <Button
-            className="border-button"
+            className="border-button bg-white active:bg-slate-100"
             variant="outline"
             onPress={() => console.log("TODO: Resend Code")}
           >
-            <Text className="text-button text-lg font-bold">Resend Code</Text>
+            <Text className="text-button font-bold">Resend Code</Text>
           </Button>
         </View>
       </View>

@@ -11,6 +11,13 @@ import * as z from "zod";
 import { newPasswordSchema } from "~/schema/auth-schema";
 import { useCallback, useMemo, useState } from "react";
 import Entypo from "@expo/vector-icons/Entypo";
+import {
+  NEW_PASSWORD_DESCRIPTION,
+  NEW_PASSWORD_PLACEHOLDER,
+  NEW_PASSWORD_REQUIREMENTS_1,
+  NEW_PASSWORD_REQUIREMENTS_2,
+  NEW_PASSWORD_REQUIREMENTS_3,
+} from "~/constants/auth-placeholders";
 
 interface PasswordRequirementProps {
   isValid: boolean;
@@ -176,24 +183,23 @@ export default function NewPasswordPage() {
           <View className="flex flex-col gap-2">
             <PasswordRequirement
               isValid={validationResults.length}
-              text="Password must be at least 8 characters long"
+              text={NEW_PASSWORD_REQUIREMENTS_1}
               id="at-least-8-characters"
             />
             <PasswordRequirement
               isValid={validationResults.uppercase}
-              text="Password must contain at least 1 uppercase letter"
+              text={NEW_PASSWORD_REQUIREMENTS_2}
               id="at-least-1-uppercase"
             />
             <PasswordRequirement
               isValid={validationResults.specialChar}
-              text="Password must contain at least one number or special character"
+              text={NEW_PASSWORD_REQUIREMENTS_3}
               id="at-least-1-special"
             />
           </View>
 
           <Text className="text-subtitle text-xl">
-            Create a new password. Ensure it differs from previous ones for
-            security
+            {NEW_PASSWORD_DESCRIPTION}
           </Text>
         </View>
 
@@ -204,7 +210,7 @@ export default function NewPasswordPage() {
             control={control}
             name="password"
             label="Password"
-            placeholder="Enter your new password"
+            placeholder={NEW_PASSWORD_PLACEHOLDER}
             error={errors.password?.message}
           />
 
@@ -213,7 +219,7 @@ export default function NewPasswordPage() {
             control={control}
             name="confirmPassword"
             label="Confirm Password"
-            placeholder="Enter your new password"
+            placeholder={NEW_PASSWORD_PLACEHOLDER}
             error={errors.confirmPassword?.message}
           />
         </View>

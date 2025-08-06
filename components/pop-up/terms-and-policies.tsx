@@ -47,9 +47,11 @@ export const TermsAndPolicies = ({ open, setOpen }: TermsAndPoliciesProps) => {
             Privacy Policy
           </DialogTitle>
         </DialogHeader>
+
         <DialogDescription className="text-center">
           <Text>{PRIVACY_POLICY}</Text>
         </DialogDescription>
+
         <DialogFooter>
           <DialogClose asChild>
             <Button className="bg-button text-white">

@@ -8,6 +8,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        icon: "#8FBFFA",
         textfield: "#FAFAFA",
         buttontext: "#8FBFFA",
         button: "#438BF7",

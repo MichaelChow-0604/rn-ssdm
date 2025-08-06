@@ -13,8 +13,12 @@ import {
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback } from "react";
 import {
-  SIGN_IN_EMAIL_PLACEHOLDER,
-  SIGN_IN_PASSWORD_PLACEHOLDER,
+  DONT_HAVE_ACCOUNT,
+  EMAIL_PLACEHOLDER,
+  FORGET_PASSWORD,
+  PASSWORD_PLACEHOLDER,
+  SIGN_IN,
+  SIGN_UP,
 } from "~/constants/auth-placeholders";
 
 interface SignInProps {
@@ -64,6 +68,13 @@ export default function SignIn({ setIsSignIn }: SignInProps) {
     clearForgetPasswordErrors();
     resetForgetPassword();
     console.log("Sign in data:", data);
+
+    router.push({
+      pathname: "/(auth)/otp-verification",
+      params: {
+        email: data.email,
+      },
+    });
   };
 
   const handleForgetPassword = async () => {
@@ -78,7 +89,7 @@ export default function SignIn({ setIsSignIn }: SignInProps) {
     if (isEmailValid) {
       // Navigate to forget password flow
       router.push({
-        pathname: "/(auth)/(forget-password)/otp-verification",
+        pathname: "/(auth)/(forget-password)/otp-verification-forget",
         params: {
           email: watchedEmail,
         },
@@ -119,7 +130,7 @@ export default function SignIn({ setIsSignIn }: SignInProps) {
                 onChangeText={onChange}
                 onBlur={onBlur}
                 value={value}
-                placeholder={SIGN_IN_EMAIL_PLACEHOLDER}
+                placeholder={EMAIL_PLACEHOLDER}
                 placeholderClassName="text-placeholder"
                 className="bg-textfield border-0 text-black"
               />
@@ -152,7 +163,7 @@ export default function SignIn({ setIsSignIn }: SignInProps) {
                 value={value}
                 placeholderClassName="text-placeholder"
                 className="bg-textfield border-0 text-black"
-                placeholder={SIGN_IN_PASSWORD_PLACEHOLDER}
+                placeholder={PASSWORD_PLACEHOLDER}
               />
             )}
           />
@@ -171,7 +182,7 @@ export default function SignIn({ setIsSignIn }: SignInProps) {
         onPress={handleForgetPassword}
         className="mt-1 items-end"
       >
-        <Text className="text-redtext">Forget Password?</Text>
+        <Text className="text-redtext">{FORGET_PASSWORD}</Text>
       </TouchableOpacity>
 
       {/* Sign in Button */}
@@ -179,17 +190,17 @@ export default function SignIn({ setIsSignIn }: SignInProps) {
         className="bg-button mt-4 rounded-xl"
         onPress={handleSignInSubmit(onSignInSubmit)}
       >
-        <Text className="text-white font-semibold">SIGN IN</Text>
+        <Text className="text-white font-semibold">{SIGN_IN}</Text>
       </Button>
 
       {/* Sign up switch */}
       <View className="flex-row justify-center mt-8 gap-2">
-        <Text className="text-subtitle text-lg">Don't have an account?</Text>
+        <Text className="text-subtitle text-lg">{DONT_HAVE_ACCOUNT}</Text>
         <Pressable
           className="flex flex-row items-center"
           onPress={() => setIsSignIn(false)}
         >
-          <Text className="text-buttontext text-lg font-bold">SIGN UP</Text>
+          <Text className="text-buttontext text-lg font-bold">{SIGN_UP}</Text>
         </Pressable>
       </View>
     </View>

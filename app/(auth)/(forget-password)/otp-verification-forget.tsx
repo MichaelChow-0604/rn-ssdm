@@ -6,15 +6,18 @@ import { BackButton } from "~/components/back-button";
 import { Button } from "~/components/ui/button";
 import { OtpInput } from "react-native-otp-entry";
 import {
-  OTP_VERIFICATION_DESCRIPTION_1,
-  OTP_VERIFICATION_DESCRIPTION_2,
+  OTP_VERIFICATION_FORGET_DESC_1,
+  OTP_VERIFICATION_FORGET_DESC_2,
+  OTP_VERIFICATION_FORGET_TITLE,
+  RESEND,
+  VERIFY,
 } from "~/constants/auth-placeholders";
 import {
   CountdownTimer,
   CountdownTimerRef,
 } from "~/components/countdown-timer";
 
-export default function OTPVerificationPage() {
+export default function OTPVerificationForgetPage() {
   const [otp, setOtp] = useState("");
   const router = useRouter();
   const { email } = useLocalSearchParams();
@@ -42,11 +45,13 @@ export default function OTPVerificationPage() {
 
         {/* Header */}
         <View className="flex flex-col gap-4">
-          <Text className="text-2xl font-semibold">Check your email</Text>
+          <Text className="text-2xl font-bold">
+            {OTP_VERIFICATION_FORGET_TITLE}
+          </Text>
           <Text className="font-semibold text-subtitle">
-            {OTP_VERIFICATION_DESCRIPTION_1} {email}
+            {OTP_VERIFICATION_FORGET_DESC_1} {email}
             {"\n\n"}
-            {OTP_VERIFICATION_DESCRIPTION_2}
+            {OTP_VERIFICATION_FORGET_DESC_2}
           </Text>
         </View>
 
@@ -68,6 +73,7 @@ export default function OTPVerificationPage() {
           }}
           onTextChange={(text) => setOtp(text)}
         />
+
         {/* Timer */}
         <CountdownTimer
           ref={timerRef}
@@ -84,7 +90,7 @@ export default function OTPVerificationPage() {
             disabled={otp.length !== 4}
             onPress={() => router.replace("/new-password")}
           >
-            <Text className="text-white font-bold">Verify Code</Text>
+            <Text className="text-white font-bold">{VERIFY}</Text>
           </Button>
 
           {/* Resend Code Button */}
@@ -93,7 +99,7 @@ export default function OTPVerificationPage() {
             variant="outline"
             onPress={handleResendCode}
           >
-            <Text className="text-button font-bold">Resend Code</Text>
+            <Text className="text-button font-bold">{RESEND}</Text>
           </Button>
         </View>
       </View>

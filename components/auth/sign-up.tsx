@@ -11,6 +11,16 @@ import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
 import AcceptAlert from "../pop-up/accept-alert";
+import {
+  EMAIL_PLACEHOLDER,
+  FIRST_NAME_PLACEHOLDER,
+  HAVE_ACCOUNT,
+  LAST_NAME_PLACEHOLDER,
+  PASSWORD_PLACEHOLDER,
+  SIGN_IN,
+  SIGN_UP,
+  SIGN_UP_DESCRIPTION,
+} from "~/constants/auth-placeholders";
 
 interface SignUpProps {
   setIsSignIn: (isSignIn: boolean) => void;
@@ -76,7 +86,7 @@ export default function SignUp({ setIsSignIn }: SignUpProps) {
                 onBlur={onBlur}
                 value={value}
                 className="bg-textfield border-0 placeholder:text-placeholder"
-                placeholder="eg: Jon"
+                placeholder={FIRST_NAME_PLACEHOLDER}
               />
             )}
           />
@@ -102,7 +112,7 @@ export default function SignUp({ setIsSignIn }: SignUpProps) {
                 onBlur={onBlur}
                 value={value}
                 className="bg-textfield border-0 placeholder:text-placeholder"
-                placeholder="eg: Smith"
+                placeholder={LAST_NAME_PLACEHOLDER}
               />
             )}
           />
@@ -128,7 +138,7 @@ export default function SignUp({ setIsSignIn }: SignUpProps) {
                 onBlur={onBlur}
                 value={value}
                 className="bg-textfield border-0 placeholder:text-placeholder"
-                placeholder="eg: jon.smith@email.com"
+                placeholder={EMAIL_PLACEHOLDER}
               />
             )}
           />
@@ -152,7 +162,7 @@ export default function SignUp({ setIsSignIn }: SignUpProps) {
                 onBlur={onBlur}
                 value={value}
                 className="bg-textfield border-0 placeholder:text-placeholder"
-                placeholder="**********"
+                placeholder={PASSWORD_PLACEHOLDER}
               />
             )}
           />
@@ -178,7 +188,7 @@ export default function SignUp({ setIsSignIn }: SignUpProps) {
                 onBlur={onBlur}
                 value={value}
                 className="bg-textfield border-0 placeholder:text-placeholder"
-                placeholder="**********"
+                placeholder={PASSWORD_PLACEHOLDER}
               />
             )}
           />
@@ -199,9 +209,9 @@ export default function SignUp({ setIsSignIn }: SignUpProps) {
           className="native:h-[16] native:w-[16] native:rounded-none"
         />
         <Text className="text-subtitle text-sm">
-          I understood the{" "}
+          {SIGN_UP_DESCRIPTION}{" "}
           <Text className="text-buttontext" onPress={() => setOpenTNP(true)}>
-            terms & policies
+            terms & policy.
           </Text>
         </Text>
       </View>
@@ -211,17 +221,17 @@ export default function SignUp({ setIsSignIn }: SignUpProps) {
         className="bg-button mt-4 rounded-xl"
         onPress={handleSubmit(onSubmit)}
       >
-        <Text className="text-white font-semibold">SIGN UP</Text>
+        <Text className="text-white font-semibold">{SIGN_UP}</Text>
       </Button>
 
       {/* Sign up switch */}
       <View className="flex-row justify-center py-8 gap-2">
-        <Text className="text-subtitle text-lg">Have an account?</Text>
+        <Text className="text-subtitle text-lg">{HAVE_ACCOUNT}</Text>
         <Pressable
           className="flex flex-row items-center"
           onPress={() => setIsSignIn(true)}
         >
-          <Text className="text-buttontext text-lg font-bold">SIGN IN</Text>
+          <Text className="text-buttontext text-lg font-bold">{SIGN_IN}</Text>
         </Pressable>
       </View>
     </View>

@@ -1,12 +1,25 @@
 import { Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Feather from "@expo/vector-icons/Feather";
-import { Button } from "~/components/ui/button";
-import { Link, useRouter, useSegments } from "expo-router";
+import { useRouter } from "expo-router";
+import { useEffect } from "react";
+import {
+  RETURN_MESSAGE_DESC,
+  RETURN_MESSAGE_TITLE,
+} from "~/constants/auth-placeholders";
 
 export default function ReturnMessagePage() {
   const router = useRouter();
-  const segments = useSegments();
+
+  // Auto-navigate after 2 second
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      router.replace("/(tabs)/(home)/documents");
+    }, 2000);
+
+    // Cleanup timer on component unmount
+    return () => clearTimeout(timer);
+  }, [router]);
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -21,18 +34,8 @@ export default function ReturnMessagePage() {
           />
         </View>
 
-        <Text className="text-2xl font-bold my-4">Successful</Text>
-        <Text className="text-lg text-center">
-          Congratulations! Your password has been changed. Click the button
-          below to login.
-        </Text>
-
-        <Button
-          className="w-full mt-8 bg-button rounded-xl"
-          onPress={() => router.replace("/")}
-        >
-          <Text className="text-white font-bold">Sign in</Text>
-        </Button>
+        <Text className="text-3xl font-bold my-4">{RETURN_MESSAGE_TITLE}</Text>
+        <Text className="text-lg text-center">{RETURN_MESSAGE_DESC}</Text>
       </View>
     </SafeAreaView>
   );

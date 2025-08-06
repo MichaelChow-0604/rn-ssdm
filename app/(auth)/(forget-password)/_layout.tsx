@@ -5,9 +5,9 @@ export default function ForgetPasswordLayout() {
   return (
     <>
       <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="otp-verification" />
+        <Stack.Screen name="otp-verification-forget" />
         <Stack.Screen name="new-password" />
-        <Stack.Screen name="return-message" />
+        <Stack.Screen name="return-message-forget" />
       </Stack>
       <PortalHost />
     </>

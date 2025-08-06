@@ -1,5 +1,12 @@
 import { useRouter } from "expo-router";
-import { Pressable, Text, View } from "react-native";
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
@@ -17,6 +24,10 @@ import {
   NEW_PASSWORD_REQUIREMENTS_1,
   NEW_PASSWORD_REQUIREMENTS_2,
   NEW_PASSWORD_REQUIREMENTS_3,
+  CANCEL,
+  UPDATE_PASSWORD,
+  NEW_PASSWORD_TITLE,
+  NEW_CREDENTIALS,
 } from "~/constants/auth-placeholders";
 
 interface PasswordRequirementProps {
@@ -162,92 +173,100 @@ export default function NewPasswordPage() {
   const onSubmit = useCallback(
     (data: NewPasswordFormFields) => {
       console.log("Form data:", data);
-      router.replace("/return-message");
+      router.replace("/return-message-forget");
     },
     [router]
   );
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-      <View className="flex-1 items-start px-8">
-        {/* Header */}
-        <View className="flex flex-col gap-4 mt-16 mb-12">
-          <Text className="text-2xl font-semibold">Set a new password</Text>
-        </View>
+      <KeyboardAvoidingView
+        style={{ flexGrow: 1 }}
+        behavior={Platform.select({ ios: "padding", android: "height" })}
+      >
+        <ScrollView
+          className="bg-white"
+          contentContainerClassName="items-start px-8"
+        >
+          {/* Header */}
+          <View className="flex flex-col gap-4 mt-16 mb-12">
+            <Text className="text-2xl font-bold">{NEW_PASSWORD_TITLE}</Text>
+          </View>
 
-        {/* New credentials requirements */}
-        <View className="flex flex-col gap-4 mr-8">
-          <Text className="text-xl font-semibold">New Credentials</Text>
+          {/* New credentials requirements */}
+          <View className="flex flex-col gap-4 mr-8">
+            <Text className="text-xl font-semibold">{NEW_CREDENTIALS}</Text>
 
-          {/* Password requirements checkboxes */}
-          <View className="flex flex-col gap-2">
-            <PasswordRequirement
-              isValid={validationResults.length}
-              text={NEW_PASSWORD_REQUIREMENTS_1}
-              id="at-least-8-characters"
+            {/* Password requirements checkboxes */}
+            <View className="flex flex-col gap-2">
+              <PasswordRequirement
+                isValid={validationResults.length}
+                text={NEW_PASSWORD_REQUIREMENTS_1}
+                id="at-least-8-characters"
+              />
+              <PasswordRequirement
+                isValid={validationResults.uppercase}
+                text={NEW_PASSWORD_REQUIREMENTS_2}
+                id="at-least-1-uppercase"
+              />
+              <PasswordRequirement
+                isValid={validationResults.specialChar}
+                text={NEW_PASSWORD_REQUIREMENTS_3}
+                id="at-least-1-special"
+              />
+            </View>
+
+            <Text className="text-subtitle text-xl">
+              {NEW_PASSWORD_DESCRIPTION}
+            </Text>
+          </View>
+
+          {/* Input */}
+          <View className="flex flex-col gap-4 pt-12 w-full">
+            {/* Password */}
+            <PasswordInput
+              control={control}
+              name="password"
+              label="Password"
+              placeholder={NEW_PASSWORD_PLACEHOLDER}
+              error={errors.password?.message}
             />
-            <PasswordRequirement
-              isValid={validationResults.uppercase}
-              text={NEW_PASSWORD_REQUIREMENTS_2}
-              id="at-least-1-uppercase"
-            />
-            <PasswordRequirement
-              isValid={validationResults.specialChar}
-              text={NEW_PASSWORD_REQUIREMENTS_3}
-              id="at-least-1-special"
+
+            {/* Confirm Password */}
+            <PasswordInput
+              control={control}
+              name="confirmPassword"
+              label="Confirm Password"
+              placeholder={NEW_PASSWORD_PLACEHOLDER}
+              error={errors.confirmPassword?.message}
             />
           </View>
 
-          <Text className="text-subtitle text-xl">
-            {NEW_PASSWORD_DESCRIPTION}
-          </Text>
-        </View>
+          {/* Verify Button */}
+          <View className="flex flex-col py-8 w-full">
+            <Button
+              className="bg-button text-buttontext"
+              disabled={!isFormValid}
+              onPress={handleSubmit(onSubmit)}
+            >
+              <Text className="text-white text-lg font-bold">
+                {UPDATE_PASSWORD}
+              </Text>
+            </Button>
+          </View>
 
-        {/* Input */}
-        <View className="flex flex-col gap-4 pt-12 w-full">
-          {/* Password */}
-          <PasswordInput
-            control={control}
-            name="password"
-            label="Password"
-            placeholder={NEW_PASSWORD_PLACEHOLDER}
-            error={errors.password?.message}
-          />
-
-          {/* Confirm Password */}
-          <PasswordInput
-            control={control}
-            name="confirmPassword"
-            label="Confirm Password"
-            placeholder={NEW_PASSWORD_PLACEHOLDER}
-            error={errors.confirmPassword?.message}
-          />
-        </View>
-
-        {/* Verify Button */}
-        <View className="flex flex-col py-8 w-full">
-          <Button
-            className="bg-button text-buttontext"
-            disabled={!isFormValid}
-            onPress={handleSubmit(onSubmit)}
-          >
-            <Text className="text-white text-lg font-bold">
-              Update Password
-            </Text>
-          </Button>
-        </View>
-
-        {/* Cancel Button */}
-        <View className="flex flex-col w-full">
-          <Button
-            className="bg-white border-button active:bg-slate-100"
-            variant="outline"
-            onPress={() => router.replace("/")}
-          >
-            <Text className="text-button font-bold">Cancel</Text>
-          </Button>
-        </View>
-      </View>
+          {/* Cancel Button */}
+          <View className="flex flex-col w-full">
+            <Button
+              className="bg-white border-button active:bg-slate-100"
+              variant="outline"
+              onPress={() => router.replace("/")}
+            >
+              <Text className="text-button font-bold">{CANCEL}</Text>
+            </Button>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

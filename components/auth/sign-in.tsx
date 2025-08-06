@@ -73,6 +73,7 @@ export default function SignIn({ setIsSignIn }: SignInProps) {
       pathname: "/(auth)/otp-verification",
       params: {
         email: data.email,
+        mode: "signin",
       },
     });
   };

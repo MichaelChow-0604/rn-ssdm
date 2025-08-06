@@ -21,6 +21,7 @@ import {
   SIGN_UP,
   SIGN_UP_DESCRIPTION,
 } from "~/constants/auth-placeholders";
+import { useRouter } from "expo-router";
 
 interface SignUpProps {
   setIsSignIn: (isSignIn: boolean) => void;
@@ -32,6 +33,7 @@ export default function SignUp({ setIsSignIn }: SignUpProps) {
   const [checked, setChecked] = useState(false);
   const [showAcceptTerms, setShowAcceptTerms] = useState(false);
   const [openTNP, setOpenTNP] = useState(false);
+  const router = useRouter();
 
   const {
     control,
@@ -51,6 +53,10 @@ export default function SignUp({ setIsSignIn }: SignUpProps) {
   const onSubmit = (data: SignUpFormFields) => {
     if (checked) {
       console.log(data);
+      router.push({
+        pathname: "/otp-verification",
+        params: { email: data.email, mode: "signup" },
+      });
     } else {
       setShowAcceptTerms(true);
     }
@@ -85,7 +91,8 @@ export default function SignUp({ setIsSignIn }: SignUpProps) {
                 onChangeText={onChange}
                 onBlur={onBlur}
                 value={value}
-                className="bg-textfield border-0 placeholder:text-placeholder"
+                className="bg-textfield border-0 text-black"
+                placeholderClassName="text-placeholder"
                 placeholder={FIRST_NAME_PLACEHOLDER}
               />
             )}
@@ -111,7 +118,8 @@ export default function SignUp({ setIsSignIn }: SignUpProps) {
                 onChangeText={onChange}
                 onBlur={onBlur}
                 value={value}
-                className="bg-textfield border-0 placeholder:text-placeholder"
+                className="bg-textfield border-0 text-black"
+                placeholderClassName="text-placeholder"
                 placeholder={LAST_NAME_PLACEHOLDER}
               />
             )}
@@ -137,7 +145,8 @@ export default function SignUp({ setIsSignIn }: SignUpProps) {
                 onChangeText={onChange}
                 onBlur={onBlur}
                 value={value}
-                className="bg-textfield border-0 placeholder:text-placeholder"
+                className="bg-textfield border-0 text-black"
+                placeholderClassName="text-placeholder"
                 placeholder={EMAIL_PLACEHOLDER}
               />
             )}
@@ -161,7 +170,8 @@ export default function SignUp({ setIsSignIn }: SignUpProps) {
                 onChangeText={onChange}
                 onBlur={onBlur}
                 value={value}
-                className="bg-textfield border-0 placeholder:text-placeholder"
+                className="bg-textfield border-0 text-black"
+                placeholderClassName="text-placeholder"
                 placeholder={PASSWORD_PLACEHOLDER}
               />
             )}
@@ -187,7 +197,8 @@ export default function SignUp({ setIsSignIn }: SignUpProps) {
                 onChangeText={onChange}
                 onBlur={onBlur}
                 value={value}
-                className="bg-textfield border-0 placeholder:text-placeholder"
+                className="bg-textfield border-0 text-black"
+                placeholderClassName="text-placeholder"
                 placeholder={PASSWORD_PLACEHOLDER}
               />
             )}
@@ -206,7 +217,9 @@ export default function SignUp({ setIsSignIn }: SignUpProps) {
         <Checkbox
           checked={checked}
           onCheckedChange={() => setChecked(!checked)}
-          className="native:h-[16] native:w-[16] native:rounded-none"
+          className={`native:h-[16] native:w-[16] native:rounded-none border-subtitle ${
+            checked ? "bg-black" : "bg-white"
+          }`}
         />
         <Text className="text-subtitle text-sm">
           {SIGN_UP_DESCRIPTION}{" "}

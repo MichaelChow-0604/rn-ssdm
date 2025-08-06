@@ -27,7 +27,7 @@ import {
 } from "~/constants/auth-placeholders";
 
 export default function OTPVerificationPage() {
-  const { email } = useLocalSearchParams();
+  const { email, mode } = useLocalSearchParams();
   const [otp, setOtp] = useState("");
   const router = useRouter();
   const timerRef = useRef<CountdownTimerRef>(null);
@@ -98,7 +98,12 @@ export default function OTPVerificationPage() {
             <Button
               className="bg-button text-buttontext"
               disabled={otp.length !== 4}
-              onPress={() => router.replace("/return-message")}
+              onPress={() =>
+                router.replace({
+                  pathname: "/return-message",
+                  params: { mode },
+                })
+              }
             >
               <Text className="text-white font-bold">{VERIFY_OTP}</Text>
             </Button>

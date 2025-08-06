@@ -1,24 +1,26 @@
 import { Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Feather from "@expo/vector-icons/Feather";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect } from "react";
 import {
   RETURN_MESSAGE_DESC,
   RETURN_MESSAGE_TITLE,
+  SIGN_IN,
 } from "~/constants/auth-placeholders";
+import { Button } from "~/components/ui/button";
 
 export default function ReturnMessagePage() {
   const router = useRouter();
+  const { mode } = useLocalSearchParams();
 
-  // Auto-navigate after 2 second
+  // Auto-navigate after 2 second (Sign in)
   useEffect(() => {
-    const timer = setTimeout(() => {
-      router.replace("/(tabs)/(home)/documents");
-    }, 2000);
-
-    // Cleanup timer on component unmount
-    return () => clearTimeout(timer);
+    if (mode === "signin") {
+      setTimeout(() => {
+        router.replace("/(tabs)/(home)/documents");
+      }, 2000);
+    }
   }, [router]);
 
   return (
@@ -36,6 +38,15 @@ export default function ReturnMessagePage() {
 
         <Text className="text-3xl font-bold my-4">{RETURN_MESSAGE_TITLE}</Text>
         <Text className="text-lg text-center">{RETURN_MESSAGE_DESC}</Text>
+
+        {mode === "signup" && (
+          <Button
+            className="bg-button text-buttontext my-8 w-full"
+            onPress={() => router.replace("/")}
+          >
+            <Text className="text-white font-bold">{SIGN_IN}</Text>
+          </Button>
+        )}
       </View>
     </SafeAreaView>
   );

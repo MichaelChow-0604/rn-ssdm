@@ -13,6 +13,7 @@
     "postinstall": "npx tailwindcss -i ./global.css -o ./node_modules/.cache/nativewind/global.css"
   },
   "dependencies": {
+    "@gorhom/bottom-sheet": "^5.1.8",
     "@hookform/resolvers": "^5.2.1",
     "@react-navigation/drawer": "^7.5.6",
     "@react-navigation/native": "^7.1.17",

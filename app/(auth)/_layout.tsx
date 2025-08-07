@@ -1,16 +1,12 @@
 import { Stack } from "expo-router";
-import { PortalHost } from "@rn-primitives/portal";
 
 export default function AuthLayout() {
   return (
-    <>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="auth" />
-        <Stack.Screen name="otp-verification" />
-        <Stack.Screen name="return-message" />
-        <Stack.Screen name="(forget-password)" />
-      </Stack>
-      <PortalHost />
-    </>
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="auth" />
+      <Stack.Screen name="otp-verification" />
+      <Stack.Screen name="return-message" />
+      <Stack.Screen name="(forget-password)" />
+    </Stack>
   );
 }

@@ -1,0 +1,74 @@
+import { TEMP_DATA } from "~/constants/temp-data";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "~/components/ui/table";
+import { FlashList } from "@shopify/flash-list";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { Image, Text, View } from "react-native";
+import DotDropdown from "./dot-dropdown";
+
+export default function DocumentListTable() {
+  return (
+    <Table className="min-w-full">
+      {/* Table header */}
+      <TableHeader>
+        <TableRow>
+          <TableHead className="w-[65%] pl-4">
+            <Text className="font-bold">Document Name</Text>
+          </TableHead>
+
+          <TableHead className="w-[25%] flex flex-col items-center justify-start">
+            <Text className="text-center text-xs text-gray-400">
+              (DD/MM/YYYY)
+            </Text>
+            <Text className="text-center font-bold">Upload Date</Text>
+          </TableHead>
+        </TableRow>
+      </TableHeader>
+
+      {/* Table body */}
+      <TableBody className="w-full">
+        {/* Document list */}
+        <FlashList
+          data={TEMP_DATA}
+          estimatedItemSize={20}
+          showsVerticalScrollIndicator={false}
+          renderItem={({ item: document }) => {
+            return (
+              <TableRow key={document.id}>
+                <TableCell className="w-[65%] flex-row items-center gap-2 pl-4">
+                  {/* Document icon and name */}
+                  <View className="relative w-8 h-8">
+                    <FontAwesome
+                      name="lock"
+                      size={16}
+                      color="black"
+                      className="absolute top-[-6] right-0 z-10"
+                    />
+                    <Image source={document.type.icon} className="w-8 h-8" />
+                  </View>
+                  <Text className="font-semibold">{document.name}</Text>
+                </TableCell>
+
+                {/* Upload date */}
+                <TableCell className="w-[25%] flex items-center justify-center">
+                  <Text className="text-center">{document.uploadDate}</Text>
+                </TableCell>
+
+                {/* 3-dot menu */}
+                <TableCell className="w-[10%] flex items-center justify-center">
+                  <DotDropdown />
+                </TableCell>
+              </TableRow>
+            );
+          }}
+        />
+      </TableBody>
+    </Table>
+  );
+}

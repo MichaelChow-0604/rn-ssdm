@@ -1,0 +1,45 @@
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
+import Feather from "@expo/vector-icons/Feather";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { Text } from "react-native";
+
+export default function DotDropdown() {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger className="p-2 rounded-full">
+        <FontAwesome name="ellipsis-h" size={16} color="black" />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        className="native:w-60 bg-white"
+        insets={{ right: 8 }}
+      >
+        <DropdownMenuItem
+          className="flex-row items-center gap-2 active:bg-gray-100"
+          onPress={() => console.log("View & edit details")}
+        >
+          <Feather name="edit" size={20} color="black" />
+          <Text className="font-medium">View & edit details</Text>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          className="flex-row items-center gap-2 active:bg-gray-100"
+          onPress={() => console.log("Download document")}
+        >
+          <Feather name="download" size={20} color="black" />
+          <Text className="font-medium">Download document</Text>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          className="flex-row items-center gap-2 active:bg-gray-100"
+          onPress={() => console.log("Move to trash")}
+        >
+          <Feather name="trash-2" size={20} color="#E42D2D" />
+          <Text className="font-medium text-[#E42D2D]">Move to trash</Text>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}

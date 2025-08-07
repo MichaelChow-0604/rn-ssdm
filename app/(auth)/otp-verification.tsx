@@ -23,7 +23,7 @@ import {
   RESEND,
   OTP_VERIFICATION_DESC,
   OTP_VERIFICATION_TITLE_2,
-  VERIFY_OTP,
+  VERIFY,
 } from "~/constants/auth-placeholders";
 
 export default function OTPVerificationPage() {
@@ -105,7 +105,7 @@ export default function OTPVerificationPage() {
                 })
               }
             >
-              <Text className="text-white font-bold">{VERIFY_OTP}</Text>
+              <Text className="text-white font-bold">{VERIFY}</Text>
             </Button>
 
             {/* Resend Code Button */}

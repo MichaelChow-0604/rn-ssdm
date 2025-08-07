@@ -5,7 +5,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect } from "react";
 import {
   RETURN_MESSAGE_DESC,
-  RETURN_MESSAGE_TITLE,
+  RETURN_SUCCESS,
   SIGN_IN,
 } from "~/constants/auth-placeholders";
 import { Button } from "~/components/ui/button";
@@ -36,7 +36,7 @@ export default function ReturnMessagePage() {
           />
         </View>
 
-        <Text className="text-3xl font-bold my-4">{RETURN_MESSAGE_TITLE}</Text>
+        <Text className="text-3xl font-bold my-4">{RETURN_SUCCESS}</Text>
         <Text className="text-lg text-center">{RETURN_MESSAGE_DESC}</Text>
 
         {mode === "signup" && (

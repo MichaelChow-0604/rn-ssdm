@@ -16,20 +16,18 @@ export const NEW_PASSWORD_REQUIREMENTS_2 = `Password must contain at least 1 upp
 export const NEW_PASSWORD_REQUIREMENTS_3 = `Password must contain at least one number or special character`;
 export const NEW_PASSWORD_DESCRIPTION = `Create a new password. Ensure it differs from previous ones for security`;
 export const NEW_PASSWORD_PLACEHOLDER = `Enter your new password`;
+export const NEW_PASSWORD_CONFIRM_PLACEHOLDER = `Re-enter password`;
 
 // Return Message (Forget Password)
-export const RETURN_MESSAGE_FORGET_TITLE = `Successful`;
 export const RETURN_MESSAGE_FORGET_DESC_1 = `Congratulations! Your password has been changed. Click the button below to login.`;
 
 // OTP Verification (Sign up and Sign in)
 export const OTP_VERIFICATION_TITLE_1 = `OTP Verification`;
 export const OTP_VERIFICATION_TITLE_2 = `Verification Code`;
 export const OTP_VERIFICATION_DESC = `OTP code has been sent to your email:`;
-export const VERIFY_OTP = `VERIFY OTP`;
 export const DIDNT_GET_CODE = `Didn't get the code?`;
 
 // Return Message (Sign up and Sign in)
-export const RETURN_MESSAGE_TITLE = `Success!`;
 export const RETURN_MESSAGE_DESC = `Congratulations! You have been successfully authenticated.`;
 
 // Global
@@ -44,3 +42,4 @@ export const VERIFY = `VERIFY`;
 export const RESEND = `RESEND`;
 export const CANCEL = `CANCEL`;
 export const UPDATE_PASSWORD = `UPDATE PASSWORD`;
+export const RETURN_SUCCESS = `Successful`;

@@ -5,7 +5,7 @@ import { Button } from "~/components/ui/button";
 import { useRouter } from "expo-router";
 import {
   RETURN_MESSAGE_FORGET_DESC_1,
-  RETURN_MESSAGE_FORGET_TITLE,
+  RETURN_SUCCESS,
   SIGN_IN,
 } from "~/constants/auth-placeholders";
 
@@ -25,9 +25,7 @@ export default function ReturnMessageForgetPage() {
           />
         </View>
 
-        <Text className="text-2xl font-bold my-4">
-          {RETURN_MESSAGE_FORGET_TITLE}
-        </Text>
+        <Text className="text-2xl font-bold my-4">{RETURN_SUCCESS}</Text>
         <Text className="text-lg text-center">
           {RETURN_MESSAGE_FORGET_DESC_1}
         </Text>

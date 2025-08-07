@@ -1,4 +1,4 @@
-import { Tabs } from "expo-router";
+import { router, Tabs } from "expo-router";
 import { Image, Platform, TouchableOpacity } from "react-native";
 import BlurBackground from "~/components/tabs/blur-background";
 import MainButton from "~/components/tabs/main-button";
@@ -26,12 +26,12 @@ export default function TabsLayout() {
         // Bell icon at the right
         headerRight: () => (
           <TouchableOpacity
-            onPress={() => console.log("gg")}
+            onPress={() => router.push("/notification-rule")}
             activeOpacity={0.6}
           >
             <Image
               source={require("~/assets/images/bell.png")}
-              className="w-8 h-8 mr-2"
+              className="w-8 h-8 mr-4"
             />
           </TouchableOpacity>
         ),
@@ -83,8 +83,8 @@ export default function TabsLayout() {
           title: "Contact List",
           tabBarIcon: () => (
             <Image
-              source={require("~/assets/images/documents_icon.png")}
-              className="w-8 h-8"
+              source={require("~/assets/images/contact_icon.png")}
+              className="w-7 h-7"
             />
           ),
         }}

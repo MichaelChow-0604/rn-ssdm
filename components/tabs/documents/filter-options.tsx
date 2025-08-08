@@ -18,7 +18,11 @@ export default function FilterOptions() {
 
   return (
     <View className="flex-row items-center justify-between gap-2">
-      <FilterBottomSheet ref={bottomSheetRef} selectedFilter={selectedFilter} />
+      <FilterBottomSheet
+        ref={bottomSheetRef}
+        selectedFilter={selectedFilter}
+        onDismiss={() => setSelectedFilter(null)}
+      />
       <TouchableOpacity activeOpacity={0.7}>
         <Image
           source={require("~/assets/images/filter_icon.png")}

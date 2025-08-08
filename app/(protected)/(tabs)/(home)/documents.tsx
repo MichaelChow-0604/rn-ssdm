@@ -8,7 +8,7 @@ export default function Documents() {
     <View className="flex-1 bg-white">
       {/* Non scrollable session */}
       <View className="items-center justify-evenly h-[140px] px-4">
-        <SearchBar />
+        <SearchBar placeholder="Search document" />
         <FilterOptions />
       </View>
 

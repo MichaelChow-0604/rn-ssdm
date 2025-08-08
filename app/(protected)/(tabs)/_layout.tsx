@@ -81,6 +81,7 @@ export default function TabsLayout() {
         name="(contact)"
         options={{
           title: "Contact List",
+          headerShown: false,
           tabBarIcon: () => (
             <Image
               source={require("~/assets/images/contact_icon.png")}

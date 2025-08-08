@@ -18,10 +18,10 @@ export default function ReturnMessagePage() {
   useEffect(() => {
     if (mode === "signin") {
       setTimeout(() => {
-        router.replace("/(tabs)/(home)/documents");
+        router.replace("/documents");
       }, 2000);
     }
-  }, [router]);
+  }, [router, mode]);
 
   return (
     <SafeAreaView className="flex-1 bg-white">

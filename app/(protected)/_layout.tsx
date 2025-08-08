@@ -11,7 +11,8 @@ export default function ProtectedLayout() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(tabs)" />
-      <Stack.Screen name="create-contact" />
+      <Stack.Screen name="(contact)/contact" />
+      <Stack.Screen name="(contact)/[id]" />
       <Stack.Screen name="notification-rule" />
     </Stack>
   );

@@ -30,10 +30,12 @@ import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "~/components/ui/button";
 import * as ImagePicker from "expo-image-picker";
+import { router } from "expo-router";
+import { addContact } from "~/lib/storage/contact";
 
 type NewContactFormFields = z.infer<typeof newContactSchema>;
 
-export default function CreateContact() {
+export default function ContactPage() {
   const [profilePic, setProfilePic] = useState<string | null>(null);
   const [isWhatsappChecked, setIsWhatsappChecked] = useState(false);
   const [isSMSChecked, setIsSMSChecked] = useState(false);
@@ -70,7 +72,22 @@ export default function CreateContact() {
   });
 
   const onSubmit = (data: NewContactFormFields) => {
-    console.log(data, selectedRelationship, isWhatsappChecked, isSMSChecked);
+    const distributions: ("email" | "whatsapp" | "sms")[] = ["email"];
+    if (isWhatsappChecked) distributions.push("whatsapp");
+    if (isSMSChecked) distributions.push("sms");
+
+    void (async () => {
+      await addContact({
+        firstName: data.firstName.trim(),
+        lastName: data.lastName.trim(),
+        mobileNumber: data.mobileNumber.trim(),
+        email: data.email.trim(),
+        profilePicUri: profilePic,
+        relationship: selectedRelationship?.value ?? null,
+        distributions,
+      });
+      router.back();
+    })();
   };
 
   return (
@@ -83,17 +100,11 @@ export default function CreateContact() {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         {/* Header */}
-        <View className="flex-row gap-2 items-center my-8 justify-start w-full">
+        <View className="flex-row gap-4 items-center my-8 justify-start w-full">
           <BackButton />
           <Text className="text-2xl font-semibold text-white">
             Create new contact
           </Text>
-          <TouchableOpacity
-            activeOpacity={0.8}
-            className="ml-auto bg-white py-2 px-4 rounded-lg"
-          >
-            <Text className="text-lg font-semibold text-button">Edit</Text>
-          </TouchableOpacity>
         </View>
 
         <ScrollView className="bg-transparent w-full">
@@ -110,7 +121,7 @@ export default function CreateContact() {
                   source={
                     profilePic
                       ? { uri: profilePic }
-                      : require("~/assets/images/anna.png")
+                      : require("~/assets/images/default_icon.png")
                   }
                   className="w-24 h-24 rounded-full text-black"
                 />

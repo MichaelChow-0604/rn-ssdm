@@ -78,7 +78,7 @@ export default function TabsLayout() {
 
       {/* Contact List */}
       <Tabs.Screen
-        name="(contact)"
+        name="contact-list"
         options={{
           title: "Contact List",
           headerShown: false,

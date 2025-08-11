@@ -13,13 +13,13 @@ export const TEMP_DATA = [
   {
     id: 1,
     name: "ABC",
-    uploadDate: "3/8/2025",
+    uploadDate: "03/08/2025",
     type: DOC_TYPE_ICON[0],
   },
   {
     id: 2,
     name: "DEF",
-    uploadDate: "23/6/2024",
+    uploadDate: "23/06/2024",
     type: DOC_TYPE_ICON[1],
   },
 ];

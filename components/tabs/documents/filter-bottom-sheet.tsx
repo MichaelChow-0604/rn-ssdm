@@ -100,8 +100,6 @@ const FilterBottomSheet = forwardRef<BottomSheetModal, FilterBottomSheetProps>(
         ? "Upload Date"
         : null;
 
-    const snapPoints = useMemo(() => ["35%"], []);
-
     const renderBackdrop = useCallback(
       (props: BottomSheetBackdropProps) => (
         <BottomSheetBackdrop
@@ -137,7 +135,6 @@ const FilterBottomSheet = forwardRef<BottomSheetModal, FilterBottomSheetProps>(
     return (
       <BottomSheetModal
         ref={ref}
-        snapPoints={snapPoints}
         enablePanDownToClose={true}
         backdropComponent={renderBackdrop}
         onDismiss={handleDismiss}

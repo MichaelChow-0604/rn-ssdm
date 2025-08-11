@@ -25,13 +25,7 @@ export default function DotDropdown() {
           <Feather name="edit" size={20} color="black" />
           <Text className="font-medium">View & edit details</Text>
         </DropdownMenuItem>
-        <DropdownMenuItem
-          className="flex-row items-center gap-2 active:bg-gray-100"
-          onPress={() => console.log("Download document")}
-        >
-          <Feather name="download" size={20} color="black" />
-          <Text className="font-medium">Download document</Text>
-        </DropdownMenuItem>
+
         <DropdownMenuItem
           className="flex-row items-center gap-2 active:bg-gray-100"
           onPress={() => console.log("Move to trash")}

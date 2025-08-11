@@ -31,15 +31,17 @@ export default function FilterOptions() {
       </TouchableOpacity>
 
       <TouchableOpacity
-        className="border flex-1 py-2 flex items-center justify-center rounded-lg border-gray-300"
+        className="border flex-1 py-2 flex items-center justify-center rounded-lg border-gray-300 h-16"
         activeOpacity={0.7}
         onPress={() => handlePresentModalPress("documentType")}
       >
-        <Text style={styles.label}>Document Type</Text>
+        <Text style={styles.label} className="text-center">
+          Document Type
+        </Text>
       </TouchableOpacity>
 
       <TouchableOpacity
-        className="border flex-1 py-2 flex items-center justify-center rounded-lg border-gray-300"
+        className="border flex-1 py-2 flex items-center justify-center rounded-lg border-gray-300 h-16"
         activeOpacity={0.7}
         onPress={() => handlePresentModalPress("category")}
       >
@@ -47,7 +49,7 @@ export default function FilterOptions() {
       </TouchableOpacity>
 
       <TouchableOpacity
-        className="border flex-1 py-2 flex items-center justify-center rounded-lg border-gray-300"
+        className="border flex-1 py-2 flex items-center justify-center rounded-lg border-gray-300 h-16"
         activeOpacity={0.7}
         onPress={() => handlePresentModalPress("uploadDate")}
       >

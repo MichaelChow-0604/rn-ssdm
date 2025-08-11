@@ -1,5 +1,5 @@
 import { router, Tabs } from "expo-router";
-import { Image, Platform, TouchableOpacity } from "react-native";
+import { Image, Platform, Pressable, TouchableOpacity } from "react-native";
 import BlurBackground from "~/components/tabs/blur-background";
 import MainButton from "~/components/tabs/main-button";
 
@@ -22,7 +22,12 @@ export default function TabsLayout() {
                 height: "10%",
                 paddingTop: 10,
               },
-        tabBarBackground: () => <BlurBackground />,
+        tabBarBackground: () => {
+          if (Platform.OS === "ios") {
+            return <BlurBackground />;
+          }
+          return null;
+        },
         // Bell icon at the right
         headerRight: () => (
           <TouchableOpacity

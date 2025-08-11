@@ -35,22 +35,23 @@ import { addContact } from "~/lib/storage/contact";
 
 type NewContactFormFields = z.infer<typeof newContactSchema>;
 
-export default function ContactPage() {
+export default function CreateContactPage() {
   const [profilePic, setProfilePic] = useState<string | null>(null);
   const [isWhatsappChecked, setIsWhatsappChecked] = useState(false);
   const [isSMSChecked, setIsSMSChecked] = useState(false);
-  const [selectedRelationship, setSelectedRelationship] = useState<Option>();
+  const [selectedRelationship, setSelectedRelationship] = useState<Option>({
+    label: "Family",
+    value: "family",
+  });
 
   const pickImage = async () => {
     // No permissions request is necessary for launching the image library
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images", "videos"],
       allowsEditing: true,
-      aspect: [4, 3],
+      aspect: [1, 1],
       quality: 1,
     });
-
-    console.log(result);
 
     if (!result.canceled) {
       setProfilePic(result.assets[0].uri);
@@ -295,7 +296,7 @@ export default function ContactPage() {
                     className="native:h-[16] native:w-[16] native:rounded-sm border-subtitle bg-subtitle"
                   />
                   <Text className="text-black font-semibold text-lg">
-                    Email (Default)
+                    Email (Necessary)
                   </Text>
                 </View>
                 <View className="flex-row gap-2 items-center justify-start">
@@ -329,12 +330,14 @@ export default function ContactPage() {
           </Card>
 
           {/* Create button */}
-          <Button
-            className="w-[80%] self-center my-8 bg-button text-white"
-            onPress={handleSubmit(onSubmit)}
-          >
-            <Text className="font-bold text-white">SAVE</Text>
-          </Button>
+          <View className="mt-8 mb-20">
+            <Button
+              className="w-[80%] self-center bg-button text-white"
+              onPress={handleSubmit(onSubmit)}
+            >
+              <Text className="font-bold text-white">SAVE</Text>
+            </Button>
+          </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

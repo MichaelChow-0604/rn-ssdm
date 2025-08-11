@@ -153,8 +153,12 @@ export default function ContactDetailPage() {
 
   async function onDelete() {
     if (!contact) return;
-    await removeContact(contact.id);
-    router.back();
+    router.push({
+      pathname: "/delete-confirm",
+      params: {
+        id: contact.id,
+      },
+    });
   }
 
   const isChecked = (k: "email" | "whatsapp" | "sms") =>

@@ -1,5 +1,11 @@
-import { Image, SectionList, Text, TouchableOpacity, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  Image,
+  SectionList,
+  Text,
+  TouchableOpacity,
+  View,
+  SafeAreaView,
+} from "react-native";
 import SearchBar from "~/components/search-bar";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { router, useFocusEffect } from "expo-router";
@@ -76,20 +82,20 @@ export default function ContactListPage() {
   return (
     <SafeAreaView className="flex-1 bg-white">
       {/* Header */}
-      <View className="flex-row items-center justify-between px-4 gap-4">
+      <View className="flex-row items-center justify-between px-4 gap-4 py-6">
         <SearchBar className="flex-1" placeholder="Search contacts" />
 
         <TouchableOpacity
           activeOpacity={0.8}
           className="rounded-full p-2"
-          onPress={() => router.push("/contact")}
+          onPress={() => router.push("/create-contact")}
         >
           <Ionicons name="person-add" size={24} color="#438BF7" />
         </TouchableOpacity>
       </View>
 
       {/* Title */}
-      <View className="pl-6 py-4 mt-6 border-t-4 border-b-4 border-gray-200">
+      <View className="pl-6 py-4 border-t-4 border-b-4 border-gray-200">
         <Text className="text-2xl font-semibold text-black">My Contacts</Text>
       </View>
 
@@ -123,7 +129,6 @@ export default function ContactListPage() {
         )}
         initialNumToRender={20}
         windowSize={10}
-        removeClippedSubviews
       />
     </SafeAreaView>
   );

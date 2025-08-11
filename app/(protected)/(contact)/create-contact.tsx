@@ -81,6 +81,7 @@ export default function CreateContactPage() {
       await addContact({
         firstName: data.firstName.trim(),
         lastName: data.lastName.trim(),
+        fullName: `${data.firstName.trim()} ${data.lastName.trim()}`,
         mobileNumber: data.mobileNumber.trim(),
         email: data.email.trim(),
         profilePicUri: profilePic,
@@ -271,13 +272,25 @@ export default function CreateContactPage() {
                 </SelectTrigger>
                 <SelectContent className="w-[160px] bg-white">
                   <SelectGroup>
-                    <SelectItem label="Family" value="family">
+                    <SelectItem
+                      label="Family"
+                      value="family"
+                      className="active:bg-gray-100"
+                    >
                       Family
                     </SelectItem>
-                    <SelectItem label="Friend" value="friend">
+                    <SelectItem
+                      label="Friend"
+                      value="friend"
+                      className="active:bg-gray-100"
+                    >
                       Friend
                     </SelectItem>
-                    <SelectItem label="Partner" value="partner">
+                    <SelectItem
+                      label="Partner"
+                      value="partner"
+                      className="active:bg-gray-100"
+                    >
                       Partner
                     </SelectItem>
                   </SelectGroup>

@@ -26,7 +26,7 @@ import { uploadDocumentSchema } from "~/schema/upload-document";
 import { AntDesign } from "@expo/vector-icons";
 import { MultiSelect } from "react-native-element-dropdown";
 import { getContacts, StoredContact } from "~/lib/storage/contact";
-import { useFocusEffect } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import * as DocumentPicker from "expo-document-picker";
 import { Button } from "~/components/ui/button";
 import { BackButton } from "~/components/back-button";
@@ -40,17 +40,18 @@ interface MultiOption {
 
 type UploadDocumentFormFields = z.infer<typeof uploadDocumentSchema>;
 
-function fullName(c: StoredContact) {
-  return `${c.firstName} ${c.lastName}`.trim();
-}
-
 export default function UploadDocument() {
-  const [selectedCategory, setSelectedCategory] = useState<Option>();
-  const [selectedType, setSelectedType] = useState<Option>();
+  const [selectedCategory, setSelectedCategory] = useState<Option>({
+    label: "Legal",
+    value: "legal",
+  });
+  const [selectedType, setSelectedType] = useState<Option>({
+    label: "Will",
+    value: "will",
+  });
 
   const [contactOptions, setContactOptions] = useState<Option[]>([]);
-  const [selected, setSelected] = useState<string[]>([]);
-
+  const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
 
   const handleChooseFile = async () => {
@@ -65,7 +66,7 @@ export default function UploadDocument() {
         const contacts = await getContacts();
         if (cancelled) return;
         const opts = contacts.map((c) => ({
-          label: fullName(c),
+          label: c.fullName,
           value: c.id,
         }));
         setContactOptions(opts);
@@ -98,13 +99,22 @@ export default function UploadDocument() {
 
   const watchedDocumentName = watch("documentName");
   const hasDocName = !!watchedDocumentName?.trim();
-  const hasRecipients = selected.length > 0;
+  const hasRecipients = selectedContacts.length > 0;
   const hasFile = !!selectedFile;
 
   const isUploadDisabled = !(hasDocName && hasRecipients && hasFile);
 
   const onSubmit = (data: UploadDocumentFormFields) => {
-    console.log(data);
+    router.push({
+      pathname: "/preview-document",
+      params: {
+        documentName: data.documentName,
+        description: data.description,
+        category: selectedCategory?.label,
+        type: selectedType?.label,
+        recipients: JSON.stringify(selectedContacts), // serialize
+      },
+    });
   };
 
   return (
@@ -118,7 +128,7 @@ export default function UploadDocument() {
           contentContainerClassName="items-center"
         >
           {/* Header */}
-          <View className="flex-row items-center justify-start gap-2 w-[80%] ">
+          <View className="flex-row items-center justify-start gap-2 w-full px-4 ">
             <BackButton />
             <Text className="text-2xl font-bold py-4">
               Document Detail Form
@@ -269,12 +279,13 @@ export default function UploadDocument() {
                 labelField="label"
                 valueField="value"
                 placeholder="Select recipients"
-                value={selected}
+                value={selectedContacts}
                 maxSelect={5}
                 search
                 searchPlaceholder="Search..."
                 onChange={(item: any) => {
-                  setSelected(item);
+                  console.log(item);
+                  setSelectedContacts(item);
                 }}
                 renderLeftIcon={() => (
                   <AntDesign
@@ -353,7 +364,7 @@ export default function UploadDocument() {
 
           {/* Button container */}
           <Button
-            className={`w-[70%] my-8 ${
+            className={`w-[80%] my-8 ${
               isUploadDisabled ? "bg-gray-300" : "bg-button"
             }`}
             onPress={handleSubmit(onSubmit)}
@@ -364,7 +375,7 @@ export default function UploadDocument() {
                 isUploadDisabled ? "text-gray-500" : "text-white"
               }`}
             >
-              Upload
+              Preview
             </Text>
           </Button>
         </ScrollView>

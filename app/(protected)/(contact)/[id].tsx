@@ -421,14 +421,14 @@ export default function ContactDetailPage() {
           {/* Footer button */}
           {isEditing ? (
             <Button
-              className="w-[80%] self-center my-8 bg-button"
+              className="w-[80%] self-center my-8 mb-20 bg-button"
               onPress={onSave}
             >
               <Text className="font-bold text-white">SAVE</Text>
             </Button>
           ) : (
             <Button
-              className="w-[80%] self-center my-8 bg-red-500"
+              className="w-[80%] self-center my-8 mb-20 bg-red-500"
               onPress={onDelete}
             >
               <Text className="font-bold text-white">DELETE</Text>

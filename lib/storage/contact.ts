@@ -4,6 +4,7 @@ export interface StoredContact {
   id: string;
   firstName: string;
   lastName: string;
+  fullName: string;
   mobileNumber: string;
   email: string;
   profilePicUri?: string | null;
@@ -38,6 +39,7 @@ export async function addContact(
     id: generateId(),
     createdAt: Date.now(),
     ...input,
+    fullName: `${input.firstName} ${input.lastName}`,
   };
   contacts.push(contact);
   await AsyncStorage.setItem(CONTACTS_KEY, JSON.stringify(contacts));
@@ -68,4 +70,11 @@ export async function removeContact(id: string): Promise<void> {
   const all = await getContacts();
   const next = all.filter((c) => c.id !== id);
   await AsyncStorage.setItem(CONTACTS_KEY, JSON.stringify(next));
+}
+
+export async function getContactById(
+  id: string
+): Promise<StoredContact | null> {
+  const all = await getContacts();
+  return all.find((c) => c.id === id) ?? null;
 }

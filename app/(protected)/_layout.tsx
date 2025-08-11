@@ -14,6 +14,8 @@ export default function ProtectedLayout() {
       <Stack.Screen name="(contact)/create-contact" />
       <Stack.Screen name="(contact)/[id]" />
       <Stack.Screen name="(document)/upload-document" />
+      <Stack.Screen name="(document)/preview-document" />
+      <Stack.Screen name="(document)/return-message" />
       <Stack.Screen name="notification-rule" />
     </Stack>
   );

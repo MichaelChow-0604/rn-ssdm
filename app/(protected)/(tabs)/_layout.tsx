@@ -1,5 +1,5 @@
 import { router, Tabs } from "expo-router";
-import { Image, Platform, Pressable, TouchableOpacity } from "react-native";
+import { Image, Platform, TouchableOpacity } from "react-native";
 import BlurBackground from "~/components/tabs/blur-background";
 import MainButton from "~/components/tabs/main-button";
 
@@ -9,6 +9,7 @@ export default function TabsLayout() {
       initialRouteName="(home)"
       screenOptions={{
         headerTitle: "SSDM",
+        headerTitleAlign: "center",
         animation: "shift",
         headerShadowVisible: false,
         tabBarStyle:

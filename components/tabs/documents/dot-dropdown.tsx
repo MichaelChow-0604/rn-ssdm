@@ -8,6 +8,7 @@ import Feather from "@expo/vector-icons/Feather";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Text } from "react-native";
 import { removeDocument } from "~/lib/storage/document";
+import { router } from "expo-router";
 
 interface DotDropdownProps {
   documentId: string;
@@ -34,7 +35,12 @@ export default function DotDropdown({
       >
         <DropdownMenuItem
           className="flex-row items-center gap-2 active:bg-gray-100"
-          onPress={() => console.log("View & edit details")}
+          onPress={() =>
+            router.push({
+              pathname: "/edit-document",
+              params: { documentId },
+            })
+          }
         >
           <Feather name="edit" size={20} color="black" />
           <Text className="font-medium">View & edit details</Text>

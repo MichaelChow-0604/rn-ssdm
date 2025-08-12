@@ -154,6 +154,8 @@ export default function CreateContactPage() {
                     rules={{ required: true }}
                     render={({ field: { onChange, onBlur, value } }) => (
                       <Input
+                        onScroll={() => console.log("gg")}
+                        scrollEnabled={false}
                         onChangeText={onChange}
                         onBlur={onBlur}
                         value={value}

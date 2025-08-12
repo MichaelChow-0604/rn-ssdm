@@ -16,6 +16,7 @@ export default function ProtectedLayout() {
       <Stack.Screen name="(document)/upload-document" />
       <Stack.Screen name="(document)/preview-document" />
       <Stack.Screen name="(document)/return-message" />
+      <Stack.Screen name="(document)/edit-document" />
       <Stack.Screen name="notification-rule" />
     </Stack>
   );

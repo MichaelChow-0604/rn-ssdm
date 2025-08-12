@@ -122,7 +122,10 @@ export default function ContactListPage() {
                 className="w-10 h-10 rounded-full"
               />
             ) : (
-              <View className="w-10 h-10 rounded-full bg-gray-300" />
+              <Image
+                source={require("~/assets/images/default_icon.png")}
+                className="w-10 h-10 rounded-full"
+              />
             )}
             <Text className="text-black font-semibold">{item.name}</Text>
           </TouchableOpacity>

@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   KeyboardAvoidingView,
@@ -7,6 +7,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -24,10 +25,11 @@ import {
 } from "~/components/ui/select";
 import { uploadDocumentSchema } from "~/schema/upload-document";
 import { AntDesign } from "@expo/vector-icons";
-import { MultiSelect } from "react-native-element-dropdown";
-import { getContacts, StoredContact } from "~/lib/storage/contact";
+import { IMultiSelectRef, MultiSelect } from "react-native-element-dropdown";
+import { getContacts } from "~/lib/storage/contact";
 import { router, useFocusEffect } from "expo-router";
 import * as DocumentPicker from "expo-document-picker";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { Button } from "~/components/ui/button";
 import { BackButton } from "~/components/back-button";
 import { Textarea } from "~/components/ui/textarea";
@@ -80,7 +82,6 @@ export default function UploadDocument() {
   const renderItem = (item: MultiOption) => (
     <View style={styles.item}>
       <Text style={styles.selectedTextStyle}>{item.label}</Text>
-      <AntDesign style={styles.icon} color="black" name="Safety" size={20} />
     </View>
   );
 
@@ -116,6 +117,8 @@ export default function UploadDocument() {
       },
     });
   };
+
+  const multiRef = useRef<IMultiSelectRef>(null!);
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -269,13 +272,16 @@ export default function UploadDocument() {
                   </Text>
                 </View>
               </View>
+
               <MultiSelect
+                ref={multiRef}
                 style={styles.dropdown}
                 placeholderStyle={styles.placeholderStyle}
                 selectedTextStyle={styles.selectedTextStyle}
                 inputSearchStyle={styles.inputSearchStyle}
                 iconStyle={styles.iconStyle}
                 data={contactOptions}
+                activeColor="#438BF7"
                 labelField="label"
                 valueField="value"
                 placeholder="Select recipients"
@@ -284,7 +290,6 @@ export default function UploadDocument() {
                 search
                 searchPlaceholder="Search..."
                 onChange={(item: any) => {
-                  console.log(item);
                   setSelectedContacts(item);
                 }}
                 renderLeftIcon={() => (
@@ -295,12 +300,35 @@ export default function UploadDocument() {
                     size={20}
                   />
                 )}
+                renderInputSearch={(onSearch) => (
+                  <View className="h-auto flex-row items-center p-1 gap-1">
+                    <Input
+                      className="flex-1"
+                      placeholder="Search here"
+                      onChangeText={onSearch}
+                      autoCorrect={false}
+                    />
+                    <Button
+                      className="w-[90px] bg-button"
+                      onPress={() => multiRef.current?.close()}
+                    >
+                      <Text className="text-white font-bold">Confirm</Text>
+                    </Button>
+                  </View>
+                )}
                 renderItem={renderItem}
                 renderSelectedItem={(item, unSelect) => (
-                  <TouchableOpacity onPress={() => unSelect && unSelect(item)}>
+                  <TouchableOpacity
+                    onPress={() => unSelect && unSelect(item)}
+                    activeOpacity={0.8}
+                  >
                     <View style={styles.selectedStyle}>
                       <Text style={styles.textSelectedStyle}>{item.label}</Text>
-                      <AntDesign color="black" name="delete" size={17} />
+                      <MaterialIcons
+                        name="delete-forever"
+                        size={20}
+                        color="white"
+                      />
                     </View>
                   </TouchableOpacity>
                 )}
@@ -428,23 +456,16 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 14,
-    backgroundColor: "white",
-    shadowColor: "#000",
+    backgroundColor: "#438BF7",
     marginTop: 8,
     marginRight: 12,
     paddingHorizontal: 12,
     paddingVertical: 8,
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.41,
-
-    elevation: 2,
   },
   textSelectedStyle: {
     marginRight: 5,
     fontSize: 16,
+    color: "white",
+    fontWeight: "bold",
   },
 });

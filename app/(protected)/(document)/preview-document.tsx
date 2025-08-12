@@ -1,9 +1,11 @@
 import {
   ActivityIndicator,
+  Animated,
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
   ScrollView,
+  StyleSheet,
   Text,
   View,
 } from "react-native";
@@ -13,7 +15,7 @@ import { Label } from "~/components/ui/label";
 import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
 import { getContactById, StoredContact } from "~/lib/storage/contact";
-import { useMemo, useEffect, useState } from "react";
+import { useMemo, useEffect, useState, useRef } from "react";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { Button } from "~/components/ui/button";
 
@@ -57,22 +59,49 @@ export default function PreviewDocument() {
     setIsUploading(true);
     setTimeout(() => {
       router.push("/return-message");
-    }, 20000);
-    setIsUploading(false);
+      setIsUploading(false);
+    }, 5000);
   };
 
-  function UploadingOverlay() {
+  function UploadingOverlay({ visible }: { visible: boolean }) {
+    const opacity = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+      Animated.timing(opacity, {
+        toValue: visible ? 0.7 : 0,
+        duration: 300,
+        useNativeDriver: true, // animates opacity on UI thread
+      }).start();
+    }, [visible]);
+
     return (
-      <View className="absolute inset-0 bg-black/50 flex items-center justify-center z-50">
-        <ActivityIndicator size="large" color="#438BF7" />
-        <Text className="text-white font-bold text-2xl">Uploading...</Text>
+      <View
+        pointerEvents={visible ? "auto" : "none"}
+        style={[StyleSheet.absoluteFillObject, { zIndex: 50 }]}
+      >
+        {/* Dim-only layer */}
+        <Animated.View
+          pointerEvents="none"
+          style={[
+            StyleSheet.absoluteFillObject,
+            { backgroundColor: "black", opacity },
+          ]}
+        />
+        {/* Foreground content (not dimmed) */}
+        <View
+          style={[StyleSheet.absoluteFillObject]}
+          className="items-center justify-center"
+        >
+          <ActivityIndicator size="large" color="#438BF7" />
+          <Text className="text-white font-bold text-2xl">Uploading...</Text>
+        </View>
       </View>
     );
   }
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-      <UploadingOverlay />
+      {isUploading && <UploadingOverlay visible={isUploading} />}
       <KeyboardAvoidingView
         style={{ flexGrow: 1 }}
         behavior={Platform.select({ ios: "padding", android: "height" })}
@@ -127,7 +156,7 @@ export default function PreviewDocument() {
             {/* Recipients */}
             <View className="flex-col gap-1">
               <Label className="text-black">Recipients</Label>
-              <Input
+              <Textarea
                 className="text-black bg-gray-300 opacity-100 border-0"
                 placeholder="Enter Recipients"
                 value={recipientContacts.map((c) => c.fullName).join(", ")}

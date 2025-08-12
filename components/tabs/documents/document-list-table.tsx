@@ -1,4 +1,3 @@
-import { TEMP_DATA } from "~/constants/temp-data";
 import {
   Table,
   TableBody,
@@ -7,12 +6,51 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import { FlashList } from "@shopify/flash-list";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { Image, Text, View } from "react-native";
+import { FlatList, Image, Text, View } from "react-native";
 import DotDropdown from "./dot-dropdown";
+import { useCallback, useState } from "react";
+import { getDocuments, StoredDocument } from "~/lib/storage/document";
+import { useFocusEffect } from "expo-router";
 
 export default function DocumentListTable() {
+  const [docs, setDocs] = useState<StoredDocument[]>([]);
+
+  const load = useCallback(async () => {
+    const list = await getDocuments();
+    setDocs(list);
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      load();
+    }, [load])
+  );
+
+  function formateDate(ts: number) {
+    const d = new Date(ts);
+    const dd = String(d.getDate()).padStart(2, "0");
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const yyyy = d.getFullYear();
+    return `${dd}/${mm}/${yyyy}`;
+  }
+
+  function iconForExt(ext: string) {
+    switch (ext?.toLowerCase()) {
+      case "pdf":
+        return require("~/assets/images/pdf_icon.png");
+      case "doc":
+      case "docx":
+        return require("~/assets/images/doc_icon.png");
+      case "jpg":
+      case "jpeg":
+      case "png":
+        return require("~/assets/images/image_icon.png");
+      default:
+        return require("~/assets/images/unknown_icon.png");
+    }
+  }
+
   return (
     <Table className="min-w-full">
       {/* Table header */}
@@ -34,10 +72,19 @@ export default function DocumentListTable() {
       {/* Table body */}
       <TableBody className="w-full">
         {/* Document list */}
-        <FlashList
-          data={TEMP_DATA}
-          estimatedItemSize={20}
+        <FlatList
+          data={docs}
           showsVerticalScrollIndicator={false}
+          contentContainerStyle={{
+            flexGrow: 1,
+          }}
+          ListEmptyComponent={
+            <View className="flex-1 items-center justify-center">
+              <Text className="text-center text-gray-400 text-2xl font-bold">
+                No documents yet
+              </Text>
+            </View>
+          }
           renderItem={({ item: document }) => {
             return (
               <TableRow key={document.id}>
@@ -50,19 +97,24 @@ export default function DocumentListTable() {
                       color="black"
                       className="absolute top-[-6] right-0 z-10"
                     />
-                    <Image source={document.type.icon} className="w-8 h-8" />
+                    <Image
+                      source={iconForExt(document.fileExtension)}
+                      className="w-8 h-8"
+                    />
                   </View>
-                  <Text className="font-semibold">{document.name}</Text>
+                  <Text className="font-semibold">{document.documentName}</Text>
                 </TableCell>
 
                 {/* Upload date */}
                 <TableCell className="w-[25%] flex items-center justify-center">
-                  <Text className="text-center">{document.uploadDate}</Text>
+                  <Text className="text-center">
+                    {formateDate(document.uploadDate)}
+                  </Text>
                 </TableCell>
 
                 {/* 3-dot menu */}
                 <TableCell className="w-[10%] flex items-center justify-center">
-                  <DotDropdown />
+                  <DotDropdown documentId={document.id} onDeleted={load} />
                 </TableCell>
               </TableRow>
             );

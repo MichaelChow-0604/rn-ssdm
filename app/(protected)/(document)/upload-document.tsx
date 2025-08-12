@@ -114,6 +114,7 @@ export default function UploadDocument() {
         category: selectedCategory?.label,
         type: selectedType?.label,
         recipients: JSON.stringify(selectedContacts), // serialize
+        fileName: selectedFile ?? "",
       },
     });
   };
@@ -374,9 +375,11 @@ export default function UploadDocument() {
               </Button>
 
               {selectedFile ? (
-                <Text className="text-gray-600 font-semibold">
-                  {selectedFile}
-                </Text>
+                <View className="flex-1 items-center justify-center">
+                  <Text className="text-gray-600 font-semibold">
+                    {selectedFile}
+                  </Text>
+                </View>
               ) : (
                 <Text className="text-gray-600 font-semibold">
                   No file chosen

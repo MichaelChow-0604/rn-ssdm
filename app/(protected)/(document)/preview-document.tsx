@@ -18,14 +18,17 @@ import { getContactById, StoredContact } from "~/lib/storage/contact";
 import { useMemo, useEffect, useState, useRef } from "react";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { Button } from "~/components/ui/button";
+import { addDocument } from "~/lib/storage/document";
 
 export default function PreviewDocument() {
-  const { documentName, description, category, type } = useLocalSearchParams<{
-    documentName: string;
-    description: string;
-    category: string;
-    type: string;
-  }>();
+  const { documentName, description, category, type, fileName } =
+    useLocalSearchParams<{
+      documentName: string;
+      description: string;
+      category: string;
+      type: string;
+      fileName: string;
+    }>();
 
   const { recipients } = useLocalSearchParams<{ recipients: string }>();
   const [recipientContacts, setRecipientContacts] = useState<StoredContact[]>(
@@ -55,12 +58,50 @@ export default function PreviewDocument() {
 
   const [isUploading, setIsUploading] = useState(false);
 
-  const handleUpload = () => {
+  function formatDateLong(ts: number) {
+    const d = new Date(ts);
+    const day = d.getDate();
+    const month = d.toLocaleString("en-US", { month: "short" });
+    const year = d.getFullYear();
+    return `${day} ${month} ${year}`;
+  }
+
+  const handleUpload = async () => {
     setIsUploading(true);
-    setTimeout(() => {
-      router.push("/return-message");
+    try {
+      const fileExt =
+        String(fileName ?? "")
+          .split(".")
+          .pop()
+          ?.toLowerCase() ?? "";
+
+      const saved = await addDocument({
+        documentName: String(documentName ?? ""),
+        description: String(description ?? ""),
+        category: String(category ?? ""),
+        type: String(type ?? ""),
+        fileName: String(fileName ?? ""),
+        fileExtension: fileExt,
+        recipients: ids,
+      });
+
+      router.replace({
+        pathname: "/return-message",
+        params: {
+          mode: "success",
+          transactionId: saved.transactionId,
+          uploadDate: formatDateLong(saved.uploadDate),
+          uploadTime: saved.uploadTime,
+        },
+      });
+    } catch {
+      router.replace({
+        pathname: "/return-message",
+        params: { mode: "error" },
+      });
+    } finally {
       setIsUploading(false);
-    }, 5000);
+    }
   };
 
   function UploadingOverlay({ visible }: { visible: boolean }) {

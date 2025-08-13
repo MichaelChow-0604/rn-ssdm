@@ -22,6 +22,10 @@ export default function ProtectedLayout() {
         options={{ animation: "slide_from_right" }}
       />
       <Stack.Screen
+        name="(profile)/return-message-reset"
+        options={{ animation: "slide_from_right" }}
+      />
+      <Stack.Screen
         name="(profile)/privacy"
         options={{ animation: "slide_from_right" }}
       />
@@ -30,7 +34,7 @@ export default function ProtectedLayout() {
         options={{ animation: "slide_from_right" }}
       />
       <Stack.Screen
-        name="(profile)/terms-policies"
+        name="(profile)/terms-disclaimer"
         options={{ animation: "slide_from_right" }}
       />
       <Stack.Screen

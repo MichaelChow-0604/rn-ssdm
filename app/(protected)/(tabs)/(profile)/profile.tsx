@@ -11,13 +11,15 @@ import {
 import { Card } from "~/components/ui/card";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Entypo from "@expo/vector-icons/Entypo";
-import Octicons from "@expo/vector-icons/Octicons";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Feather from "@expo/vector-icons/Feather";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { Button } from "~/components/ui/button";
 import { router } from "expo-router";
 import { useProfile } from "~/lib/profile-context";
+import { useAuth } from "~/lib/auth-context";
+import { useState } from "react";
+import { LogoutConfirm } from "~/components/pop-up/logout-confirm";
 
 interface SettingRowProps {
   icon: React.ReactNode;
@@ -53,6 +55,8 @@ export function SettingRow({
 
 export default function Profile() {
   const { profile } = useProfile();
+  const { setIsAuthenticated } = useAuth();
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   const handleEditProfile = () => {
     router.push("/edit-profile");
@@ -74,8 +78,8 @@ export default function Profile() {
     router.push("/help-support");
   };
 
-  const handleTermsPolicies = () => {
-    router.push("/terms-policies");
+  const handleTermsDisclaimer = () => {
+    router.push("/terms-disclaimer");
   };
 
   const handleLanguage = () => {
@@ -176,14 +180,14 @@ export default function Profile() {
                       color="#4b5563"
                     />
                   }
-                  label="Terms and Policies"
-                  onPress={handleTermsPolicies}
+                  label="Terms and Disclaimer"
+                  onPress={handleTermsDisclaimer}
                 />
 
                 {/* Privacy */}
                 <SettingRow
                   icon={<AntDesign name="lock" size={24} color="#4b5563" />}
-                  label="Privacy"
+                  label="Privacy Policy"
                   onPress={handlePrivacy}
                 />
               </View>
@@ -213,12 +217,21 @@ export default function Profile() {
             </View>
 
             {/* Logout */}
-            <Button className="bg-button w-[40%] mx-auto mt-12 mb-4">
+            <Button
+              className="bg-button w-[40%] mx-auto mt-12 mb-4"
+              onPress={() => setDialogOpen(true)}
+            >
               <Text className="text-white font-bold">LOGOUT</Text>
             </Button>
           </Card>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      <LogoutConfirm
+        visible={dialogOpen}
+        onCancel={() => setDialogOpen(false)}
+        onConfirm={() => setIsAuthenticated(false)}
+      />
     </SafeAreaView>
   );
 }

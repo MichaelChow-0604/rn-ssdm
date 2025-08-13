@@ -5,13 +5,14 @@ import { shareSchema } from "~/schema/share-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useFocusEffect } from "expo-router";
 import {
   ensureLocalFromAsset,
   openFile,
   resolveFileMeta,
 } from "~/lib/open-file";
+import { AccessProgressDialog } from "~/components/pop-up/access-progress";
 
 type ShareFormFields = z.infer<typeof shareSchema>;
 
@@ -31,6 +32,10 @@ export default function SharePage() {
 
   const [dialogText, setDialogText] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogStatus, setDialogStatus] = useState<"pending" | "success">(
+    "pending"
+  );
+
   const timers = useRef<number[]>([]);
 
   const onSubmit = async (data: ShareFormFields) => {
@@ -43,13 +48,26 @@ export default function SharePage() {
 
     const { mimeType, iosUTI } = resolveFileMeta(fileName);
 
-    const REQUEST_MS = 1800;
-    const OPEN_DELAY_MS = 3000;
+    const REQUEST_MS = 5000;
+    const OPEN_DELAY_MS = 2000;
 
     setDialogOpen(true);
+    setDialogStatus("pending");
     setDialogText("Requesting for access");
 
-    await openFile({ localUri, mimeType, iosUTI });
+    timers.current.push(
+      setTimeout(() => {
+        setDialogText("Unlock successful!");
+        setDialogStatus("success");
+      }, REQUEST_MS)
+    );
+
+    timers.current.push(
+      setTimeout(async () => {
+        setDialogOpen(false);
+        await openFile({ localUri, mimeType, iosUTI });
+      }, REQUEST_MS + OPEN_DELAY_MS)
+    );
   };
 
   useFocusEffect(
@@ -60,6 +78,13 @@ export default function SharePage() {
       };
     }, [reset])
   );
+
+  useEffect(() => {
+    return () => {
+      timers.current.forEach((timer) => clearTimeout(timer));
+      timers.current = [];
+    };
+  }, []);
 
   return (
     <View className="flex-1 bg-white items-center justify-center">
@@ -132,6 +157,12 @@ export default function SharePage() {
       >
         <Text className="text-white font-bold">VERIFY</Text>
       </Button>
+
+      <AccessProgressDialog
+        visible={dialogOpen}
+        text={dialogText}
+        status={dialogStatus}
+      />
     </View>
   );
 }

@@ -62,6 +62,7 @@ export default function TabsLayout() {
         name="(share)"
         options={{
           title: "Share with me",
+          headerShown: false,
           tabBarIcon: () => (
             <Image
               source={require("~/assets/images/share_icon.png")}
@@ -102,6 +103,7 @@ export default function TabsLayout() {
         name="(profile)"
         options={{
           title: "My Profile",
+          headerShown: false,
           tabBarIcon: () => (
             <Image
               source={require("~/assets/images/profile_icon.png")}

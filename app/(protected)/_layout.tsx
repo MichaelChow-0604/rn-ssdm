@@ -17,7 +17,30 @@ export default function ProtectedLayout() {
       <Stack.Screen name="(document)/preview-document" />
       <Stack.Screen name="(document)/return-message" />
       <Stack.Screen name="(document)/edit-document" />
-      <Stack.Screen name="notification-rule" />
+      <Stack.Screen
+        name="(profile)/change-password"
+        options={{ animation: "slide_from_right" }}
+      />
+      <Stack.Screen
+        name="(profile)/privacy"
+        options={{ animation: "slide_from_right" }}
+      />
+      <Stack.Screen
+        name="(profile)/language"
+        options={{ animation: "slide_from_right" }}
+      />
+      <Stack.Screen
+        name="(profile)/terms-policies"
+        options={{ animation: "slide_from_right" }}
+      />
+      <Stack.Screen
+        name="(profile)/help-support"
+        options={{ animation: "slide_from_right" }}
+      />
+      <Stack.Screen
+        name="notification-rule"
+        options={{ animation: "slide_from_right" }}
+      />
     </Stack>
   );
 }

@@ -85,15 +85,18 @@ export default function PreviewDocument() {
         recipients: ids,
       });
 
-      router.replace({
-        pathname: "/return-message",
-        params: {
-          mode: "success",
-          transactionId: saved.transactionId,
-          uploadDate: formatDateLong(saved.uploadDate),
-          uploadTime: saved.uploadTime,
-        },
-      });
+      // Fake delay
+      setTimeout(() => {
+        router.replace({
+          pathname: "/return-message",
+          params: {
+            mode: "success",
+            transactionId: saved.transactionId,
+            uploadDate: formatDateLong(saved.uploadDate),
+            uploadTime: saved.uploadTime,
+          },
+        });
+      }, 3000);
     } catch {
       router.replace({
         pathname: "/return-message",

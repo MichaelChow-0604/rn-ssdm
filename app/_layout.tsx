@@ -5,18 +5,21 @@ import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 
 import "~/global.css";
 import { AuthProvider } from "~/lib/auth-context";
+import { ProfileProvider } from "~/lib/profile-context";
 
 export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <BottomSheetModalProvider>
         <AuthProvider>
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="index" />
-            <Stack.Screen name="(auth)" />
-            <Stack.Screen name="(protected)" />
-          </Stack>
-          <PortalHost />
+          <ProfileProvider>
+            <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="index" />
+              <Stack.Screen name="(auth)" />
+              <Stack.Screen name="(protected)" />
+            </Stack>
+            <PortalHost />
+          </ProfileProvider>
         </AuthProvider>
       </BottomSheetModalProvider>
     </GestureHandlerRootView>

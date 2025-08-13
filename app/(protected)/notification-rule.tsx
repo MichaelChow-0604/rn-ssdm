@@ -2,9 +2,9 @@ import { View, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { BackButton } from "~/components/back-button";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import Feather from "@expo/vector-icons/Feather";
 import { Switch } from "~/components/ui/switch";
 import { useState } from "react";
-import Feather from "@expo/vector-icons/Feather";
 import { Input } from "~/components/ui/input";
 
 export default function NotificationRule() {

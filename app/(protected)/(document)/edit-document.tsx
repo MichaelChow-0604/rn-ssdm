@@ -82,11 +82,6 @@ export default function EditDocument() {
     setIsEditing(false);
   }
 
-  function handleCancel() {
-    setDescription(doc?.description ?? "");
-    setIsEditing(false);
-  }
-
   return (
     <SafeAreaView className="flex-1 bg-white">
       <KeyboardAvoidingView
@@ -95,14 +90,22 @@ export default function EditDocument() {
       >
         <ScrollView
           className="bg-white"
-          contentContainerClassName="items-center"
+          contentContainerClassName="items-center pb-12"
         >
           {/* Header */}
           <View className="flex-row items-center justify-start gap-2 w-full px-4 ">
             <BackButton />
-            <Text className="text-2xl font-bold py-4">
-              Preview Document Details
-            </Text>
+            <Text className="text-2xl font-bold py-4">Document Details</Text>
+
+            <Button
+              className="bg-button ml-auto"
+              onPress={isEditing ? handleSave : handleEdit}
+              size="sm"
+            >
+              <Text className="font-bold text-white">
+                {isEditing ? "Save" : "Edit"}
+              </Text>
+            </Button>
           </View>
 
           {/* Form preview */}
@@ -163,7 +166,6 @@ export default function EditDocument() {
                 value={description}
                 onChangeText={setDescription}
                 editable={isEditing}
-                autoFocus={isEditing}
               />
             </View>
           </View>
@@ -216,25 +218,6 @@ export default function EditDocument() {
               />
             </View>
           </View>
-
-          {/* Footer (edit wiring will be added later) */}
-          {!isEditing ? (
-            <Button
-              className="w-[80%] self-center bg-button mt-8 mb-12"
-              onPress={handleEdit}
-            >
-              <Text className="font-bold text-white">Edit Description</Text>
-            </Button>
-          ) : (
-            <View className="flex-row gap-4 w-[80%] justify-center mt-8 mb-12">
-              <Button className="bg-gray-200 flex-1" onPress={handleCancel}>
-                <Text className="font-bold text-black">Cancel</Text>
-              </Button>
-              <Button className="bg-button flex-1" onPress={handleSave}>
-                <Text className="font-bold text-white">Save</Text>
-              </Button>
-            </View>
-          )}
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

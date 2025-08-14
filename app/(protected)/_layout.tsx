@@ -42,6 +42,14 @@ export default function ProtectedLayout() {
         options={{ animation: "slide_from_right" }}
       />
       <Stack.Screen
+        name="(profile)/delete-account"
+        options={{ animation: "slide_from_right" }}
+      />
+      <Stack.Screen
+        name="(profile)/delete-confirm"
+        options={{ animation: "slide_from_right" }}
+      />
+      <Stack.Screen
         name="notification-rule"
         options={{ animation: "slide_from_right" }}
       />

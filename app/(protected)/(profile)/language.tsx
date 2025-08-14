@@ -4,9 +4,11 @@ import { Button } from "~/components/ui/button";
 import { useState } from "react";
 
 export default function Language() {
-  const [selectedLanguage, setSelectedLanguage] = useState<"en" | "zh">("en");
+  const [selectedLanguage, setSelectedLanguage] = useState<
+    "en" | "zh-hk" | "zh-cn"
+  >("en");
 
-  const handleSelectLanguage = (language: "en" | "zh") => {
+  const handleSelectLanguage = (language: "en" | "zh-hk" | "zh-cn") => {
     setSelectedLanguage(language);
   };
 
@@ -21,7 +23,7 @@ export default function Language() {
       {/* Select language */}
       <View className="flex-col gap-4 items-center">
         <Button
-          className={`w-[90%] border-2 flex-row items-center justify-start border-button gap-2 ${
+          className={`w-[90%] border-2 flex-row items-center justify-center border-button gap-2 ${
             selectedLanguage === "en"
               ? "border-button bg-blue-100"
               : "border-gray-200 bg-white"
@@ -29,35 +31,33 @@ export default function Language() {
           size="lg"
           onPress={() => handleSelectLanguage("en")}
         >
-          <View className="h-8 w-8 rounded-full overflow-hidden">
-            <Image
-              source={require("~/assets/lang_icon/us.png")}
-              className="h-full w-full"
-              resizeMode="cover"
-            />
-          </View>
           <Text className="font-bold text-black">English</Text>
         </Button>
 
         <Button
-          className={`w-[90%] border-2 flex-row items-center justify-start border-button gap-2 ${
-            selectedLanguage === "zh"
+          className={`w-[90%] border-2 flex-row items-center justify-center border-button gap-2 ${
+            selectedLanguage === "zh-hk"
               ? "border-button bg-blue-100"
               : "border-gray-200 bg-white"
           }`}
           size="lg"
-          onPress={() => handleSelectLanguage("zh")}
-          // TODO: Add functionality to select Chinese
+          onPress={() => handleSelectLanguage("zh-hk")}
           disabled={true}
         >
-          <View className="h-8 w-8 rounded-full overflow-hidden">
-            <Image
-              source={require("~/assets/lang_icon/zh.png")}
-              className="h-full w-full"
-              resizeMode="cover"
-            />
-          </View>
-          <Text className="font-bold text-black">中文</Text>
+          <Text className="font-bold text-black">繁中</Text>
+        </Button>
+
+        <Button
+          className={`w-[90%] border-2 flex-row items-center justify-center border-button gap-2 ${
+            selectedLanguage === "zh-cn"
+              ? "border-button bg-blue-100"
+              : "border-gray-200 bg-white"
+          }`}
+          size="lg"
+          onPress={() => handleSelectLanguage("zh-cn")}
+          disabled={true}
+        >
+          <Text className="font-bold text-black">简中</Text>
         </Button>
       </View>
     </SafeAreaView>

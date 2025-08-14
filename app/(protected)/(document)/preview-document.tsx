@@ -66,6 +66,9 @@ export default function PreviewDocument() {
     return `${day} ${month} ${year}`;
   }
 
+  const sleep = (ms: number) =>
+    new Promise((resolve) => setTimeout(resolve, ms));
+
   const handleUpload = async () => {
     setIsUploading(true);
     try {
@@ -85,18 +88,17 @@ export default function PreviewDocument() {
         recipients: ids,
       });
 
-      // Fake delay
-      setTimeout(() => {
-        router.replace({
-          pathname: "/return-message",
-          params: {
-            mode: "success",
-            transactionId: saved.transactionId,
-            uploadDate: formatDateLong(saved.uploadDate),
-            uploadTime: saved.uploadTime,
-          },
-        });
-      }, 3000);
+      await sleep(3000);
+
+      router.replace({
+        pathname: "/return-message",
+        params: {
+          mode: "success",
+          transactionId: saved.transactionId,
+          uploadDate: formatDateLong(saved.uploadDate),
+          uploadTime: saved.uploadTime,
+        },
+      });
     } catch {
       router.replace({
         pathname: "/return-message",

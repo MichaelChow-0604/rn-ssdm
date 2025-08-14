@@ -64,9 +64,6 @@ export default function SignIn({ setIsSignIn }: SignInProps) {
   const watchedEmail = watch("email");
 
   const onSignInSubmit = (data: SignInFormFields) => {
-    // Clear forget password errors when sign-in is submitted
-    clearForgetPasswordErrors();
-    resetForgetPassword();
     console.log("Sign in data:", data);
 
     router.push({
@@ -189,7 +186,12 @@ export default function SignIn({ setIsSignIn }: SignInProps) {
       {/* Sign in Button */}
       <Button
         className="bg-button mt-4 rounded-xl"
-        onPress={handleSignInSubmit(onSignInSubmit)}
+        onPress={() => {
+          // Clear forget password errors when sign-in is submitted
+          clearForgetPasswordErrors();
+          resetForgetPassword();
+          handleSignInSubmit(onSignInSubmit)();
+        }}
       >
         <Text className="text-white font-semibold">{SIGN_IN}</Text>
       </Button>

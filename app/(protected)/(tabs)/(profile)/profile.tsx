@@ -86,6 +86,10 @@ export default function Profile() {
     router.push("/language");
   };
 
+  const handleDeleteAccount = () => {
+    router.push("/delete-account");
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-blue-100">
       {/* Curved blue topper */}
@@ -210,7 +214,7 @@ export default function Profile() {
                     <AntDesign name="deleteuser" size={24} color="#E42D2D" />
                   }
                   label="Delete Account"
-                  onPress={() => {}}
+                  onPress={handleDeleteAccount}
                   labelClassName="text-red-500"
                 />
               </View>

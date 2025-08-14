@@ -1,13 +1,51 @@
 import { router, useLocalSearchParams } from "expo-router";
+import { useEffect, useState } from "react";
 import { View, Text, Image } from "react-native";
 import { Button } from "~/components/ui/button";
 import { removeContact } from "~/lib/storage/contact";
+import {
+  getDocuments,
+  StoredDocument,
+  updateDocument,
+} from "~/lib/storage/document";
 
 export default function DeleteConfirm() {
   const { id } = useLocalSearchParams();
+  const contactId = String(id ?? "");
+
+  const [affectedDocs, setAffectedDocs] = useState<StoredDocument[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      if (!contactId) return;
+      const docs = await getDocuments();
+      const affected = docs.filter((d) => d.recipients?.includes(contactId));
+
+      if (!cancelled) setAffectedDocs(affected);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   async function handleDelete() {
-    await removeContact(id as string);
+    if (!contactId) {
+      router.back();
+      return;
+    }
+
+    await removeContact(contactId);
+
+    if (affectedDocs.length) {
+      await Promise.all(
+        affectedDocs.map((d) =>
+          updateDocument(d.id, {
+            recipients: (d.recipients ?? []).filter((r) => r !== contactId),
+          })
+        )
+      );
+    }
     router.replace("/contact-list");
   }
 
@@ -20,6 +58,22 @@ export default function DeleteConfirm() {
       <Text className="text-xl font-semibold text-center w-[80%]">
         Are you sure you want to delete this contact person?
       </Text>
+
+      {affectedDocs.length > 0 && (
+        <View className="flex-col gap-1 w-[90%] mt-4">
+          <Text className="text-center text-sm text-redtext">
+            This contact is the recipient of the following documents:
+          </Text>
+          <Text className="text-center text-sm text-redtext font-bold">
+            {affectedDocs.map((d) => d.documentName).join(", ")}
+          </Text>
+          <Text className="text-center text-sm text-redtext">
+            Proceeding will automatically remove this contact from those
+            documents' recipient field.
+          </Text>
+        </View>
+      )}
+
       <View className="flex-col gap-4 pt-8 w-[60%]">
         <Button onPress={handleDelete} className="bg-button">
           <Text className="text-white font-bold">YES, DELETE</Text>

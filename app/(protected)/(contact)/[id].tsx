@@ -32,7 +32,6 @@ import * as ImagePicker from "expo-image-picker";
 import { router, useLocalSearchParams, useFocusEffect } from "expo-router";
 import {
   getContact,
-  removeContact,
   updateContact,
   StoredContact,
 } from "~/lib/storage/contact";

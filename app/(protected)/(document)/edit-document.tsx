@@ -3,7 +3,9 @@ import {
   Platform,
   SafeAreaView,
   ScrollView,
+  StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from "react-native";
 import { BackButton } from "~/components/back-button";
@@ -12,14 +14,26 @@ import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { Button } from "~/components/ui/button";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocalSearchParams } from "expo-router";
 import {
   getDocumentById,
   StoredDocument,
   updateDocument,
 } from "~/lib/storage/document";
-import { getContactById, StoredContact } from "~/lib/storage/contact";
+import {
+  getContactById,
+  getContacts,
+  StoredContact,
+} from "~/lib/storage/contact";
+import { IMultiSelectRef, MultiSelect } from "react-native-element-dropdown";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { EditAlert } from "~/components/pop-up/edit-alert";
+
+interface MultiOption {
+  label: string;
+  value: string; // contact id
+}
 
 export default function EditDocument() {
   const { documentId } = useLocalSearchParams<{ documentId: string }>();
@@ -30,6 +44,10 @@ export default function EditDocument() {
   );
   const [description, setDescription] = useState("");
 
+  const [contactOptions, setContactOptions] = useState<MultiOption[]>([]);
+  const [selectedRecipients, setSelectedRecipients] = useState<string[]>([]);
+  const multiRef = useRef<IMultiSelectRef>(null!);
+
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -38,6 +56,7 @@ export default function EditDocument() {
       if (cancelled) return;
       setDoc(found);
       setDescription(found?.description ?? "");
+      setSelectedRecipients(found?.recipients ?? []);
 
       if (found?.recipients?.length) {
         const contacts = await Promise.all(
@@ -54,6 +73,19 @@ export default function EditDocument() {
       cancelled = true;
     };
   }, [documentId]);
+
+  // load all contacts as options
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const all = await getContacts();
+      if (cancelled) return;
+      setContactOptions(all.map((c) => ({ label: c.fullName, value: c.id })));
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const recipientsText = useMemo(
     () => recipientContacts.map((c) => c.fullName).join(", "),
@@ -72,13 +104,33 @@ export default function EditDocument() {
     setIsEditing(true);
   }
 
+  const [editAlertOpen, setEditAlertOpen] = useState(false);
+
   async function handleSave() {
     if (!documentId || !doc) {
       setIsEditing(false);
       return;
     }
-    const updated = await updateDocument(String(documentId), { description });
-    if (updated) setDoc(updated);
+
+    if (selectedRecipients.length === 0) {
+      setEditAlertOpen(true);
+      return;
+    }
+
+    const updated = await updateDocument(String(documentId), {
+      description,
+      recipients: selectedRecipients,
+    });
+
+    if (updated) {
+      setDoc(updated);
+      if (updated.recipients?.length) {
+        const contacts = await Promise.all(
+          updated.recipients.map((id) => getContactById(id))
+        );
+        setRecipientContacts(contacts.filter(Boolean) as StoredContact[]);
+      }
+    }
     setIsEditing(false);
   }
 
@@ -146,12 +198,79 @@ export default function EditDocument() {
             {/* Recipients */}
             <View className="flex-col gap-1">
               <Label className="text-black">Recipients</Label>
-              <Textarea
-                className="text-black bg-gray-300 opacity-100 border-0"
-                placeholder="Recipients"
-                value={recipientsText}
-                editable={false}
-              />
+              {isEditing ? (
+                <MultiSelect
+                  ref={multiRef}
+                  style={styles.dropdown}
+                  placeholderStyle={styles.placeholderStyle}
+                  selectedTextStyle={styles.selectedTextStyle}
+                  inputSearchStyle={styles.inputSearchStyle}
+                  iconStyle={styles.iconStyle}
+                  data={contactOptions}
+                  activeColor="#438BF7"
+                  labelField="label"
+                  valueField="value"
+                  placeholder="Select recipients"
+                  value={selectedRecipients}
+                  maxSelect={5}
+                  search
+                  searchPlaceholder="Search..."
+                  onChange={(vals: any) => setSelectedRecipients(vals)}
+                  renderLeftIcon={() => (
+                    <AntDesign
+                      style={styles.icon}
+                      color="black"
+                      name="user"
+                      size={20}
+                    />
+                  )}
+                  renderItem={(item: MultiOption) => (
+                    <View style={styles.item}>
+                      <Text style={styles.selectedTextStyle}>{item.label}</Text>
+                    </View>
+                  )}
+                  renderSelectedItem={(item, unSelect) => (
+                    <TouchableOpacity
+                      onPress={() => unSelect && unSelect(item)}
+                      activeOpacity={0.8}
+                    >
+                      <View style={styles.selectedStyle}>
+                        <Text style={styles.textSelectedStyle}>
+                          {item.label}
+                        </Text>
+                        <MaterialIcons
+                          name="delete-forever"
+                          size={20}
+                          color="white"
+                        />
+                      </View>
+                    </TouchableOpacity>
+                  )}
+                  renderInputSearch={(onSearch) => (
+                    <View className="h-auto flex-row items-center p-1 gap-1">
+                      <Input
+                        className="flex-1"
+                        placeholder="Search here"
+                        onChangeText={onSearch}
+                        autoCorrect={false}
+                      />
+                      <Button
+                        className="w-[90px] bg-button"
+                        onPress={() => multiRef.current?.close()}
+                      >
+                        <Text className="text-white font-bold">Confirm</Text>
+                      </Button>
+                    </View>
+                  )}
+                />
+              ) : (
+                <Textarea
+                  className="text-black bg-gray-300 opacity-100 border-0"
+                  placeholder="Recipients"
+                  value={recipientsText}
+                  editable={false}
+                />
+              )}
             </View>
 
             {/* Description */}
@@ -220,6 +339,66 @@ export default function EditDocument() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      <EditAlert visible={editAlertOpen} setOpen={setEditAlertOpen} />
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: { padding: 16 },
+  dropdown: {
+    height: 50,
+    backgroundColor: "white",
+    borderRadius: 12,
+    padding: 12,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 1.41,
+    elevation: 2,
+  },
+  placeholderStyle: {
+    fontSize: 16,
+  },
+  selectedTextStyle: {
+    fontSize: 14,
+  },
+  iconStyle: {
+    width: 20,
+    height: 20,
+  },
+  inputSearchStyle: {
+    height: 40,
+    fontSize: 16,
+  },
+  icon: {
+    marginRight: 5,
+  },
+  item: {
+    padding: 17,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  selectedStyle: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 14,
+    backgroundColor: "#438BF7",
+    marginTop: 8,
+    marginRight: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  textSelectedStyle: {
+    marginRight: 5,
+    fontSize: 16,
+    color: "white",
+    fontWeight: "bold",
+  },
+});

@@ -7,7 +7,7 @@ import {
   WHATSAPP_NOTIFICATION_MESSAGE,
 } from "~/constants/notification-message";
 
-export default function Notification() {
+export default function NotificationMessage() {
   return (
     <SafeAreaView className="flex-1 bg-white">
       {/* Header */}

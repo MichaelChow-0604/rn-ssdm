@@ -11,6 +11,9 @@ export default function ProtectedLayout() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(tabs)" />
+      <Stack.Screen name="notification-rule" />
+      <Stack.Screen name="(trash)/trash" />
+      <Stack.Screen name="(trash)/delete-doc-confirm" />
       <Stack.Screen name="(contact)/create-contact" />
       <Stack.Screen name="(contact)/[id]" />
       <Stack.Screen name="(document)/upload-document" />
@@ -50,7 +53,7 @@ export default function ProtectedLayout() {
         options={{ animation: "slide_from_right" }}
       />
       <Stack.Screen
-        name="notification-message"
+        name="(profile)/notification-message"
         options={{ animation: "slide_from_right" }}
       />
     </Stack>

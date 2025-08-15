@@ -8,16 +8,16 @@ import {
 } from "~/components/ui/table";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { FlatList, Image, Text, View } from "react-native";
-import DotDropdown from "./dot-dropdown";
+import DotDropdown from "~/components/trash/dot-dropdown";
 import { useCallback, useState } from "react";
-import { getDocuments, StoredDocument } from "~/lib/storage/document";
+import { getTrash, TrashedDocument } from "~/lib/storage/trash";
 import { useFocusEffect } from "expo-router";
 
-export default function DocumentListTable() {
-  const [docs, setDocs] = useState<StoredDocument[]>([]);
+export default function TrashListTable() {
+  const [docs, setDocs] = useState<TrashedDocument[]>([]);
 
   const load = useCallback(async () => {
-    const list = await getDocuments();
+    const list = await getTrash();
     setDocs(list);
   }, []);
 
@@ -81,7 +81,7 @@ export default function DocumentListTable() {
           ListEmptyComponent={
             <View className="flex-1 items-center justify-center">
               <Text className="text-center text-gray-400 text-2xl font-bold">
-                No document yet
+                No trash yet
               </Text>
             </View>
           }

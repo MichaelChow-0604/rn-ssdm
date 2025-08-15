@@ -281,7 +281,6 @@ export default function EditDocument() {
                 className={`text-black opacity-100 border-0 ${
                   isEditing ? "bg-white border bored-gray-300" : "bg-gray-300"
                 }`}
-                placeholder="Enter Description"
                 value={description}
                 onChangeText={setDescription}
                 editable={isEditing}

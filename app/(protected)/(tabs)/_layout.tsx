@@ -2,6 +2,7 @@ import { router, Tabs } from "expo-router";
 import { Image, Platform, TouchableOpacity } from "react-native";
 import BlurBackground from "~/components/tabs/blur-background";
 import MainButton from "~/components/tabs/main-button";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 export default function TabsLayout() {
   return (
@@ -29,6 +30,19 @@ export default function TabsLayout() {
           }
           return null;
         },
+        headerLeft: () => (
+          <TouchableOpacity
+            onPress={() => router.push("/trash")}
+            activeOpacity={0.6}
+          >
+            <MaterialIcons
+              name="delete"
+              size={32}
+              color="#ef4444"
+              className="ml-3"
+            />
+          </TouchableOpacity>
+        ),
         // Bell icon at the right
         headerRight: () => (
           <TouchableOpacity

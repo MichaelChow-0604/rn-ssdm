@@ -7,10 +7,11 @@ import {
 import Feather from "@expo/vector-icons/Feather";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Text } from "react-native";
-import { moveToTrash } from "~/lib/storage/trash";
-import { router } from "expo-router";
+import { removeDocument, recoverDocument } from "~/lib/storage/trash";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { useState } from "react";
-import { MoveToTrashAlert } from "~/components/pop-up/move-to-trash-alert";
+import { PermanentDeleteAlert } from "../pop-up/permanent-delete-alert";
+import { router } from "expo-router";
 
 interface DotDropdownProps {
   documentId: string;
@@ -21,12 +22,20 @@ export default function DotDropdown({
   documentId,
   onDeleted,
 }: DotDropdownProps) {
-  const [isMoveToTrashAlertOpen, setIsMoveToTrashAlertOpen] = useState(false);
+  const [isPermanentDeleteAlertOpen, setIsPermanentDeleteAlertOpen] =
+    useState(false);
 
-  const handleMoveToTrash = async () => {
-    await moveToTrash(documentId);
+  const handleRecover = async () => {
+    await recoverDocument(documentId);
     onDeleted?.();
-    setIsMoveToTrashAlertOpen(false);
+  };
+
+  const handlePermanentDelete = async () => {
+    router.replace({
+      pathname: "/(protected)/(trash)/delete-doc-confirm",
+      params: { documentId },
+    });
+    setIsPermanentDeleteAlertOpen(false);
   };
 
   return (
@@ -41,30 +50,27 @@ export default function DotDropdown({
         >
           <DropdownMenuItem
             className="flex-row items-center gap-2 active:bg-gray-100"
-            onPress={() =>
-              router.push({
-                pathname: "/edit-document",
-                params: { documentId },
-              })
-            }
+            onPress={handleRecover}
           >
-            <Feather name="edit" size={20} color="black" />
-            <Text className="font-medium">View & edit details</Text>
+            <Ionicons name="reload" size={20} color="black" />
+            <Text className="font-medium">Recover</Text>
           </DropdownMenuItem>
 
           <DropdownMenuItem
             className="flex-row items-center gap-2 active:bg-gray-100"
-            onPress={() => setIsMoveToTrashAlertOpen(true)}
+            onPress={() => setIsPermanentDeleteAlertOpen(true)}
           >
             <Feather name="trash-2" size={20} color="#E42D2D" />
-            <Text className="font-medium text-[#E42D2D]">Move to trash</Text>
+            <Text className="font-medium text-[#E42D2D]">
+              Permanently delete
+            </Text>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      <MoveToTrashAlert
-        visible={isMoveToTrashAlertOpen}
-        onConfirm={handleMoveToTrash}
-        onCancel={() => setIsMoveToTrashAlertOpen(false)}
+      <PermanentDeleteAlert
+        visible={isPermanentDeleteAlertOpen}
+        onConfirm={handlePermanentDelete}
+        onCancel={() => setIsPermanentDeleteAlertOpen(false)}
       />
     </>
   );

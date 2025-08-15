@@ -215,7 +215,6 @@ export default function PreviewDocument() {
               <Label className="text-black">Description</Label>
               <Textarea
                 className="text-black bg-gray-300 opacity-100 border-0"
-                placeholder="Enter Description"
                 value={description as string}
                 editable={false}
               />

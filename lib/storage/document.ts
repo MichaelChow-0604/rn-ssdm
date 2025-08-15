@@ -94,6 +94,11 @@ export async function updateDocument(
   return updated;
 }
 
+export async function insertDocument(doc: StoredDocument): Promise<void> {
+  const all = await getDocuments();
+  await AsyncStorage.setItem(DOCUMENTS_KEY, JSON.stringify([doc, ...all]));
+}
+
 export async function removeDocument(id: string): Promise<void> {
   const all = await getDocuments();
   const next = all.filter((d) => d.id !== id);

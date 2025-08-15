@@ -76,7 +76,7 @@ export function TrashDeleteSuccess({ visible }: TrashDeleteSuccessProps) {
               </View>
 
               <Button className="bg-button" onPress={handleBack}>
-                <Text className="text-white font-bold">BACK</Text>
+                <Text className="text-white font-bold">BACK TO TRASH</Text>
               </Button>
             </CardContent>
           </Card>

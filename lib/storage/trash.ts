@@ -56,3 +56,24 @@ export async function removeDocument(id: string): Promise<void> {
   const next = trashList.filter((t) => t.id !== id);
   await setTrash(next);
 }
+
+export async function updateTrashedDocument(
+  id: string,
+  patch: Partial<TrashedDocument>
+): Promise<TrashedDocument | null> {
+  const all = await getTrash();
+  let updated: TrashedDocument | null = null;
+  const next = all.map((t) => {
+    if (t.id !== id) return t;
+    updated = {
+      ...t,
+      ...patch,
+      id: t.id,
+      uploadDate: t.uploadDate,
+      trashedAt: t.trashedAt,
+    };
+    return updated!;
+  });
+  await setTrash(next);
+  return updated;
+}

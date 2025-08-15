@@ -229,9 +229,7 @@ export default function PreviewDocument() {
 
             <View className="flex-row gap-2 items-center bg-gray-100 p-3 w-full my-2">
               <AntDesign name="file1" size={20} color="#438BF7" />
-              <Text className="text-black font-bold text-lg">
-                {documentName}
-              </Text>
+              <Text className="text-black font-bold text-lg">{fileName}</Text>
             </View>
           </View>
 

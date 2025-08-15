@@ -8,27 +8,51 @@ import {
   StoredDocument,
   updateDocument,
 } from "~/lib/storage/document";
+import {
+  getTrash,
+  TrashedDocument,
+  updateTrashedDocument,
+} from "~/lib/storage/trash";
 
 export default function DeleteConfirm() {
   const { id } = useLocalSearchParams();
   const contactId = String(id ?? "");
 
-  const [affectedDocs, setAffectedDocs] = useState<StoredDocument[]>([]);
-  const [blockedDocs, setBlockedDocs] = useState<StoredDocument[]>([]);
+  const [affectedActiveDocs, setAffectedActiveDocs] = useState<
+    StoredDocument[]
+  >([]);
+  const [affectedTrashedDocs, setAffectedTrashedDocs] = useState<
+    TrashedDocument[]
+  >([]);
+  const [blockedDocNames, setBlockedDocNames] = useState<string[]>([]);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       if (!contactId) return;
-      const docs = await getDocuments();
-      const affected = docs.filter((d) => d.recipients?.includes(contactId));
-      const blocked = affected.filter(
+      const [docs, trash] = await Promise.all([getDocuments(), getTrash()]);
+
+      const affectedActive = docs.filter((d) =>
+        d.recipients?.includes(contactId)
+      );
+      const affectedTrash = trash.filter((t) =>
+        t.recipients?.includes(contactId)
+      );
+
+      const blockedActive = affectedActive.filter(
         (d) => (d.recipients?.filter(Boolean).length ?? 0) === 1
+      );
+      const blockedTrash = affectedTrash.filter(
+        (t) => (t.recipients?.filter(Boolean).length ?? 0) === 1
       );
 
       if (!cancelled) {
-        setAffectedDocs(affected);
-        setBlockedDocs(blocked);
+        setAffectedActiveDocs(affectedActive);
+        setAffectedTrashedDocs(affectedTrash);
+        setBlockedDocNames([
+          ...blockedActive.map((d) => d.documentName),
+          ...blockedTrash.map((t) => t.documentName),
+        ]);
       }
     })();
 
@@ -37,7 +61,11 @@ export default function DeleteConfirm() {
     };
   }, [contactId]);
 
-  const canDelete = blockedDocs.length === 0;
+  const canDelete = blockedDocNames.length === 0;
+  const affectedNames = [
+    ...affectedActiveDocs.map((d) => d.documentName),
+    ...affectedTrashedDocs.map((t) => t.documentName),
+  ];
 
   async function handleDelete() {
     if (!contactId || !canDelete) {
@@ -46,15 +74,26 @@ export default function DeleteConfirm() {
 
     await removeContact(contactId);
 
-    if (affectedDocs.length) {
+    if (affectedActiveDocs.length) {
       await Promise.all(
-        affectedDocs.map((d) =>
+        affectedActiveDocs.map((d) =>
           updateDocument(d.id, {
             recipients: (d.recipients ?? []).filter((r) => r !== contactId),
           })
         )
       );
     }
+
+    if (affectedTrashedDocs.length) {
+      await Promise.all(
+        affectedTrashedDocs.map((t) =>
+          updateTrashedDocument(t.id, {
+            recipients: (t.recipients ?? []).filter((r) => r !== contactId),
+          })
+        )
+      );
+    }
+
     router.replace("/contact-list");
   }
 
@@ -68,7 +107,7 @@ export default function DeleteConfirm() {
         Are you sure you want to delete this contact person?
       </Text>
 
-      {blockedDocs.length > 0 ? (
+      {blockedDocNames.length > 0 ? (
         <View className="flex-col gap-1 w-[90%] mt-4">
           <Text className="text-center text-sm text-redtext">
             You cannot delete this contact.
@@ -79,7 +118,7 @@ export default function DeleteConfirm() {
           </Text>
 
           <Text className="text-center text-sm text-redtext font-bold">
-            {blockedDocs.map((d) => d.documentName).join(", ")}
+            {blockedDocNames.join(", ")}
           </Text>
 
           <Text className="text-center text-sm text-redtext">
@@ -87,13 +126,13 @@ export default function DeleteConfirm() {
             this contact.
           </Text>
         </View>
-      ) : affectedDocs.length > 0 ? (
+      ) : affectedNames.length > 0 ? (
         <View className="flex-col gap-1 w-[90%] mt-4">
           <Text className="text-center text-sm text-redtext">
             This contact is the recipient of the following documents:
           </Text>
           <Text className="text-center text-sm text-redtext font-bold">
-            {affectedDocs.map((d) => d.documentName).join(", ")}
+            {affectedNames.join(", ")}
           </Text>
           <Text className="text-center text-sm text-redtext">
             Proceeding will automatically remove this contact from those

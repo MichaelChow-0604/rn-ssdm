@@ -1,9 +1,10 @@
 import React, {
   forwardRef,
-  useMemo,
   useCallback,
   useState,
   useEffect,
+  memo,
+  useMemo,
 } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import {
@@ -19,6 +20,7 @@ type FilterOption = "documentType" | "category" | "uploadDate" | null;
 interface FilterBottomSheetProps {
   selectedFilter: FilterOption;
   onDismiss: () => void;
+  onApply: (filter: Exclude<FilterOption, null>, subOptionId: string) => void;
 }
 
 // Define your filter data
@@ -46,35 +48,54 @@ interface FilterGridProps {
   onSelect: (id: string) => void;
 }
 
-function FilterGrid({ items, selectedId, onSelect }: FilterGridProps) {
+const FilterGridItem = memo(function FilterGridItem({
+  item,
+  selected,
+  onPress,
+}: {
+  item: { id: string; label: string };
+  selected: boolean;
+  onPress: (id: string) => void;
+}) {
+  const handlePress = useCallback(() => onPress(item.id), [onPress, item.id]);
+  return (
+    <TouchableOpacity
+      className={`w-[45%] flex items-center justify-center p-2 rounded-lg ${
+        selected ? "bg-button" : "bg-gray-100 "
+      }`}
+      activeOpacity={1}
+      onPress={handlePress}
+    >
+      <Text
+        className={`text-gray-700 font-medium ${selected ? "text-white" : ""}`}
+      >
+        {item.label}
+      </Text>
+    </TouchableOpacity>
+  );
+});
+
+const FilterGrid = memo(function FilterGrid({
+  items,
+  selectedId,
+  onSelect,
+}: FilterGridProps) {
   return (
     <View className="flex-row flex-wrap gap-4 items-center justify-center w-full p-4">
       {items.map((item) => (
-        <TouchableOpacity
+        <FilterGridItem
           key={item.id}
-          className={`w-[45%] flex items-center justify-center p-2 rounded-lg ${
-            selectedId === item.id ? "bg-button" : "bg-gray-100 "
-          }`}
-          activeOpacity={1}
-          onPress={() => {
-            onSelect(item.id);
-          }}
-        >
-          <Text
-            className={`text-gray-700 font-medium ${
-              selectedId === item.id ? "text-white" : ""
-            }`}
-          >
-            {item.label}
-          </Text>
-        </TouchableOpacity>
+          item={item}
+          selected={selectedId === item.id}
+          onPress={onSelect}
+        />
       ))}
     </View>
   );
-}
+});
 
 const FilterBottomSheet = forwardRef<BottomSheetModal, FilterBottomSheetProps>(
-  ({ selectedFilter, onDismiss }, ref) => {
+  ({ selectedFilter, onDismiss, onApply }, ref) => {
     const [selectedSubOption, setSelectedSubOption] = useState<string | null>(
       null
     );
@@ -91,14 +112,17 @@ const FilterBottomSheet = forwardRef<BottomSheetModal, FilterBottomSheetProps>(
       onDismiss?.(); // notify parent to clear selectedFilter
     }, [onDismiss]);
 
-    const selectedFilterType =
-      selectedFilter === "documentType"
-        ? "Document Type"
-        : selectedFilter === "category"
-        ? "Category"
-        : selectedFilter === "uploadDate"
-        ? "Upload Date"
-        : null;
+    const selectedFilterType = useMemo(
+      () =>
+        selectedFilter === "documentType"
+          ? "Document Type"
+          : selectedFilter === "category"
+          ? "Category"
+          : selectedFilter === "uploadDate"
+          ? "Upload Date"
+          : null,
+      [selectedFilter]
+    );
 
     const renderBackdrop = useCallback(
       (props: BottomSheetBackdropProps) => (
@@ -112,25 +136,21 @@ const FilterBottomSheet = forwardRef<BottomSheetModal, FilterBottomSheetProps>(
       []
     );
 
-    function renderFilterContent() {
-      if (!selectedFilter) return null;
-      const items = filterData[selectedFilter];
-      return (
-        <FilterGrid
-          items={items}
-          selectedId={selectedSubOption}
-          onSelect={setSelectedSubOption}
-        />
-      );
-    }
+    const items = useMemo(
+      () => (selectedFilter ? filterData[selectedFilter] : []),
+      [selectedFilter]
+    );
 
-    const handleApply = () => {
+    const handleApply = useCallback(() => {
+      if (selectedFilter && selectedSubOption) {
+        onApply(selectedFilter, selectedSubOption);
+      }
       dismiss();
       console.log("Apply filter:", {
         option: selectedFilter,
         subOption: selectedSubOption,
       });
-    };
+    }, [dismiss, onApply, selectedFilter, selectedSubOption]);
 
     return (
       <BottomSheetModal
@@ -149,7 +169,13 @@ const FilterBottomSheet = forwardRef<BottomSheetModal, FilterBottomSheetProps>(
           </View>
 
           <View className="items-center justify-center py-6">
-            {renderFilterContent()}
+            {selectedFilter ? (
+              <FilterGrid
+                items={items}
+                selectedId={selectedSubOption}
+                onSelect={setSelectedSubOption}
+              />
+            ) : null}
           </View>
 
           <Button

@@ -297,7 +297,7 @@ export default function EditDocument() {
             <View className="flex-row gap-2 items-center bg-gray-100 p-3 w-full my-2">
               <AntDesign name="file1" size={20} color="#438BF7" />
               <Text className="text-black font-bold text-lg">
-                {doc?.documentName ?? ""}
+                {doc?.fileName ?? ""}
               </Text>
             </View>
           </View>

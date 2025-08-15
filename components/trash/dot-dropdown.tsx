@@ -7,7 +7,7 @@ import {
 import Feather from "@expo/vector-icons/Feather";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Text } from "react-native";
-import { removeDocument, recoverDocument } from "~/lib/storage/trash";
+import { recoverDocument } from "~/lib/storage/trash";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useState } from "react";
 import { PermanentDeleteAlert } from "../pop-up/permanent-delete-alert";

@@ -38,6 +38,7 @@ export default function NotificationRule() {
             <Switch
               checked={notificationEnabled}
               onCheckedChange={setNotificationEnabled}
+              disabled={true}
             />
           </View>
 

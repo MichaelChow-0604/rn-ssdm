@@ -42,6 +42,12 @@
             "./assets/docs/rikki.jpg"
           ]
         }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/app_icon.png"
+        }
       ]
     ],
     "experiments": {

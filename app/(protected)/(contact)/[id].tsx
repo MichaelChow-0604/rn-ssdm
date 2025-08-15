@@ -187,15 +187,15 @@ export default function ContactDetailPage() {
           <BackButton />
           <Text className="text-2xl font-semibold text-white">{title}</Text>
 
-          {!isEditing && (
-            <TouchableOpacity
-              activeOpacity={0.8}
-              className="ml-auto bg-white py-2 px-4 rounded-lg"
-              onPress={() => setIsEditing(true)}
-            >
-              <Text className="text-lg font-semibold text-button">Edit</Text>
-            </TouchableOpacity>
-          )}
+          <TouchableOpacity
+            activeOpacity={0.8}
+            className="ml-auto bg-white py-2 px-4 rounded-lg"
+            onPress={isEditing ? onSave : () => setIsEditing(true)}
+          >
+            <Text className="text-lg font-semibold text-button">
+              {isEditing ? "Save" : "Edit"}
+            </Text>
+          </TouchableOpacity>
         </View>
 
         <ScrollView className="bg-transparent w-full">
@@ -225,7 +225,7 @@ export default function ContactDetailPage() {
           </View>
 
           {/* Form section */}
-          <Card className="w-full bg-white p-4 rounded-xl mt-8 gap-4 relative">
+          <Card className="w-full bg-white p-4 rounded-xl mt-8 mb-6 gap-4 relative">
             <CardHeader className="py-2">
               {/* No 'All fields are required' in detail page */}
             </CardHeader>
@@ -401,7 +401,15 @@ export default function ContactDetailPage() {
                       />
                     )}
                     <Text className="text-black font-semibold text-lg">
-                      {k === "email" ? "Email (Default)" : k.toUpperCase()}
+                      {
+                        (
+                          {
+                            email: "Email (necessary)",
+                            whatsapp: "Whatsapp",
+                            sms: "SMS",
+                          } as const
+                        )[k]
+                      }
                     </Text>
                   </View>
                 ))}
@@ -418,21 +426,13 @@ export default function ContactDetailPage() {
           </Card>
 
           {/* Footer button */}
-          {isEditing ? (
-            <Button
-              className="w-[80%] self-center my-8 mb-20 bg-button"
-              onPress={onSave}
-            >
-              <Text className="font-bold text-white">SAVE</Text>
-            </Button>
-          ) : (
-            <Button
-              className="w-[80%] self-center my-8 mb-20 bg-red-500"
-              onPress={onDelete}
-            >
-              <Text className="font-bold text-white">DELETE</Text>
-            </Button>
-          )}
+          <Button
+            className="w-[80%] self-center bg-red-500"
+            onPress={onDelete}
+            disabled={!isEditing}
+          >
+            <Text className="font-bold text-white">DELETE</Text>
+          </Button>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

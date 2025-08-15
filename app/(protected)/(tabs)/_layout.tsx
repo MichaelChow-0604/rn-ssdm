@@ -47,7 +47,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="(home)"
         options={{
-          title: "Documents",
+          title: "Document",
           tabBarIcon: () => (
             <Image
               source={require("~/assets/images/documents_icon.png")}

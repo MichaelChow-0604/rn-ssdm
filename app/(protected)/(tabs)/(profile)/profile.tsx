@@ -67,7 +67,7 @@ export default function Profile() {
   };
 
   const handleNotifications = () => {
-    router.push("/notification-rule");
+    router.push("/notification-message");
   };
 
   const handlePrivacy = () => {
@@ -143,7 +143,7 @@ export default function Profile() {
                       color="#4b5563"
                     />
                   }
-                  label="Notifications"
+                  label="Notification Message"
                   onPress={handleNotifications}
                 />
 

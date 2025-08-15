@@ -7,10 +7,24 @@ function Textarea({
   multiline = true,
   numberOfLines = 4,
   placeholderClassName,
+  autoExpand = false,
   ...props
 }: TextInputProps & {
   ref?: React.RefObject<TextInput>;
+  autoExpand?: boolean;
 }) {
+  const [height, setHeight] = React.useState<number | undefined>(undefined);
+
+  const handleContentSizeChange = React.useCallback(
+    (event: any) => {
+      if (autoExpand) {
+        const { height: contentHeight } = event.nativeEvent.contentSize;
+        setHeight(contentHeight);
+      }
+    },
+    [autoExpand]
+  );
+
   return (
     <TextInput
       className={cn(
@@ -22,6 +36,10 @@ function Textarea({
       multiline={multiline}
       numberOfLines={numberOfLines}
       textAlignVertical="top"
+      style={autoExpand && height ? { height } : undefined}
+      onContentSizeChange={
+        autoExpand ? handleContentSizeChange : props.onContentSizeChange
+      }
       {...props}
     />
   );

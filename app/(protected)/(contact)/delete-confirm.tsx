@@ -14,6 +14,7 @@ export default function DeleteConfirm() {
   const contactId = String(id ?? "");
 
   const [affectedDocs, setAffectedDocs] = useState<StoredDocument[]>([]);
+  const [blockedDocs, setBlockedDocs] = useState<StoredDocument[]>([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -21,17 +22,25 @@ export default function DeleteConfirm() {
       if (!contactId) return;
       const docs = await getDocuments();
       const affected = docs.filter((d) => d.recipients?.includes(contactId));
+      const blocked = affected.filter(
+        (d) => (d.recipients?.filter(Boolean).length ?? 0) === 1
+      );
 
-      if (!cancelled) setAffectedDocs(affected);
+      if (!cancelled) {
+        setAffectedDocs(affected);
+        setBlockedDocs(blocked);
+      }
     })();
+
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [contactId]);
+
+  const canDelete = blockedDocs.length === 0;
 
   async function handleDelete() {
-    if (!contactId) {
-      router.back();
+    if (!contactId || !canDelete) {
       return;
     }
 
@@ -59,7 +68,26 @@ export default function DeleteConfirm() {
         Are you sure you want to delete this contact person?
       </Text>
 
-      {affectedDocs.length > 0 && (
+      {blockedDocs.length > 0 ? (
+        <View className="flex-col gap-1 w-[90%] mt-4">
+          <Text className="text-center text-sm text-redtext">
+            You cannot delete this contact.
+          </Text>
+
+          <Text className="text-center text-sm text-redtext">
+            This contact is the only recipient of the following document(s):
+          </Text>
+
+          <Text className="text-center text-sm text-redtext font-bold">
+            {blockedDocs.map((d) => d.documentName).join(", ")}
+          </Text>
+
+          <Text className="text-center text-sm text-redtext">
+            Please add another recipient to those document(s) before deleting
+            this contact.
+          </Text>
+        </View>
+      ) : affectedDocs.length > 0 ? (
         <View className="flex-col gap-1 w-[90%] mt-4">
           <Text className="text-center text-sm text-redtext">
             This contact is the recipient of the following documents:
@@ -72,12 +100,17 @@ export default function DeleteConfirm() {
             documents' recipient field.
           </Text>
         </View>
-      )}
+      ) : null}
 
       <View className="flex-col gap-4 pt-8 w-[60%]">
-        <Button onPress={handleDelete} className="bg-button">
+        <Button
+          onPress={handleDelete}
+          className={canDelete ? "bg-button" : "bg-gray-300"}
+          disabled={!canDelete}
+        >
           <Text className="text-white font-bold">YES, DELETE</Text>
         </Button>
+
         <Button
           variant="outline"
           onPress={() => router.back()}

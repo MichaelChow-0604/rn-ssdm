@@ -50,7 +50,7 @@ export default function ProtectedLayout() {
         options={{ animation: "slide_from_right" }}
       />
       <Stack.Screen
-        name="notification-rule"
+        name="notification-message"
         options={{ animation: "slide_from_right" }}
       />
     </Stack>

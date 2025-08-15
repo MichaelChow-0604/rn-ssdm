@@ -32,7 +32,7 @@ export default function ReturnMessageForgetPage() {
 
         <Button
           className="w-full mt-8 bg-button rounded-xl"
-          onPress={() => router.replace("/")}
+          onPress={() => router.replace("/auth")}
         >
           <Text className="text-white font-bold">{SIGN_IN}</Text>
         </Button>

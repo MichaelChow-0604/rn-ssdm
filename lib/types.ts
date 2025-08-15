@@ -3,3 +3,5 @@ export interface Contact {
   name: string;
   avatarUri?: string;
 }
+
+export type FilterOption = "documentType" | "category" | "uploadDate";

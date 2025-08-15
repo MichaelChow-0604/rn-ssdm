@@ -15,31 +15,14 @@ import {
   useBottomSheetModal,
 } from "@gorhom/bottom-sheet";
 import { Button } from "~/components/ui/button";
+import { FilterOption } from "~/lib/types";
+import { FILTER_DATA } from "~/constants/filter-data";
 
-type FilterOption = "documentType" | "category" | "uploadDate" | null;
 interface FilterBottomSheetProps {
-  selectedFilter: FilterOption;
+  selectedFilter: FilterOption | null;
   onDismiss: () => void;
   onApply: (filter: Exclude<FilterOption, null>, subOptionId: string) => void;
 }
-
-// Define your filter data
-const filterData = {
-  documentType: [
-    { id: "insurance_policy", label: "Insurance Policy" },
-    { id: "will", label: "Will" },
-  ],
-  category: [
-    { id: "legal", label: "Legal" },
-    { id: "insurance", label: "Insurance" },
-    { id: "medical", label: "Medical" },
-    { id: "financials", label: "Financials" },
-  ],
-  uploadDate: [
-    { id: "latest", label: "Latest" },
-    { id: "earliest", label: "Earliest" },
-  ],
-};
 
 // Reusable grid component (controlled)
 interface FilterGridProps {
@@ -137,7 +120,7 @@ const FilterBottomSheet = forwardRef<BottomSheetModal, FilterBottomSheetProps>(
     );
 
     const items = useMemo(
-      () => (selectedFilter ? filterData[selectedFilter] : []),
+      () => (selectedFilter ? FILTER_DATA[selectedFilter] : []),
       [selectedFilter]
     );
 

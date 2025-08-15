@@ -162,6 +162,7 @@ export default function SignIn({ setIsSignIn }: SignInProps) {
                 placeholderClassName="text-placeholder"
                 className="bg-textfield border-0 text-black"
                 placeholder={PASSWORD_PLACEHOLDER}
+                secureTextEntry
               />
             )}
           />

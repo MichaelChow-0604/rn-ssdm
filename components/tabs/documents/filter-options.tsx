@@ -3,8 +3,7 @@ import { useRef, useState, useCallback } from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import FilterBottomSheet from "./filter-bottom-sheet";
-
-type FilterOption = "documentType" | "category" | "uploadDate";
+import { FilterOption } from "~/lib/types";
 
 export default function FilterOptions() {
   const bottomSheetRef = useRef<BottomSheetModal>(null);
@@ -51,12 +50,13 @@ export default function FilterOptions() {
         onPress={() => appliedFilter !== null && handleClearFilter()}
       >
         {appliedFilter === null ? (
-          <Image
-            source={require("~/assets/images/filter_icon.png")}
-            style={{ width: 24, height: 24 }}
+          <MaterialCommunityIcons
+            name="filter-outline"
+            size={24}
+            color="black"
           />
         ) : (
-          <MaterialCommunityIcons name="cancel" size={24} color="black" />
+          <MaterialCommunityIcons name="filter" size={24} color="#438BF7" />
         )}
       </TouchableOpacity>
 

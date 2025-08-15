@@ -42,7 +42,7 @@ export default function ReturnMessagePage() {
         {mode === "signup" && (
           <Button
             className="bg-button text-buttontext my-8 w-full"
-            onPress={() => router.replace("/")}
+            onPress={() => router.replace("/auth")}
           >
             <Text className="text-white font-bold">{SIGN_IN}</Text>
           </Button>

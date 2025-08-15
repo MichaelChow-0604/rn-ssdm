@@ -103,6 +103,16 @@ export default function ContactListPage() {
         sections={sections}
         keyExtractor={(item) => item.id}
         stickySectionHeadersEnabled
+        contentContainerStyle={{
+          flexGrow: 1,
+        }}
+        ListEmptyComponent={
+          <View className="flex-1 items-center justify-center">
+            <Text className="text-center text-gray-400 text-2xl font-bold">
+              No contact yet
+            </Text>
+          </View>
+        }
         renderSectionHeader={({ section }) => (
           <View className="bg-gray-100 px-6 py-2">
             <Text className="font-semibold">{section.title}</Text>

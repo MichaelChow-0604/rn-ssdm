@@ -1,5 +1,5 @@
 import { Image, Pressable, Text, View } from "react-native";
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Button } from "../ui/button";
@@ -20,14 +20,111 @@ import {
   SIGN_IN,
   SIGN_UP,
   SIGN_UP_DESCRIPTION,
+  NEW_PASSWORD_DESCRIPTION,
+  NEW_PASSWORD_REQUIREMENTS_1,
+  NEW_PASSWORD_REQUIREMENTS_2,
+  NEW_PASSWORD_REQUIREMENTS_3,
+  NEW_CREDENTIALS,
 } from "~/constants/auth-placeholders";
 import { useRouter } from "expo-router";
+import Entypo from "@expo/vector-icons/Entypo";
 
 interface SignUpProps {
   setIsSignIn: (isSignIn: boolean) => void;
 }
 
 type SignUpFormFields = z.infer<typeof signUpSchema>;
+
+interface PasswordRequirementProps {
+  isValid: boolean;
+  text: string;
+  id: string;
+}
+
+interface PasswordInputProps {
+  control: any;
+  name: string;
+  label: string;
+  placeholder: string;
+  error?: string;
+}
+
+function validatePasswordLength(password: string) {
+  return password.length >= 8;
+}
+function validatePasswordUppercase(password: string) {
+  return /[A-Z]/.test(password);
+}
+function validatePasswordSpecialChar(password: string) {
+  return /[0-9!@#$%^&*(),.?":{}|<>]/.test(password);
+}
+
+const PasswordRequirement = ({
+  isValid,
+  text,
+  id,
+}: PasswordRequirementProps) => (
+  <View className="flex flex-row gap-2">
+    <Checkbox
+      className={`native:rounded-full border-button ${
+        isValid ? "bg-button" : "bg-transparent"
+      }`}
+      id={id}
+      checked={isValid}
+      onCheckedChange={() => {}}
+    />
+    <Text className="text-passwordRequirements">{text}</Text>
+  </View>
+);
+
+const PasswordInput = ({
+  control,
+  name,
+  label,
+  placeholder,
+  error,
+}: PasswordInputProps) => {
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+
+  const togglePasswordVisibility = useCallback(() => {
+    setIsPasswordVisible((prev) => !prev);
+  }, []);
+
+  return (
+    <View className="flex flex-col gap-1">
+      <Label className="text-subtitle">{label}</Label>
+      <View className="relative">
+        <Controller
+          control={control}
+          name={name}
+          render={({ field: { onChange, onBlur, value } }) => (
+            <Input
+              onChangeText={onChange}
+              onBlur={onBlur}
+              value={value}
+              className="bg-textfield border-0 text-black pr-12"
+              placeholderClassName="text-placeholder"
+              placeholder={placeholder}
+              secureTextEntry={!isPasswordVisible}
+            />
+          )}
+        />
+        <Pressable
+          onPress={togglePasswordVisibility}
+          className="absolute right-3 top-1/2 transform -translate-y-1/2"
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
+          {isPasswordVisible ? (
+            <Entypo name="eye" size={20} color="#888888" />
+          ) : (
+            <Entypo name="eye-with-line" size={20} color="#888888" />
+          )}
+        </Pressable>
+      </View>
+      {error && <Text className="text-redtext text-sm">{error}</Text>}
+    </View>
+  );
+};
 
 export default function SignUp({ setIsSignIn }: SignUpProps) {
   const [checked, setChecked] = useState(false);
@@ -38,8 +135,9 @@ export default function SignUp({ setIsSignIn }: SignUpProps) {
   const {
     control,
     handleSubmit,
+    watch,
     formState: { errors },
-  } = useForm({
+  } = useForm<SignUpFormFields>({
     defaultValues: {
       firstName: "",
       lastName: "",
@@ -48,11 +146,28 @@ export default function SignUp({ setIsSignIn }: SignUpProps) {
       confirmPassword: "",
     },
     resolver: zodResolver(signUpSchema),
+    mode: "onChange",
   });
+
+  const watchedPassword = watch("password");
+
+  const validationResults = useMemo(() => {
+    if (!watchedPassword) {
+      return {
+        length: false,
+        uppercase: false,
+        specialChar: false,
+      };
+    }
+    return {
+      length: validatePasswordLength(watchedPassword),
+      uppercase: validatePasswordUppercase(watchedPassword),
+      specialChar: validatePasswordSpecialChar(watchedPassword),
+    };
+  }, [watchedPassword]);
 
   const onSubmit = (data: SignUpFormFields) => {
     if (checked) {
-      console.log(data);
       router.push({
         pathname: "/otp-verification",
         params: { email: data.email, mode: "signup" },
@@ -81,11 +196,9 @@ export default function SignUp({ setIsSignIn }: SignUpProps) {
         {/* First Name */}
         <View className="flex-col gap-2">
           <Label className="text-subtitle">First Name</Label>
-          {/* First Name input validation */}
           <Controller
             name="firstName"
             control={control}
-            rules={{ required: true }}
             render={({ field: { onChange, onBlur, value } }) => (
               <Input
                 onChangeText={onChange}
@@ -97,7 +210,6 @@ export default function SignUp({ setIsSignIn }: SignUpProps) {
               />
             )}
           />
-          {/* First Name validation error */}
           {errors.firstName && (
             <Text className="text-redtext text-sm">
               {errors.firstName.message}
@@ -108,11 +220,9 @@ export default function SignUp({ setIsSignIn }: SignUpProps) {
         {/* Last Name */}
         <View className="flex-col gap-2">
           <Label className="text-subtitle">Last Name</Label>
-          {/* Last Name input validation */}
           <Controller
             name="lastName"
             control={control}
-            rules={{ required: true }}
             render={({ field: { onChange, onBlur, value } }) => (
               <Input
                 onChangeText={onChange}
@@ -124,7 +234,6 @@ export default function SignUp({ setIsSignIn }: SignUpProps) {
               />
             )}
           />
-          {/* Last Name validation error */}
           {errors.lastName && (
             <Text className="text-redtext text-sm">
               {errors.lastName.message}
@@ -135,11 +244,9 @@ export default function SignUp({ setIsSignIn }: SignUpProps) {
         {/* Email */}
         <View className="flex-col gap-2">
           <Label className="text-subtitle">Email</Label>
-          {/* Email input validation */}
           <Controller
             name="email"
             control={control}
-            rules={{ required: true }}
             render={({ field: { onChange, onBlur, value } }) => (
               <Input
                 onChangeText={onChange}
@@ -151,65 +258,49 @@ export default function SignUp({ setIsSignIn }: SignUpProps) {
               />
             )}
           />
-          {/* Email validation error */}
           {errors.email && (
             <Text className="text-redtext text-sm">{errors.email.message}</Text>
           )}
         </View>
 
-        {/* Password */}
-        <View className="flex-col gap-2">
-          <Label className="text-subtitle">Password</Label>
-          {/* Password input validation */}
-          <Controller
-            name="password"
-            control={control}
-            rules={{ required: true }}
-            render={({ field: { onChange, onBlur, value } }) => (
-              <Input
-                onChangeText={onChange}
-                onBlur={onBlur}
-                value={value}
-                className="bg-textfield border-0 text-black"
-                placeholderClassName="text-placeholder"
-                placeholder={PASSWORD_PLACEHOLDER}
-              />
-            )}
-          />
-          {/* Password validation error */}
-          {errors.password && (
-            <Text className="text-redtext text-sm">
-              {errors.password.message}
-            </Text>
-          )}
+        {/* Password requirements (above the password field) */}
+        <View className="flex flex-col gap-4 mt-2">
+          <View className="flex flex-col gap-2">
+            <PasswordRequirement
+              isValid={validationResults.length}
+              text={NEW_PASSWORD_REQUIREMENTS_1}
+              id="at-least-8-characters"
+            />
+            <PasswordRequirement
+              isValid={validationResults.uppercase}
+              text={NEW_PASSWORD_REQUIREMENTS_2}
+              id="at-least-1-uppercase"
+            />
+            <PasswordRequirement
+              isValid={validationResults.specialChar}
+              text={NEW_PASSWORD_REQUIREMENTS_3}
+              id="at-least-1-special"
+            />
+          </View>
         </View>
 
+        {/* Password */}
+        <PasswordInput
+          control={control}
+          name="password"
+          label="Password"
+          placeholder={PASSWORD_PLACEHOLDER}
+          error={errors.password?.message}
+        />
+
         {/* Confirm Password */}
-        <View className="flex-col gap-2">
-          <Label className="text-subtitle">Confirm Password</Label>
-          {/* Confirm Password input validation */}
-          <Controller
-            name="confirmPassword"
-            control={control}
-            rules={{ required: true }}
-            render={({ field: { onChange, onBlur, value } }) => (
-              <Input
-                onChangeText={onChange}
-                onBlur={onBlur}
-                value={value}
-                className="bg-textfield border-0 text-black"
-                placeholderClassName="text-placeholder"
-                placeholder={PASSWORD_PLACEHOLDER}
-              />
-            )}
-          />
-          {/* Confirm Password validation error */}
-          {errors.confirmPassword && (
-            <Text className="text-redtext text-sm">
-              {errors.confirmPassword.message}
-            </Text>
-          )}
-        </View>
+        <PasswordInput
+          control={control}
+          name="confirmPassword"
+          label="Confirm Password"
+          placeholder={PASSWORD_PLACEHOLDER}
+          error={errors.confirmPassword?.message}
+        />
       </View>
 
       {/* Terms and Conditions */}

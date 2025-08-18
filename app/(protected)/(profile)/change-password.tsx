@@ -15,7 +15,7 @@ import { Label } from "~/components/ui/label";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { changePasswordSchema, newPasswordSchema } from "~/schema/auth-schema";
+import { changePasswordSchema } from "~/schema/auth-schema";
 import { useCallback, useMemo, useState } from "react";
 import Entypo from "@expo/vector-icons/Entypo";
 import {
@@ -29,6 +29,8 @@ import {
   NEW_CREDENTIALS,
   NEW_PASSWORD_CONFIRM_PLACEHOLDER,
 } from "~/constants/auth-placeholders";
+import { BackButton } from "~/components/back-button";
+import { IncorrectPassword } from "~/components/pop-up/incorrect-password";
 
 interface PasswordRequirementProps {
   isValid: boolean;
@@ -124,6 +126,8 @@ const PasswordInput = ({
 export default function ChangePassword() {
   const router = useRouter();
 
+  const [open, setOpen] = useState(false);
+
   const {
     control,
     handleSubmit,
@@ -131,10 +135,25 @@ export default function ChangePassword() {
     formState: { errors },
   } = useForm<ChangePasswordFormFields>({
     resolver: zodResolver(changePasswordSchema),
+    defaultValues: {
+      oldPassword: "",
+      password: "",
+      confirmPassword: "",
+    },
+    mode: "onChange",
   });
 
   const watchedPassword = watch("password");
   const watchedConfirmPassword = watch("confirmPassword");
+  const watchedOldPassword = watch("oldPassword");
+
+  const tempCheck = useCallback(() => {
+    if (watchedOldPassword === "12345678") {
+      router.replace("/return-message-reset");
+    } else {
+      setOpen(true);
+    }
+  }, [watchedOldPassword, router]);
 
   // Memoized validation results
   const validationResults = useMemo(() => {
@@ -166,16 +185,20 @@ export default function ChangePassword() {
 
   // Memoized form validity
   const isFormValid = useMemo(() => {
-    return validationResults.allValid && doPasswordsMatch;
-  }, [validationResults.allValid, doPasswordsMatch]);
+    return (
+      validationResults.allValid &&
+      doPasswordsMatch &&
+      watchedOldPassword.trim().length > 0
+    );
+  }, [validationResults.allValid, doPasswordsMatch, watchedOldPassword]);
 
   // Memoized submit handler
   const onSubmit = useCallback(
     (data: ChangePasswordFormFields) => {
       console.log("Form data:", data);
-      router.replace("/return-message-reset");
+      tempCheck();
     },
-    [router]
+    [tempCheck]
   );
 
   return (
@@ -184,15 +207,16 @@ export default function ChangePassword() {
         style={{ flexGrow: 1 }}
         behavior={Platform.select({ ios: "padding", android: "height" })}
       >
+        {/* Header */}
+        <View className="flex-row items-center gap-2 px-4 pt-4 pb-8">
+          <BackButton />
+          <Text className="text-2xl font-bold">Change Password</Text>
+        </View>
+
         <ScrollView
           className="bg-white"
           contentContainerClassName="items-start px-8"
         >
-          {/* Header */}
-          <View className="flex flex-col gap-4 mt-16 mb-12">
-            <Text className="text-2xl font-bold">Reset new password</Text>
-          </View>
-
           {/* New credentials requirements */}
           <View className="flex flex-col gap-4 mr-8">
             <Text className="text-xl font-semibold">{NEW_CREDENTIALS}</Text>
@@ -276,6 +300,8 @@ export default function ChangePassword() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      <IncorrectPassword visible={open} setOpen={setOpen} />
     </SafeAreaView>
   );
 }

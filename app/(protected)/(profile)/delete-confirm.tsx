@@ -4,17 +4,16 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { useState } from "react";
-import { useAuth } from "~/lib/auth-context";
 import { IncorrectPassword } from "~/components/pop-up/incorrect-password";
+import { router } from "expo-router";
 
 export default function DeleteConfirm() {
   const [open, setOpen] = useState(false);
   const [password, setPassword] = useState("");
-  const { setIsAuthenticated } = useAuth();
 
   const tempCheck = () => {
-    if (password === "123456") {
-      setIsAuthenticated(false);
+    if (password === "12345678") {
+      router.replace("/account-deleted");
     } else {
       setOpen(true);
     }

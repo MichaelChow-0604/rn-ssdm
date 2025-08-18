@@ -27,7 +27,7 @@ export default function DeleteDocConfirm() {
     useState(false);
 
   const tempCheck = () => {
-    if (password === "123456") {
+    if (password === "12345678") {
       return true;
     }
 

@@ -18,7 +18,7 @@ export default function TermsDisclaimer() {
         <Text className="text-2xl font-bold">{TERMS_AND_DISCLAIMER}</Text>
       </View>
 
-      <Separator className="mt-6" />
+      <Separator className="mt-6 bg-gray-300" />
 
       {/* Content */}
       <ScrollView className="flex-1 px-6">

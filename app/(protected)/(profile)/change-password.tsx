@@ -293,7 +293,7 @@ export default function ChangePassword() {
             <Button
               className="bg-white border-button active:bg-slate-100"
               variant="outline"
-              onPress={() => router.replace("/")}
+              onPress={() => router.back()}
             >
               <Text className="text-button font-bold">{CANCEL}</Text>
             </Button>

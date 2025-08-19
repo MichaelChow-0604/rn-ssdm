@@ -22,7 +22,7 @@ export default function Privacy() {
         <Text className="text-2xl font-bold">{PRIVACY_POLICY}</Text>
       </View>
 
-      <Separator className="mt-6" />
+      <Separator className="mt-6 bg-gray-300" />
 
       {/* Content */}
       <ScrollView className="flex-1 px-6">

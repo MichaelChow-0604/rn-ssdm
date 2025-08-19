@@ -69,7 +69,7 @@ export default function FilterOptions() {
         activeOpacity={0.7}
         onPress={() => handlePresentModalPress("documentType")}
       >
-        <Text style={styles.label} className="text-center">
+        <Text style={styles.label} className="text-center px-2">
           Document Type
         </Text>
       </TouchableOpacity>
@@ -81,7 +81,9 @@ export default function FilterOptions() {
         activeOpacity={0.7}
         onPress={() => handlePresentModalPress("category")}
       >
-        <Text style={styles.label}>Category</Text>
+        <Text style={styles.label} className="px-2 text-center">
+          Category
+        </Text>
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -91,7 +93,9 @@ export default function FilterOptions() {
         activeOpacity={0.7}
         onPress={() => handlePresentModalPress("uploadDate")}
       >
-        <Text style={styles.label}>Upload Date</Text>
+        <Text style={styles.label} className="px-2 text-center">
+          Upload Date
+        </Text>
       </TouchableOpacity>
     </View>
   );

@@ -63,7 +63,7 @@ export default function DeleteConfirm() {
           <Input
             value={password}
             onChangeText={setPassword}
-            className="w-[70%] bg-gray-100"
+            className="w-[70%] bg-gray-100 border-gray-300 text-black"
             secureTextEntry
           />
         </View>

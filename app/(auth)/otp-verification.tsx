@@ -23,14 +23,17 @@ import {
   RESEND,
   OTP_VERIFICATION_DESC,
   OTP_VERIFICATION_TITLE_2,
-  VERIFY_OTP,
+  VERIFY,
 } from "~/constants/auth-placeholders";
+import { useAuth } from "~/lib/auth-context";
 
 export default function OTPVerificationPage() {
   const { email, mode } = useLocalSearchParams();
   const [otp, setOtp] = useState("");
   const router = useRouter();
   const timerRef = useRef<CountdownTimerRef>(null);
+
+  const { setIsAuthenticated } = useAuth();
 
   const handleTimerExpire = () => {
     console.log("Timer expired");
@@ -45,6 +48,14 @@ export default function OTPVerificationPage() {
     // Call the resetTimer function from the timer component
     timerRef.current?.resetTimer();
     handleTimerReset();
+  };
+
+  const handleVerify = () => {
+    setIsAuthenticated(true);
+    router.replace({
+      pathname: "/return-message",
+      params: { mode },
+    });
   };
 
   return (
@@ -98,14 +109,9 @@ export default function OTPVerificationPage() {
             <Button
               className="bg-button text-buttontext"
               disabled={otp.length !== 4}
-              onPress={() =>
-                router.replace({
-                  pathname: "/return-message",
-                  params: { mode },
-                })
-              }
+              onPress={handleVerify}
             >
-              <Text className="text-white font-bold">{VERIFY_OTP}</Text>
+              <Text className="text-white font-bold">{VERIFY}</Text>
             </Button>
 
             {/* Resend Code Button */}

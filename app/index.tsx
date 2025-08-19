@@ -39,7 +39,7 @@ export default function Index() {
 
   // Use Redirect component for proper navigation
   if (isAuthenticated) {
-    return <Redirect href="/(tabs)/(home)/documents" />;
+    return <Redirect href="/documents" />;
   } else {
     return <Redirect href="/(auth)/auth" />;
   }

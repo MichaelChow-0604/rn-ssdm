@@ -21,7 +21,6 @@ export default function AuthPage() {
         <ScrollView
           className="bg-white"
           contentContainerClassName="items-center"
-          scrollEnabled={!isSignIn}
         >
           {/* Form */}
           {isSignIn ? (

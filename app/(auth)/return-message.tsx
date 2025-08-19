@@ -5,7 +5,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect } from "react";
 import {
   RETURN_MESSAGE_DESC,
-  RETURN_MESSAGE_TITLE,
+  RETURN_SUCCESS,
   SIGN_IN,
 } from "~/constants/auth-placeholders";
 import { Button } from "~/components/ui/button";
@@ -18,10 +18,10 @@ export default function ReturnMessagePage() {
   useEffect(() => {
     if (mode === "signin") {
       setTimeout(() => {
-        router.replace("/(tabs)/(home)/documents");
+        router.replace("/documents");
       }, 2000);
     }
-  }, [router]);
+  }, [router, mode]);
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -36,13 +36,13 @@ export default function ReturnMessagePage() {
           />
         </View>
 
-        <Text className="text-3xl font-bold my-4">{RETURN_MESSAGE_TITLE}</Text>
+        <Text className="text-3xl font-bold my-4">{RETURN_SUCCESS}</Text>
         <Text className="text-lg text-center">{RETURN_MESSAGE_DESC}</Text>
 
         {mode === "signup" && (
           <Button
             className="bg-button text-buttontext my-8 w-full"
-            onPress={() => router.replace("/")}
+            onPress={() => router.replace("/auth")}
           >
             <Text className="text-white font-bold">{SIGN_IN}</Text>
           </Button>

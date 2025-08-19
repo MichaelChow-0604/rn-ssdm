@@ -28,6 +28,7 @@ import {
   UPDATE_PASSWORD,
   NEW_PASSWORD_TITLE,
   NEW_CREDENTIALS,
+  NEW_PASSWORD_CONFIRM_PLACEHOLDER,
 } from "~/constants/auth-placeholders";
 
 interface PasswordRequirementProps {
@@ -237,7 +238,7 @@ export default function NewPasswordPage() {
               control={control}
               name="confirmPassword"
               label="Confirm Password"
-              placeholder={NEW_PASSWORD_PLACEHOLDER}
+              placeholder={NEW_PASSWORD_CONFIRM_PLACEHOLDER}
               error={errors.confirmPassword?.message}
             />
           </View>

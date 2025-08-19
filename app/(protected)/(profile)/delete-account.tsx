@@ -41,6 +41,7 @@ export default function DeleteAccount() {
             <Checkbox
               checked={isChecked}
               onCheckedChange={() => setIsChecked(!isChecked)}
+              className="border-gray-300"
             />
             <Text className="text-sm font-semibold">
               I understand that I won’t able to recover my account.

@@ -68,12 +68,12 @@ export default function EditProfile() {
       {/* Curved blue topper */}
       <View className="h-[40%] bg-[#438BF7] rounded-b-[20px] absolute top-0 left-0 right-0" />
 
-      <BackButton className="absolute top-4 left-4 z-50" />
-
       <KeyboardAvoidingView
         className="flex-1 items-start px-4"
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
+        <BackButton className="absolute top-4 left-4 z-50" />
+
         <ScrollView className="w-full" showsVerticalScrollIndicator={false}>
           {/* Profile pic */}
           <View className="flex items-center justify-center w-full gap-1 flex-col pt-20 pb-10">

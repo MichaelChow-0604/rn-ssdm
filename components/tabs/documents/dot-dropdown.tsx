@@ -35,6 +35,7 @@ export default function DotDropdown({
         <DropdownMenuTrigger className="p-2 rounded-full">
           <FontAwesome name="ellipsis-h" size={16} color="black" />
         </DropdownMenuTrigger>
+
         <DropdownMenuContent
           className="native:w-60 bg-white"
           insets={{ right: 8 }}
@@ -61,6 +62,7 @@ export default function DotDropdown({
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+
       <MoveToTrashAlert
         visible={isMoveToTrashAlertOpen}
         onConfirm={handleMoveToTrash}

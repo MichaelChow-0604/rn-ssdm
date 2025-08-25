@@ -1,4 +1,3 @@
-import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Animated,
@@ -9,6 +8,7 @@ import {
 import { Card, CardContent } from "~/components/ui/card";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { Portal } from "@rn-primitives/portal";
+import { useAnimatedModal } from "~/hooks/use-animated-modal";
 
 interface AccessProgressDialogProps {
   visible: boolean;
@@ -21,52 +21,15 @@ export function AccessProgressDialog({
   text,
   status = "pending",
 }: AccessProgressDialogProps) {
-  const [mounted, setMounted] = useState(visible);
-
-  const backdropOpacity = useRef(new Animated.Value(0)).current;
-  const cardOpacity = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    let cancelled = false;
-    if (visible) {
-      setMounted(true);
-      Animated.parallel([
-        Animated.timing(backdropOpacity, {
-          toValue: 1,
-          duration: 500, // longer fade-in
-          useNativeDriver: true,
-        }),
-        Animated.timing(cardOpacity, {
-          toValue: 1,
-          duration: 500, // longer fade-in
-          useNativeDriver: true,
-        }),
-      ]).start();
-    } else if (mounted) {
-      Animated.parallel([
-        Animated.timing(cardOpacity, {
-          toValue: 0,
-          duration: 500, // longer fade-out
-          useNativeDriver: true,
-        }),
-        Animated.timing(backdropOpacity, {
-          toValue: 0,
-          duration: 500, // longer fade-out
-          useNativeDriver: true,
-        }),
-      ]).start(({ finished }) => {
-        if (!cancelled && finished) setMounted(false);
-      });
-    }
-    return () => {
-      cancelled = true;
-    };
-  }, [visible]);
+  const { mounted, backdropOpacity, cardOpacity } = useAnimatedModal(visible, {
+    inDuration: 500,
+    outDuration: 500,
+  });
 
   if (!mounted) return null;
 
   return (
-    <Portal name="access-progress">
+    <Portal name="access-progress-dialog">
       <Animated.View
         style={[StyleSheet.absoluteFill, { opacity: backdropOpacity }]}
         className="bg-black/60 items-center justify-center z-50"

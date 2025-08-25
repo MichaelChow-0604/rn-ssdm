@@ -5,9 +5,9 @@ import {
   PRIVACY_POLICY,
   TERMS_OF_USE,
 } from "~/constants/terms-and-policies";
-import { useEffect, useRef, useState } from "react";
 import { Portal } from "@rn-primitives/portal";
 import { Card, CardContent } from "../ui/card";
+import { useAnimatedModal } from "~/hooks/use-animated-modal";
 
 interface TermsAndPoliciesProps {
   visible: boolean;
@@ -18,50 +18,11 @@ export const TermsAndPolicies = ({
   visible,
   setOpen,
 }: TermsAndPoliciesProps) => {
-  const [mounted, setMounted] = useState(visible);
-  const backdropOpacity = useRef(new Animated.Value(0)).current;
-  const cardOpacity = useRef(new Animated.Value(0)).current;
+  const { mounted, backdropOpacity, cardOpacity } = useAnimatedModal(visible);
 
   const handleClose = () => {
     setOpen(false);
   };
-
-  useEffect(() => {
-    let cancelled = false;
-    if (visible) {
-      setMounted(true);
-      Animated.parallel([
-        Animated.timing(backdropOpacity, {
-          toValue: 1,
-          duration: 250,
-          useNativeDriver: true,
-        }),
-        Animated.timing(cardOpacity, {
-          toValue: 1,
-          duration: 250,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    } else if (mounted) {
-      Animated.parallel([
-        Animated.timing(cardOpacity, {
-          toValue: 0,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-        Animated.timing(backdropOpacity, {
-          toValue: 0,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-      ]).start(({ finished }) => {
-        if (!cancelled && finished) setMounted(false);
-      });
-    }
-    return () => {
-      cancelled = true;
-    };
-  }, [visible]);
 
   if (!mounted) return null;
 

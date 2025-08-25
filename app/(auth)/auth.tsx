@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { KeyboardAvoidingView, Platform, ScrollView } from "react-native";
+import { KeyboardAvoidingView, Platform, View } from "react-native";
 import SignIn from "~/components/auth/sign-in";
 import SignUp from "~/components/auth/sign-up";
 import Animated, {
@@ -18,10 +18,7 @@ export default function AuthPage() {
         style={{ flexGrow: 1 }}
         behavior={Platform.select({ ios: "padding", android: "height" })}
       >
-        <ScrollView
-          className="bg-white"
-          contentContainerClassName="items-center"
-        >
+        <View className="bg-white items-center">
           {/* Form */}
           {isSignIn ? (
             // Sign in form
@@ -46,7 +43,7 @@ export default function AuthPage() {
               <SignUp setIsSignIn={setIsSignIn} />
             </Animated.View>
           )}
-        </ScrollView>
+        </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

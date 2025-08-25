@@ -18,10 +18,10 @@ export default function RootLayout() {
               <Stack.Screen name="(auth)" />
               <Stack.Screen name="(protected)" />
             </Stack>
-            <PortalHost />
           </ProfileProvider>
         </AuthProvider>
       </BottomSheetModalProvider>
+      <PortalHost />
     </GestureHandlerRootView>
   );
 }

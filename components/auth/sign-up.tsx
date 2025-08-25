@@ -20,11 +20,9 @@ import {
   SIGN_IN,
   SIGN_UP,
   SIGN_UP_DESCRIPTION,
-  NEW_PASSWORD_DESCRIPTION,
   NEW_PASSWORD_REQUIREMENTS_1,
   NEW_PASSWORD_REQUIREMENTS_2,
   NEW_PASSWORD_REQUIREMENTS_3,
-  NEW_CREDENTIALS,
 } from "~/constants/auth-placeholders";
 import { useRouter } from "expo-router";
 import Entypo from "@expo/vector-icons/Entypo";
@@ -179,8 +177,8 @@ export default function SignUp({ setIsSignIn }: SignUpProps) {
 
   return (
     <View className="w-[80%]">
-      <TermsAndPolicies open={openTNP} setOpen={setOpenTNP} />
-      <AcceptAlert open={showAcceptTerms} setOpen={setShowAcceptTerms} />
+      <TermsAndPolicies visible={openTNP} setOpen={setOpenTNP} />
+      <AcceptAlert visible={showAcceptTerms} setOpen={setShowAcceptTerms} />
 
       {/* Header */}
       <View className="items-center justify-center pt-12 pb-12 gap-2 w-full">

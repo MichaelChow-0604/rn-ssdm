@@ -58,7 +58,7 @@ export function EditAlert({ visible, setOpen }: EditAlertProps) {
   if (!mounted) return null;
 
   return (
-    <Portal name="confirm-dialog">
+    <Portal name="edit-alert-dialog">
       <Animated.View
         style={[StyleSheet.absoluteFill, { opacity: backdropOpacity }]}
         className="bg-black/60 items-center justify-center z-50"

@@ -7,7 +7,7 @@ import {
   RETURN_SUCCESS,
   SIGN_IN,
 } from "~/constants/auth-placeholders";
-import { useAuth } from "~/lib/auth-context";
+import { useAuth } from "~/context/auth-context";
 
 export default function ReturnMessageResetPage() {
   const { setIsAuthenticated } = useAuth();

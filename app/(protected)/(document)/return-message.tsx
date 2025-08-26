@@ -62,7 +62,7 @@ export default function ReturnMessage() {
 
   const handleButtonPress = () => {
     if (isSuccess) {
-      router.replace("/");
+      router.replace("/documents");
     } else {
       router.replace("../");
     }

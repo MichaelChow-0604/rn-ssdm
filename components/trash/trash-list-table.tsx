@@ -12,6 +12,7 @@ import DotDropdown from "~/components/trash/dot-dropdown";
 import { useCallback, useState } from "react";
 import { getTrash, TrashedDocument } from "~/lib/storage/trash";
 import { useFocusEffect } from "expo-router";
+import { formateDate, iconForExt } from "~/lib/utils";
 
 export default function TrashListTable() {
   const [docs, setDocs] = useState<TrashedDocument[]>([]);
@@ -26,30 +27,6 @@ export default function TrashListTable() {
       load();
     }, [load])
   );
-
-  function formateDate(ts: number) {
-    const d = new Date(ts);
-    const dd = String(d.getDate()).padStart(2, "0");
-    const mm = String(d.getMonth() + 1).padStart(2, "0");
-    const yyyy = d.getFullYear();
-    return `${dd}/${mm}/${yyyy}`;
-  }
-
-  function iconForExt(ext: string) {
-    switch (ext?.toLowerCase()) {
-      case "pdf":
-        return require("~/assets/images/pdf_icon.png");
-      case "doc":
-      case "docx":
-        return require("~/assets/images/doc_icon.png");
-      case "jpg":
-      case "jpeg":
-      case "png":
-        return require("~/assets/images/image_icon.png");
-      default:
-        return require("~/assets/images/unknown_icon.png");
-    }
-  }
 
   return (
     <Table className="min-w-full">

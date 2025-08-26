@@ -7,7 +7,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 export default function TabsLayout() {
   return (
     <Tabs
-      initialRouteName="(home)"
+      initialRouteName="documents"
       screenOptions={{
         headerTitle: "SSDM",
         headerTitleAlign: "center",
@@ -30,6 +30,7 @@ export default function TabsLayout() {
           }
           return null;
         },
+        // Trash icon at the left
         headerLeft: () => (
           <TouchableOpacity
             onPress={() => router.push("/trash")}
@@ -59,12 +60,12 @@ export default function TabsLayout() {
     >
       {/* Documents */}
       <Tabs.Screen
-        name="(home)"
+        name="documents"
         options={{
           title: "Document",
           tabBarIcon: () => (
             <Image
-              source={require("~/assets/images/documents_icon.png")}
+              source={require("~/assets/tabs_icon/document.png")}
               className="w-8 h-8"
             />
           ),
@@ -73,13 +74,13 @@ export default function TabsLayout() {
 
       {/* Share with me */}
       <Tabs.Screen
-        name="(share)"
+        name="share"
         options={{
           title: "Share with me",
           headerShown: false,
           tabBarIcon: () => (
             <Image
-              source={require("~/assets/images/share_icon.png")}
+              source={require("~/assets/tabs_icon/share.png")}
               className="w-8 h-8"
             />
           ),
@@ -105,7 +106,7 @@ export default function TabsLayout() {
           headerShown: false,
           tabBarIcon: () => (
             <Image
-              source={require("~/assets/images/contact_icon.png")}
+              source={require("~/assets/tabs_icon/contact.png")}
               className="w-7 h-7"
             />
           ),
@@ -120,7 +121,7 @@ export default function TabsLayout() {
           headerShown: false,
           tabBarIcon: () => (
             <Image
-              source={require("~/assets/images/profile_icon.png")}
+              source={require("~/assets/tabs_icon/profile.png")}
               className="w-8 h-8"
             />
           ),

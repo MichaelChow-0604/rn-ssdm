@@ -25,7 +25,7 @@ import {
   OTP_VERIFICATION_TITLE_2,
   VERIFY,
 } from "~/constants/auth-placeholders";
-import { useAuth } from "~/lib/auth-context";
+import { useAuth } from "~/context/auth-context";
 
 export default function OTPVerificationPage() {
   const { email, mode } = useLocalSearchParams();

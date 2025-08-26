@@ -38,7 +38,10 @@ export default function SharePage() {
 
   const timers = useRef<number[]>([]);
 
+  // For temporary testing & demo
   const onSubmit = async (data: ShareFormFields) => {
+    console.log(data);
+
     // pick any bundled asset
     const fileName = "ssdm.pdf";
     const localUri = await ensureLocalFromAsset(

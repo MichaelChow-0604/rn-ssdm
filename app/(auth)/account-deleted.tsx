@@ -5,7 +5,7 @@ import { useRouter } from "expo-router";
 import { useEffect } from "react";
 import { RETURN_SUCCESS } from "~/constants/auth-placeholders";
 import { Button } from "~/components/ui/button";
-import { useAuth } from "~/lib/auth-context";
+import { useAuth } from "~/context/auth-context";
 
 export default function AccountDeleted() {
   const router = useRouter();

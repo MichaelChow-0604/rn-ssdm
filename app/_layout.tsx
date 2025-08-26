@@ -4,8 +4,8 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 
 import "~/global.css";
-import { AuthProvider } from "~/lib/auth-context";
-import { ProfileProvider } from "~/lib/profile-context";
+import { AuthProvider } from "~/context/auth-context";
+import { ProfileProvider } from "~/context/profile-context";
 
 export default function RootLayout() {
   return (

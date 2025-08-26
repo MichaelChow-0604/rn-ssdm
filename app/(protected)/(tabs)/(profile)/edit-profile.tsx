@@ -14,7 +14,7 @@ import { useState } from "react";
 import { Card } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { BackButton } from "~/components/back-button";
-import { useProfile } from "~/lib/profile-context";
+import { useProfile } from "~/context/profile-context";
 import { router } from "expo-router";
 import { profileSchema } from "~/schema/profile-schema";
 import { z } from "zod";

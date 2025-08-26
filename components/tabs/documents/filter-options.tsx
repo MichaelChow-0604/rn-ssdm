@@ -1,6 +1,6 @@
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { useRef, useState, useCallback } from "react";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import FilterBottomSheet from "./filter-bottom-sheet";
 import { FilterOption } from "~/lib/types";

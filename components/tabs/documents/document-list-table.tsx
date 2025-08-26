@@ -12,6 +12,7 @@ import DotDropdown from "./dot-dropdown";
 import { useCallback, useState } from "react";
 import { getDocuments, StoredDocument } from "~/lib/storage/document";
 import { useFocusEffect } from "expo-router";
+import { formateDate, iconForExt } from "~/lib/utils";
 
 export default function DocumentListTable() {
   const [docs, setDocs] = useState<StoredDocument[]>([]);
@@ -26,30 +27,6 @@ export default function DocumentListTable() {
       load();
     }, [load])
   );
-
-  function formateDate(ts: number) {
-    const d = new Date(ts);
-    const dd = String(d.getDate()).padStart(2, "0");
-    const mm = String(d.getMonth() + 1).padStart(2, "0");
-    const yyyy = d.getFullYear();
-    return `${dd}/${mm}/${yyyy}`;
-  }
-
-  function iconForExt(ext: string) {
-    switch (ext?.toLowerCase()) {
-      case "pdf":
-        return require("~/assets/images/pdf_icon.png");
-      case "doc":
-      case "docx":
-        return require("~/assets/images/doc_icon.png");
-      case "jpg":
-      case "jpeg":
-      case "png":
-        return require("~/assets/images/image_icon.png");
-      default:
-        return require("~/assets/images/unknown_icon.png");
-    }
-  }
 
   return (
     <Table className="min-w-full">
@@ -78,13 +55,7 @@ export default function DocumentListTable() {
           contentContainerStyle={{
             flexGrow: 1,
           }}
-          ListEmptyComponent={
-            <View className="flex-1 items-center justify-center">
-              <Text className="text-center text-gray-400 text-2xl font-bold">
-                No document yet
-              </Text>
-            </View>
-          }
+          ListEmptyComponent={<EmptyDocumentList />}
           renderItem={({ item: document }) => {
             return (
               <TableRow key={document.id}>
@@ -122,5 +93,15 @@ export default function DocumentListTable() {
         />
       </TableBody>
     </Table>
+  );
+}
+
+function EmptyDocumentList() {
+  return (
+    <View className="flex-1 items-center justify-center">
+      <Text className="text-center text-gray-400 text-2xl font-bold">
+        No document yet
+      </Text>
+    </View>
   );
 }

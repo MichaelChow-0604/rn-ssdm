@@ -16,8 +16,8 @@ import Feather from "@expo/vector-icons/Feather";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { Button } from "~/components/ui/button";
 import { router } from "expo-router";
-import { useProfile } from "~/lib/profile-context";
-import { useAuth } from "~/lib/auth-context";
+import { useProfile } from "~/context/profile-context";
+import { useAuth } from "~/context/auth-context";
 import { useState } from "react";
 import { LogoutConfirm } from "~/components/pop-up/logout-confirm";
 

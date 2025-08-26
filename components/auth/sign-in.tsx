@@ -22,6 +22,7 @@ import {
 } from "~/constants/auth-placeholders";
 
 interface SignInProps {
+  // For toggling the state in the parent AuthPage component
   setIsSignIn: (isSignIn: boolean) => void;
 }
 
@@ -30,7 +31,7 @@ type SignInFormFields = z.infer<typeof signInSchema>;
 export default function SignIn({ setIsSignIn }: SignInProps) {
   const router = useRouter();
 
-  // Sign in form
+  // Sign in validation form
   const {
     control: signInControl,
     handleSubmit: handleSignInSubmit,
@@ -73,6 +74,13 @@ export default function SignIn({ setIsSignIn }: SignInProps) {
         mode: "signin",
       },
     });
+  };
+
+  const handleSignIn = () => {
+    // Clear forget password errors when sign-in is submitted
+    clearForgetPasswordErrors();
+    resetForgetPassword();
+    handleSignInSubmit(onSignInSubmit)();
   };
 
   const handleForgetPassword = async () => {
@@ -185,15 +193,7 @@ export default function SignIn({ setIsSignIn }: SignInProps) {
       </TouchableOpacity>
 
       {/* Sign in Button */}
-      <Button
-        className="bg-button mt-4 rounded-xl"
-        onPress={() => {
-          // Clear forget password errors when sign-in is submitted
-          clearForgetPasswordErrors();
-          resetForgetPassword();
-          handleSignInSubmit(onSignInSubmit)();
-        }}
-      >
+      <Button className="bg-button mt-4 rounded-xl" onPress={handleSignIn}>
         <Text className="text-white font-semibold">{SIGN_IN}</Text>
       </Button>
 

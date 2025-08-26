@@ -10,6 +10,7 @@ import Animated, {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function AuthPage() {
+  // State for toggle between sign in and sign up forms
   const [isSignIn, setIsSignIn] = useState(true);
 
   return (

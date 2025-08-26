@@ -104,7 +104,7 @@ export default function EditProfile() {
           </View>
 
           {/* Form section */}
-          <Card className="w-full bg-white p-4 rounded-xl gap-4 mb-16 px-6">
+          <Card className="w-full bg-white p-4 rounded-xl gap-4 mb-16 px-6 border-gray-200">
             {/* Title */}
             <View className="py-2">
               <Text className="text-xl font-bold text-gray-600">
@@ -123,7 +123,7 @@ export default function EditProfile() {
                   control={control}
                   render={({ field: { onChange, onBlur, value } }) => (
                     <Input
-                      className="bg-white text-black"
+                      className="bg-white text-black border-gray-200"
                       placeholder="First name"
                       onChangeText={onChange}
                       onBlur={onBlur}
@@ -148,7 +148,7 @@ export default function EditProfile() {
                   control={control}
                   render={({ field: { onChange, onBlur, value } }) => (
                     <Input
-                      className="bg-white text-black"
+                      className="bg-white text-black border-gray-200"
                       placeholder="Last name"
                       onChangeText={onChange}
                       onBlur={onBlur}

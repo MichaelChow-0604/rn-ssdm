@@ -38,7 +38,11 @@ export function LogoutConfirm({
               </View>
 
               <View className="flex-row gap-2">
-                <Button variant="outline" className="flex-1" onPress={onCancel}>
+                <Button
+                  variant="outline"
+                  className="flex-1 bg-white border-gray-200 active:bg-gray-100"
+                  onPress={onCancel}
+                >
                   <Text className="font-bold">CANCEL</Text>
                 </Button>
                 <Button className="flex-1 bg-button" onPress={onConfirm}>

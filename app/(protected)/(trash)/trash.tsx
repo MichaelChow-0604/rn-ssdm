@@ -14,14 +14,9 @@ export default function Trash() {
       </View>
 
       {/* Scrollable session */}
-      <ScrollView
-        horizontal
-        bounces={false}
-        showsHorizontalScrollIndicator={false}
-        className="flex-1"
-      >
+      <View className="flex-1">
         <TrashListTable />
-      </ScrollView>
+      </View>
 
       {/* Warning */}
       <View className="flex-row items-center justify-center py-2">

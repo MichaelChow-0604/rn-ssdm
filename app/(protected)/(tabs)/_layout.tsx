@@ -1,5 +1,5 @@
 import { router, Tabs } from "expo-router";
-import { Image, Platform, TouchableOpacity } from "react-native";
+import { Image, Platform, TouchableOpacity, Text } from "react-native";
 import BlurBackground from "~/components/tabs/blur-background";
 import MainButton from "~/components/tabs/main-button";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
@@ -76,8 +76,19 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="share"
         options={{
-          title: "Share with me",
           headerShown: false,
+          tabBarLabel: ({ color }) => (
+            <Text
+              style={{
+                color,
+                fontSize: 10,
+                textAlign: "center",
+                fontWeight: 500,
+              }}
+            >
+              Share with me
+            </Text>
+          ),
           tabBarIcon: () => (
             <Image
               source={require("~/assets/tabs_icon/share.png")}

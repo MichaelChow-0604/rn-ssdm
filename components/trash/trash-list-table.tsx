@@ -29,7 +29,7 @@ export default function TrashListTable() {
   );
 
   return (
-    <Table className="min-w-full">
+    <Table className="min-w-full flex-1">
       {/* Table header */}
       <TableHeader>
         <TableRow>

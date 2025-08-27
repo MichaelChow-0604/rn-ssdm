@@ -25,11 +25,15 @@ export default function ReturnMessageForgetPage() {
           />
         </View>
 
+        {/* Title */}
         <Text className="text-2xl font-bold my-4">{RETURN_SUCCESS}</Text>
+
+        {/* Description */}
         <Text className="text-lg text-center">
           {RETURN_MESSAGE_FORGET_DESC_1}
         </Text>
 
+        {/* Back to sign in button */}
         <Button
           className="w-full mt-8 bg-button rounded-xl"
           onPress={() => router.replace("/auth")}

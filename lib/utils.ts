@@ -29,3 +29,11 @@ export function iconForExt(ext: string) {
       return require("~/assets/docs_icon/unknown.png");
   }
 }
+
+export function formatDateLong(ts: number) {
+  const d = new Date(ts);
+  const day = d.getDate();
+  const month = d.toLocaleString("en-US", { month: "short" });
+  const year = d.getFullYear();
+  return `${day} ${month} ${year}`;
+}

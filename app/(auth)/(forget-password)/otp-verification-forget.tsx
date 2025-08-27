@@ -18,9 +18,10 @@ import {
 } from "~/components/countdown-timer";
 
 export default function OTPVerificationForgetPage() {
-  const [otp, setOtp] = useState("");
-  const router = useRouter();
   const { email } = useLocalSearchParams();
+  const router = useRouter();
+
+  const [otp, setOtp] = useState("");
   const timerRef = useRef<CountdownTimerRef>(null);
 
   const handleTimerExpire = () => {

@@ -1,9 +1,9 @@
 import { View } from "react-native";
 import SearchBar from "~/components/search-bar";
-import FilterOptions from "~/components/tabs/documents/filter-options";
-import DocumentListTable from "~/components/tabs/documents/document-list-table";
+import FilterOptions from "~/components/documents/filter-options";
+import DocumentListTable from "~/components/documents/document-list-table";
 
-export default function Documents() {
+export default function DocumentTab() {
   return (
     <View className="flex-1 bg-white">
       {/* Search + Filter */}

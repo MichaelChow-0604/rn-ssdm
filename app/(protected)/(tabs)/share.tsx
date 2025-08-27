@@ -16,7 +16,7 @@ import { AccessProgressDialog } from "~/components/pop-up/access-progress";
 
 type ShareFormFields = z.infer<typeof shareSchema>;
 
-export default function SharePage() {
+export default function ShareTab() {
   const {
     control,
     handleSubmit,

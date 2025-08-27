@@ -3,7 +3,6 @@ import {
   Platform,
   SafeAreaView,
   ScrollView,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -29,11 +28,9 @@ import {
 import { IMultiSelectRef, MultiSelect } from "react-native-element-dropdown";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { EditAlert } from "~/components/pop-up/edit-alert";
-
-interface MultiOption {
-  label: string;
-  value: string; // contact id
-}
+import { formatDateLong } from "~/lib/utils";
+import { MultiOption } from "~/lib/types";
+import { multiSelectStyles } from "~/components/documents/multi-select-style";
 
 export default function EditDocument() {
   const { documentId } = useLocalSearchParams<{ documentId: string }>();
@@ -48,6 +45,9 @@ export default function EditDocument() {
   const [selectedRecipients, setSelectedRecipients] = useState<string[]>([]);
   const multiRef = useRef<IMultiSelectRef>(null!);
 
+  const [editAlertOpen, setEditAlertOpen] = useState(false);
+
+  // Load document
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -74,7 +74,7 @@ export default function EditDocument() {
     };
   }, [documentId]);
 
-  // load all contacts as options
+  // Load all contacts as options
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -92,19 +92,9 @@ export default function EditDocument() {
     [recipientContacts]
   );
 
-  function formatDateLong(ts: number) {
-    const d = new Date(ts);
-    const day = d.getDate();
-    const month = d.toLocaleString("en-US", { month: "short" });
-    const year = d.getFullYear();
-    return `${day} ${month} ${year}`;
-  }
-
   function handleEdit() {
     setIsEditing(true);
   }
-
-  const [editAlertOpen, setEditAlertOpen] = useState(false);
 
   async function handleSave() {
     if (!documentId || !doc) {
@@ -112,6 +102,7 @@ export default function EditDocument() {
       return;
     }
 
+    // Check if no recipients are selected
     if (selectedRecipients.length === 0) {
       setEditAlertOpen(true);
       return;
@@ -201,11 +192,11 @@ export default function EditDocument() {
               {isEditing ? (
                 <MultiSelect
                   ref={multiRef}
-                  style={styles.dropdown}
-                  placeholderStyle={styles.placeholderStyle}
-                  selectedTextStyle={styles.selectedTextStyle}
-                  inputSearchStyle={styles.inputSearchStyle}
-                  iconStyle={styles.iconStyle}
+                  style={multiSelectStyles.dropdown}
+                  placeholderStyle={multiSelectStyles.placeholderStyle}
+                  selectedTextStyle={multiSelectStyles.selectedTextStyle}
+                  inputSearchStyle={multiSelectStyles.inputSearchStyle}
+                  iconStyle={multiSelectStyles.iconStyle}
                   data={contactOptions}
                   activeColor="#438BF7"
                   labelField="label"
@@ -218,15 +209,17 @@ export default function EditDocument() {
                   onChange={(vals: any) => setSelectedRecipients(vals)}
                   renderLeftIcon={() => (
                     <AntDesign
-                      style={styles.icon}
+                      style={multiSelectStyles.icon}
                       color="black"
                       name="user"
                       size={20}
                     />
                   )}
                   renderItem={(item: MultiOption) => (
-                    <View style={styles.item}>
-                      <Text style={styles.selectedTextStyle}>{item.label}</Text>
+                    <View style={multiSelectStyles.item}>
+                      <Text style={multiSelectStyles.selectedTextStyle}>
+                        {item.label}
+                      </Text>
                     </View>
                   )}
                   renderSelectedItem={(item, unSelect) => (
@@ -234,8 +227,8 @@ export default function EditDocument() {
                       onPress={() => unSelect && unSelect(item)}
                       activeOpacity={0.8}
                     >
-                      <View style={styles.selectedStyle}>
-                        <Text style={styles.textSelectedStyle}>
+                      <View style={multiSelectStyles.selectedStyle}>
+                        <Text style={multiSelectStyles.textSelectedStyle}>
                           {item.label}
                         </Text>
                         <MaterialIcons
@@ -343,61 +336,3 @@ export default function EditDocument() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { padding: 16 },
-  dropdown: {
-    height: 50,
-    backgroundColor: "white",
-    borderRadius: 12,
-    padding: 12,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.41,
-    elevation: 2,
-  },
-  placeholderStyle: {
-    fontSize: 16,
-  },
-  selectedTextStyle: {
-    fontSize: 14,
-  },
-  iconStyle: {
-    width: 20,
-    height: 20,
-  },
-  inputSearchStyle: {
-    height: 40,
-    fontSize: 16,
-  },
-  icon: {
-    marginRight: 5,
-  },
-  item: {
-    padding: 17,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  selectedStyle: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 14,
-    backgroundColor: "#438BF7",
-    marginTop: 8,
-    marginRight: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  textSelectedStyle: {
-    marginRight: 5,
-    fontSize: 16,
-    color: "white",
-    fontWeight: "bold",
-  },
-});

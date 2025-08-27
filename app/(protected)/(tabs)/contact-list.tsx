@@ -54,7 +54,7 @@ function buildSections(contacts: Contact[]) {
   }));
 }
 
-export default function ContactListPage() {
+export default function ContactListTab() {
   const [contacts, setContacts] = useState<StoredContact[]>([]);
 
   useFocusEffect(

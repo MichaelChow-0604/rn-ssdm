@@ -53,7 +53,7 @@ export function SettingRow({
   );
 }
 
-export default function Profile() {
+export default function ProfileTab() {
   const { profile } = useProfile();
   const { setIsAuthenticated } = useAuth();
   const [dialogOpen, setDialogOpen] = useState(false);

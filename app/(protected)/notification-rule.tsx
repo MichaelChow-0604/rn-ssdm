@@ -13,7 +13,7 @@ export default function NotificationRule() {
   return (
     <SafeAreaView className="flex-1 bg-white">
       {/* Header */}
-      <View className="flex-row gap-2 items-center my-8 px-4">
+      <View className="flex-row gap-2 items-center mt-2 mb-6 px-4">
         <BackButton />
         <Text className="text-2xl font-semibold">Notification Rule</Text>
       </View>

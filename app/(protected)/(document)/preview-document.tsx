@@ -58,14 +58,6 @@ export default function PreviewDocument() {
 
   const [isUploading, setIsUploading] = useState(false);
 
-  function formatDateLong(ts: number) {
-    const d = new Date(ts);
-    const day = d.getDate();
-    const month = d.toLocaleString("en-US", { month: "short" });
-    const year = d.getFullYear();
-    return `${day} ${month} ${year}`;
-  }
-
   const sleep = (ms: number) =>
     new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -88,15 +80,13 @@ export default function PreviewDocument() {
         recipients: ids,
       });
 
-      await sleep(3000);
+      await sleep(4000);
 
       router.replace({
         pathname: "/return-message",
         params: {
           mode: "success",
           transactionId: saved.transactionId,
-          uploadDate: formatDateLong(saved.uploadDate),
-          uploadTime: saved.uploadTime,
         },
       });
     } catch {

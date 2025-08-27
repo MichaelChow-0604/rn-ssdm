@@ -28,11 +28,15 @@ export default function AccountDeleted() {
           />
         </View>
 
+        {/* Title */}
         <Text className="text-3xl font-bold my-4">{RETURN_SUCCESS}</Text>
+
+        {/* Description */}
         <Text className="text-lg text-center">
           Your account has been deleted.
         </Text>
 
+        {/* Back to login button */}
         <Button
           className="bg-button text-buttontext my-8 w-full"
           onPress={() => router.replace("/auth")}

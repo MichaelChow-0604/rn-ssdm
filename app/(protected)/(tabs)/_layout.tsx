@@ -7,7 +7,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 export default function TabsLayout() {
   return (
     <Tabs
-      initialRouteName="documents"
+      initialRouteName="document"
       screenOptions={{
         headerTitle: "SSDM",
         headerTitleAlign: "center",
@@ -60,7 +60,7 @@ export default function TabsLayout() {
     >
       {/* Documents */}
       <Tabs.Screen
-        name="documents"
+        name="document"
         options={{
           title: "Document",
           tabBarIcon: () => (

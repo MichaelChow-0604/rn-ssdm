@@ -17,6 +17,7 @@ import { formateDate, iconForExt } from "~/lib/utils";
 export default function DocumentListTable() {
   const [docs, setDocs] = useState<StoredDocument[]>([]);
 
+  // Load documents
   const load = useCallback(async () => {
     const list = await getDocuments();
     setDocs(list);

@@ -151,13 +151,14 @@ export default function UploadDocument() {
                 value={selectedCategory}
                 onValueChange={setSelectedCategory}
               >
-                <SelectTrigger className="bg-white w-full">
+                <SelectTrigger className="bg-white w-full border-gray-200">
                   <SelectValue
                     className="text-black font-medium text-lg"
                     placeholder="Select Category"
                   />
                 </SelectTrigger>
-                <SelectContent className="w-[80%] bg-white">
+
+                <SelectContent className="w-[80%] bg-white border-gray-200">
                   <SelectGroup>
                     <SelectItem
                       label="Legal"
@@ -203,13 +204,13 @@ export default function UploadDocument() {
                 value={selectedType}
                 onValueChange={setSelectedType}
               >
-                <SelectTrigger className="bg-white w-full">
+                <SelectTrigger className="bg-white w-full border-gray-200">
                   <SelectValue
                     className="text-black font-medium text-lg"
                     placeholder="Select Type"
                   />
                 </SelectTrigger>
-                <SelectContent className="w-[80%] bg-white">
+                <SelectContent className="w-[80%] bg-white border-gray-200">
                   <SelectGroup>
                     <SelectItem
                       label="Will"
@@ -245,7 +246,7 @@ export default function UploadDocument() {
                     onChangeText={onChange}
                     onBlur={onBlur}
                     value={value}
-                    className="bg-white text-black"
+                    className="bg-white text-black border-gray-200"
                     placeholderClassName="text-placeholder"
                     placeholder="Enter Document Name"
                   />
@@ -303,7 +304,7 @@ export default function UploadDocument() {
                 renderInputSearch={(onSearch) => (
                   <View className="h-auto flex-row items-center p-1 gap-1">
                     <Input
-                      className="flex-1"
+                      className="flex-1 bg-white border-gray-200 text-black"
                       placeholder="Search here"
                       onChangeText={onSearch}
                       autoCorrect={false}
@@ -349,7 +350,7 @@ export default function UploadDocument() {
                     value={value}
                     placeholderClassName="text-placeholder"
                     placeholder="Enter Description"
-                    className="bg-white text-black"
+                    className="bg-white text-black border-gray-200"
                   />
                 )}
               />

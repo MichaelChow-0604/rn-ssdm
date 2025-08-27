@@ -29,7 +29,7 @@ export default function DocumentListTable() {
   );
 
   return (
-    <Table className="min-w-full">
+    <Table className="min-w-full flex-1">
       {/* Table header */}
       <TableHeader>
         <TableRow>
@@ -51,6 +51,7 @@ export default function DocumentListTable() {
         {/* Document list */}
         <FlatList
           data={docs}
+          keyExtractor={(item) => item.id}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{
             flexGrow: 1,

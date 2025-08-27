@@ -122,7 +122,7 @@ export default function Profile() {
           </View>
 
           {/* Form section */}
-          <Card className="w-full bg-white p-4 rounded-xl gap-4 mb-16">
+          <Card className="w-full bg-white p-4 rounded-xl gap-4 mb-16 border-gray-200">
             {/* Account section */}
             <View className="flex-col gap-2">
               <Text className="text-lg font-bold">Account</Text>

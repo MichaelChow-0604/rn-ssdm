@@ -36,6 +36,7 @@ export default function DeleteDocConfirm() {
 
   const handleVerify = async () => {
     if (tempCheck()) {
+      Keyboard.dismiss();
       await removeDocument(documentId as string);
       setOpenSuccessDialog(true);
     } else {
@@ -64,7 +65,7 @@ export default function DeleteDocConfirm() {
             placeholder="Enter your password"
             value={password}
             onChangeText={setPassword}
-            className="w-full my-8"
+            className="w-full my-8 bg-white border-gray-200 text-black"
           />
 
           {/* Verify Button */}

@@ -249,7 +249,7 @@ export default function EditDocument() {
                   renderInputSearch={(onSearch) => (
                     <View className="h-auto flex-row items-center p-1 gap-1">
                       <Input
-                        className="flex-1"
+                        className="flex-1 bg-white border-gray-200"
                         placeholder="Search here"
                         onChangeText={onSearch}
                         autoCorrect={false}
@@ -279,7 +279,7 @@ export default function EditDocument() {
               <Textarea
                 key={isEditing ? "editing" : "readonly"}
                 className={`text-black opacity-100 border-0 ${
-                  isEditing ? "bg-white border bored-gray-300" : "bg-gray-300"
+                  isEditing ? "bg-white border border-gray-200" : "bg-gray-300"
                 }`}
                 value={description}
                 onChangeText={setDescription}

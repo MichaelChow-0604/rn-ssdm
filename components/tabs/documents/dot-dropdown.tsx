@@ -37,7 +37,7 @@ export default function DotDropdown({
         </DropdownMenuTrigger>
 
         <DropdownMenuContent
-          className="native:w-60 bg-white"
+          className="native:w-60 bg-white border-gray-200"
           insets={{ right: 8 }}
         >
           <DropdownMenuItem

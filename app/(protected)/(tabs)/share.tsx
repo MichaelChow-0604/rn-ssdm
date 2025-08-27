@@ -111,7 +111,7 @@ export default function SharePage() {
               control={control}
               render={({ field: { onChange, onBlur, value } }) => (
                 <Input
-                  className="bg-gray-100 text-black flex-1"
+                  className="bg-gray-100 text-black flex-1 border-gray-200"
                   onChangeText={onChange}
                   onBlur={onBlur}
                   value={value}
@@ -136,7 +136,7 @@ export default function SharePage() {
               control={control}
               render={({ field: { onChange, onBlur, value } }) => (
                 <Input
-                  className="bg-gray-100 text-black flex-1"
+                  className="bg-gray-100 text-black flex-1 border-gray-200"
                   onChangeText={onChange}
                   onBlur={onBlur}
                   value={value}

@@ -225,7 +225,7 @@ export default function ContactDetailPage() {
           </View>
 
           {/* Form section */}
-          <Card className="w-full bg-white p-4 rounded-xl mt-8 mb-6 gap-4 relative">
+          <Card className="w-full bg-white p-4 rounded-xl mt-8 mb-6 gap-4 relative border-gray-200">
             <CardHeader className="py-2">
               {/* No 'All fields are required' in detail page */}
             </CardHeader>
@@ -244,7 +244,7 @@ export default function ContactDetailPage() {
                         onBlur={onBlur}
                         value={value}
                         placeholder="First name"
-                        className="bg-white text-black"
+                        className="bg-white text-black border-gray-200"
                         editable={isEditing}
                       />
                     )}
@@ -266,7 +266,7 @@ export default function ContactDetailPage() {
                         onBlur={onBlur}
                         value={value}
                         placeholder="Last name"
-                        className="bg-white text-black"
+                        className="bg-white text-black border-gray-200"
                         editable={isEditing}
                       />
                     )}
@@ -294,7 +294,7 @@ export default function ContactDetailPage() {
                       onBlur={onBlur}
                       value={value}
                       placeholder="Mobile number"
-                      className="bg-white text-black"
+                      className="bg-white text-black border-gray-200"
                       editable={isEditing}
                     />
                   )}
@@ -320,7 +320,7 @@ export default function ContactDetailPage() {
                       onBlur={onBlur}
                       value={value}
                       placeholder="Email"
-                      className="bg-white text-black"
+                      className="bg-white text-black border-gray-200"
                       editable={isEditing}
                     />
                   )}
@@ -352,7 +352,7 @@ export default function ContactDetailPage() {
                 }
               >
                 <SelectTrigger
-                  className="bg-white w-[160px]"
+                  className="bg-white w-[160px] border-gray-200"
                   disabled={!isEditing}
                 >
                   <SelectValue
@@ -360,7 +360,8 @@ export default function ContactDetailPage() {
                     placeholder="Relationship"
                   />
                 </SelectTrigger>
-                <SelectContent className="w-[160px] bg-white">
+
+                <SelectContent className="w-[160px] bg-white border-gray-200">
                   <SelectGroup>
                     <SelectItem label="Family" value="family">
                       Family

@@ -13,16 +13,7 @@ import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { Card, CardHeader } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import {
-  Option,
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
-import { Checkbox } from "~/components/ui/checkbox";
+import { Option } from "~/components/ui/select";
 import { useState } from "react";
 import { newContactSchema } from "~/schema/new-contact-schema";
 import * as z from "zod";
@@ -32,6 +23,8 @@ import { Button } from "~/components/ui/button";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import { addContact } from "~/lib/storage/contact";
+import { RelationshipSelect } from "~/components/contact/create/relationship-select";
+import { DistributionCheckbox } from "~/components/contact/create/distribution-checkbox";
 
 type NewContactFormFields = z.infer<typeof newContactSchema>;
 
@@ -135,7 +128,7 @@ export default function CreateContactPage() {
           </View>
 
           {/* Form section */}
-          <Card className="w-full bg-white p-4 rounded-xl mt-8 gap-4">
+          <Card className="w-full bg-white p-4 rounded-xl mt-8 gap-4 border-gray-200">
             <CardHeader className="py-2">
               <Text className="text-lg font-semibold text-center text-button">
                 **All fields are required**
@@ -159,7 +152,7 @@ export default function CreateContactPage() {
                         onChangeText={onChange}
                         onBlur={onBlur}
                         value={value}
-                        className="bg-white text-black"
+                        className="bg-white text-black border-gray-200"
                         placeholderClassName="text-placeholder"
                         placeholder="First name"
                       />
@@ -184,7 +177,7 @@ export default function CreateContactPage() {
                         onChangeText={onChange}
                         onBlur={onBlur}
                         value={value}
-                        className="bg-white text-black"
+                        className="bg-white text-black border-gray-200"
                         placeholderClassName="text-placeholder"
                         placeholder="Last name"
                       />
@@ -215,7 +208,7 @@ export default function CreateContactPage() {
                       onChangeText={onChange}
                       onBlur={onBlur}
                       value={value}
-                      className="bg-white text-black"
+                      className="bg-white text-black border-gray-200"
                       placeholder="Mobile number"
                     />
                   )}
@@ -244,7 +237,7 @@ export default function CreateContactPage() {
                       onBlur={onBlur}
                       value={value}
                       placeholder="Email"
-                      className="bg-white text-black"
+                      className="bg-white text-black border-gray-200"
                     />
                   )}
                 />
@@ -258,90 +251,19 @@ export default function CreateContactPage() {
               </View>
             </View>
 
-            {/* Relationship */}
-            <View className="flex-row gap-4 items-center justify-start">
-              <AntDesign name="team" size={24} color="#438BF7" />
-              <Select
-                defaultValue={{ label: "Family", value: "family" }}
-                value={selectedRelationship}
-                onValueChange={setSelectedRelationship}
-              >
-                <SelectTrigger className="bg-white w-[160px]">
-                  <SelectValue
-                    className="text-black font-medium text-lg"
-                    placeholder="Relationship"
-                  />
-                </SelectTrigger>
-                <SelectContent className="w-[160px] bg-white">
-                  <SelectGroup>
-                    <SelectItem
-                      label="Family"
-                      value="family"
-                      className="active:bg-gray-100"
-                    >
-                      Family
-                    </SelectItem>
-                    <SelectItem
-                      label="Friend"
-                      value="friend"
-                      className="active:bg-gray-100"
-                    >
-                      Friend
-                    </SelectItem>
-                    <SelectItem
-                      label="Partner"
-                      value="partner"
-                      className="active:bg-gray-100"
-                    >
-                      Partner
-                    </SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </View>
+            {/* Relationship select dropdown */}
+            <RelationshipSelect
+              selectedRelationship={selectedRelationship}
+              setSelectedRelationship={setSelectedRelationship}
+            />
 
             {/* Distributon method */}
-            <View className="flex-row gap-4 items-center justify-start">
-              <AntDesign name="notification" size={24} color="#438BF7" />
-              <View className="flex-col gap-2">
-                <View className="flex-row gap-2 items-center justify-start">
-                  <Checkbox
-                    checked={true}
-                    onCheckedChange={() => {}}
-                    className="native:h-[16] native:w-[16] native:rounded-sm border-subtitle bg-subtitle"
-                  />
-                  <Text className="text-black font-semibold text-lg">
-                    Email (Necessary)
-                  </Text>
-                </View>
-                <View className="flex-row gap-2 items-center justify-start">
-                  <Checkbox
-                    checked={isWhatsappChecked}
-                    onCheckedChange={setIsWhatsappChecked}
-                    className={`native:h-[16] native:w-[16] native:rounded-sm border-subtitle ${
-                      isWhatsappChecked
-                        ? "bg-button border-button"
-                        : "bg-white border-subtitle"
-                    }`}
-                  />
-                  <Text className="text-black font-semibold text-lg">
-                    Whatsapp
-                  </Text>
-                </View>
-                <View className="flex-row gap-2 items-center justify-start">
-                  <Checkbox
-                    checked={isSMSChecked}
-                    onCheckedChange={setIsSMSChecked}
-                    className={`native:h-[16] native:w-[16] native:rounded-sm border-subtitle ${
-                      isSMSChecked
-                        ? "bg-button border-button"
-                        : "bg-white border-subtitle"
-                    }`}
-                  />
-                  <Text className="text-black font-semibold text-lg">SMS</Text>
-                </View>
-              </View>
-            </View>
+            <DistributionCheckbox
+              isWhatsappChecked={isWhatsappChecked}
+              setIsWhatsappChecked={setIsWhatsappChecked}
+              isSMSChecked={isSMSChecked}
+              setIsSMSChecked={setIsSMSChecked}
+            />
           </Card>
 
           {/* Create button */}

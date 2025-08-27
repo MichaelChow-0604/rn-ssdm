@@ -33,7 +33,7 @@ export function CategorySelect({
         <Text className="text-red-500 font-bold">*</Text>
       </View>
       <Select
-        defaultValue={{ label: "Legal", value: "legal" }}
+        defaultValue={CATEGORIES[0]}
         value={selectedCategory}
         onValueChange={setSelectedCategory}
       >

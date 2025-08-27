@@ -28,7 +28,7 @@ export function TypeSelect({ selectedType, setSelectedType }: TypeSelectProps) {
         <Text className="text-red-500 font-bold">*</Text>
       </View>
       <Select
-        defaultValue={{ label: "Will", value: "will" }}
+        defaultValue={TYPES[0]}
         value={selectedType}
         onValueChange={setSelectedType}
       >

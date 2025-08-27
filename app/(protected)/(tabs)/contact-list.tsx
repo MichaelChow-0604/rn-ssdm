@@ -1,5 +1,4 @@
 import {
-  Image,
   SectionList,
   Text,
   TouchableOpacity,
@@ -8,76 +7,18 @@ import {
 } from "react-native";
 import SearchBar from "~/components/search-bar";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { router, useFocusEffect } from "expo-router";
-import { useCallback, useMemo, useState } from "react";
-import { getContacts, StoredContact } from "~/lib/storage/contact";
+import { router } from "expo-router";
+import { useMemo } from "react";
 import { Contact } from "~/lib/types";
-
-// derive display name
-function fullName(c: StoredContact) {
-  return `${c.firstName} ${c.lastName}`.trim();
-}
-
-// helpers
-function normalizeName(name: string) {
-  return name
-    .trim()
-    .normalize("NFD")
-    .replace(/\p{Diacritic}/gu, "");
-}
-
-function groupKeyFromName(name: string) {
-  const n = normalizeName(name);
-  const first = n[0]?.toUpperCase() ?? "#";
-  return /[A-Z]/.test(first) ? first : "#"; // non-letters go to '#'
-}
-
-function buildSections(contacts: Contact[]) {
-  const map = new Map<string, Contact[]>();
-
-  for (const c of contacts) {
-    const key = groupKeyFromName(c.name);
-    if (!map.has(key)) map.set(key, []);
-    map.get(key)!.push(c);
-  }
-
-  // only non-empty, sorted section keys
-  const keys = Array.from(map.keys()).sort();
-
-  return keys.map((title) => ({
-    title,
-    data: map
-      .get(title)!
-      .sort((a, b) =>
-        normalizeName(a.name).localeCompare(normalizeName(b.name))
-      ),
-  }));
-}
+import { useContacts } from "~/hooks/use-contacts";
+import { buildSections, toListItem } from "~/lib/contacts/utils";
+import { ContactRow } from "~/components/contact/contact-row";
 
 export default function ContactListTab() {
-  const [contacts, setContacts] = useState<StoredContact[]>([]);
+  const contacts = useContacts();
 
-  useFocusEffect(
-    useCallback(() => {
-      let cancelled = false;
-      (async () => {
-        const data = await getContacts();
-        if (!cancelled) setContacts(data);
-      })();
-      return () => {
-        cancelled = true;
-      };
-    }, [])
-  );
-
-  const sections = useMemo(() => {
-    const formatted = contacts.map((c) => ({
-      id: c.id,
-      name: fullName(c),
-      avatarUri: c.profilePicUri ?? undefined,
-    }));
-    return buildSections(formatted);
-  }, [contacts]);
+  const items = useMemo<Contact[]>(() => contacts.map(toListItem), [contacts]);
+  const sections = useMemo(() => buildSections(items), [items]);
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -99,6 +40,7 @@ export default function ContactListTab() {
         <Text className="text-2xl font-semibold text-black">My Contacts</Text>
       </View>
 
+      {/* Contact list */}
       <SectionList
         sections={sections}
         keyExtractor={(item) => item.id}
@@ -106,43 +48,39 @@ export default function ContactListTab() {
         contentContainerStyle={{
           flexGrow: 1,
         }}
-        ListEmptyComponent={
-          <View className="flex-1 items-center justify-center">
-            <Text className="text-center text-gray-400 text-2xl font-bold">
-              No contact yet
-            </Text>
-          </View>
-        }
+        ListEmptyComponent={<EmptyState />}
         renderSectionHeader={({ section }) => (
-          <View className="bg-gray-100 px-6 py-2">
-            <Text className="font-semibold">{section.title}</Text>
-          </View>
+          <SectionHeader title={section.title} />
         )}
         renderItem={({ item }) => (
-          <TouchableOpacity
-            activeOpacity={0.7}
-            className="flex-row items-center gap-3 px-6 py-3 border-b border-gray-200"
-            onPress={() =>
-              router.push({ pathname: "/[id]", params: { id: item.id } })
-            }
-          >
-            {item.avatarUri ? (
-              <Image
-                source={{ uri: item.avatarUri }}
-                className="w-10 h-10 rounded-full"
-              />
-            ) : (
-              <Image
-                source={require("~/assets/images/default_icon.png")}
-                className="w-10 h-10 rounded-full"
-              />
-            )}
-            <Text className="text-black font-semibold">{item.name}</Text>
-          </TouchableOpacity>
+          <ContactRow
+            id={item.id}
+            name={item.name}
+            avatarUri={item.avatarUri}
+            onPress={(id) => router.push({ pathname: "/[id]", params: { id } })}
+          />
         )}
         initialNumToRender={20}
         windowSize={10}
       />
     </SafeAreaView>
+  );
+}
+
+function SectionHeader({ title }: { title: string }) {
+  return (
+    <View className="bg-gray-100 px-6 py-2">
+      <Text className="font-semibold">{title}</Text>
+    </View>
+  );
+}
+
+function EmptyState({ text = "No contact yet" }: { text?: string }) {
+  return (
+    <View className="flex-1 items-center justify-center">
+      <Text className="text-center text-gray-400 text-2xl font-bold">
+        {text}
+      </Text>
+    </View>
   );
 }

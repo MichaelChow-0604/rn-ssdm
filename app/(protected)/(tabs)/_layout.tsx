@@ -79,7 +79,10 @@ export default function TabsLayout() {
           headerShown: false,
           tabBarLabel: ({ color }) => (
             <Text
+              numberOfLines={1}
               style={{
+                // Give space to the text
+                marginHorizontal: -2,
                 color,
                 fontSize: 10,
                 textAlign: "center",

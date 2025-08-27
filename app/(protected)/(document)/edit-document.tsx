@@ -4,7 +4,6 @@ import {
   SafeAreaView,
   ScrollView,
   Text,
-  TouchableOpacity,
   View,
 } from "react-native";
 import { BackButton } from "~/components/back-button";
@@ -13,7 +12,7 @@ import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { Button } from "~/components/ui/button";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocalSearchParams } from "expo-router";
 import {
   getDocumentById,
@@ -25,12 +24,10 @@ import {
   getContacts,
   StoredContact,
 } from "~/lib/storage/contact";
-import { IMultiSelectRef, MultiSelect } from "react-native-element-dropdown";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { EditAlert } from "~/components/pop-up/edit-alert";
 import { formatDateLong } from "~/lib/utils";
 import { MultiOption } from "~/lib/types";
-import { multiSelectStyles } from "~/components/documents/multi-select-style";
+import { RecipientsMultiSelect } from "~/components/documents/recipient-multi-select";
 
 export default function EditDocument() {
   const { documentId } = useLocalSearchParams<{ documentId: string }>();
@@ -43,7 +40,6 @@ export default function EditDocument() {
 
   const [contactOptions, setContactOptions] = useState<MultiOption[]>([]);
   const [selectedRecipients, setSelectedRecipients] = useState<string[]>([]);
-  const multiRef = useRef<IMultiSelectRef>(null!);
 
   const [editAlertOpen, setEditAlertOpen] = useState(false);
 
@@ -190,71 +186,10 @@ export default function EditDocument() {
             <View className="flex-col gap-1">
               <Label className="text-black">Recipients</Label>
               {isEditing ? (
-                <MultiSelect
-                  ref={multiRef}
-                  style={multiSelectStyles.dropdown}
-                  placeholderStyle={multiSelectStyles.placeholderStyle}
-                  selectedTextStyle={multiSelectStyles.selectedTextStyle}
-                  inputSearchStyle={multiSelectStyles.inputSearchStyle}
-                  iconStyle={multiSelectStyles.iconStyle}
-                  data={contactOptions}
-                  activeColor="#438BF7"
-                  labelField="label"
-                  valueField="value"
-                  placeholder="Select recipients"
+                <RecipientsMultiSelect
+                  options={contactOptions}
                   value={selectedRecipients}
-                  maxSelect={5}
-                  search
-                  searchPlaceholder="Search..."
-                  onChange={(vals: any) => setSelectedRecipients(vals)}
-                  renderLeftIcon={() => (
-                    <AntDesign
-                      style={multiSelectStyles.icon}
-                      color="black"
-                      name="user"
-                      size={20}
-                    />
-                  )}
-                  renderItem={(item: MultiOption) => (
-                    <View style={multiSelectStyles.item}>
-                      <Text style={multiSelectStyles.selectedTextStyle}>
-                        {item.label}
-                      </Text>
-                    </View>
-                  )}
-                  renderSelectedItem={(item, unSelect) => (
-                    <TouchableOpacity
-                      onPress={() => unSelect && unSelect(item)}
-                      activeOpacity={0.8}
-                    >
-                      <View style={multiSelectStyles.selectedStyle}>
-                        <Text style={multiSelectStyles.textSelectedStyle}>
-                          {item.label}
-                        </Text>
-                        <MaterialIcons
-                          name="delete-forever"
-                          size={20}
-                          color="white"
-                        />
-                      </View>
-                    </TouchableOpacity>
-                  )}
-                  renderInputSearch={(onSearch) => (
-                    <View className="h-auto flex-row items-center p-1 gap-1">
-                      <Input
-                        className="flex-1 bg-white border-gray-200"
-                        placeholder="Search here"
-                        onChangeText={onSearch}
-                        autoCorrect={false}
-                      />
-                      <Button
-                        className="w-[90px] bg-button"
-                        onPress={() => multiRef.current?.close()}
-                      >
-                        <Text className="text-white font-bold">Confirm</Text>
-                      </Button>
-                    </View>
-                  )}
+                  onChange={setSelectedRecipients}
                 />
               ) : (
                 <Textarea

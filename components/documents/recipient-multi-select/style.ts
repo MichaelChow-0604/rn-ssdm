@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 
-export const multiSelectStyles = StyleSheet.create({
+export const styles = StyleSheet.create({
   container: { padding: 16 },
   dropdown: {
     height: 50,

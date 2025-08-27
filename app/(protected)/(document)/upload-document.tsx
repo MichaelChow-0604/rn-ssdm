@@ -1,40 +1,30 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  StyleSheet,
   Text,
-  TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import {
-  Option,
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
+import { Option } from "~/components/ui/select";
 import { uploadDocumentSchema } from "~/schema/upload-document";
 import { AntDesign } from "@expo/vector-icons";
-import { IMultiSelectRef, MultiSelect } from "react-native-element-dropdown";
 import { getContacts } from "~/lib/storage/contact";
 import { router, useFocusEffect } from "expo-router";
 import * as DocumentPicker from "expo-document-picker";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { Button } from "~/components/ui/button";
 import { BackButton } from "~/components/back-button";
 import { Textarea } from "~/components/ui/textarea";
 import * as z from "zod";
+import { RecipientsMultiSelect } from "~/components/documents/recipient-multi-select";
 import { MultiOption } from "~/lib/types";
-import { multiSelectStyles } from "~/components/documents/multi-select-style";
+import { CategorySelect } from "~/components/documents/upload/category-select";
+import { TypeSelect } from "~/components/documents/upload/type-select";
 
 type UploadDocumentFormFields = z.infer<typeof uploadDocumentSchema>;
 
@@ -48,7 +38,7 @@ export default function UploadDocument() {
     value: "will",
   });
 
-  const [contactOptions, setContactOptions] = useState<Option[]>([]);
+  const [contactOptions, setContactOptions] = useState<MultiOption[]>([]);
   const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
 
@@ -73,12 +63,6 @@ export default function UploadDocument() {
         cancelled = true;
       };
     }, [])
-  );
-
-  const renderItem = (item: MultiOption) => (
-    <View style={multiSelectStyles.item}>
-      <Text style={multiSelectStyles.selectedTextStyle}>{item.label}</Text>
-    </View>
   );
 
   const {
@@ -115,8 +99,6 @@ export default function UploadDocument() {
     });
   };
 
-  const multiRef = useRef<IMultiSelectRef>(null!);
-
   return (
     <SafeAreaView className="flex-1 bg-white">
       <KeyboardAvoidingView
@@ -137,96 +119,17 @@ export default function UploadDocument() {
 
           {/* Form */}
           <View className="flex-col gap-4 w-[80%]">
-            {/* Category */}
-            <View className="flex-col gap-1">
-              <View className="flex-row gap-0.5">
-                <Label className="text-black">Category</Label>
-                <Text className="text-red-500 font-bold">*</Text>
-              </View>
-              <Select
-                defaultValue={{ label: "Legal", value: "legal" }}
-                value={selectedCategory}
-                onValueChange={setSelectedCategory}
-              >
-                <SelectTrigger className="bg-white w-full border-gray-200">
-                  <SelectValue
-                    className="text-black font-medium text-lg"
-                    placeholder="Select Category"
-                  />
-                </SelectTrigger>
+            {/* Category select dropdown */}
+            <CategorySelect
+              selectedCategory={selectedCategory}
+              setSelectedCategory={setSelectedCategory}
+            />
 
-                <SelectContent className="w-[80%] bg-white border-gray-200">
-                  <SelectGroup>
-                    <SelectItem
-                      label="Legal"
-                      value="legal"
-                      className="active:bg-gray-100"
-                    >
-                      Legal
-                    </SelectItem>
-                    <SelectItem
-                      label="Insurance"
-                      value="insurance"
-                      className="active:bg-gray-100"
-                    >
-                      Insurance
-                    </SelectItem>
-                    <SelectItem
-                      label="Medical"
-                      value="medical"
-                      className="active:bg-gray-100"
-                    >
-                      Medical
-                    </SelectItem>
-                    <SelectItem
-                      label="Financials"
-                      value="financials"
-                      className="active:bg-gray-100"
-                    >
-                      Financials
-                    </SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </View>
-
-            {/* Type */}
-            <View className="flex-col gap-1">
-              <View className="flex-row gap-0.5">
-                <Label className="text-black">Type</Label>
-                <Text className="text-red-500 font-bold">*</Text>
-              </View>
-              <Select
-                defaultValue={{ label: "Will", value: "will" }}
-                value={selectedType}
-                onValueChange={setSelectedType}
-              >
-                <SelectTrigger className="bg-white w-full border-gray-200">
-                  <SelectValue
-                    className="text-black font-medium text-lg"
-                    placeholder="Select Type"
-                  />
-                </SelectTrigger>
-                <SelectContent className="w-[80%] bg-white border-gray-200">
-                  <SelectGroup>
-                    <SelectItem
-                      label="Will"
-                      value="will"
-                      className="active:bg-gray-100"
-                    >
-                      Will
-                    </SelectItem>
-                    <SelectItem
-                      label="Insurance Policy"
-                      value="insurance-policy"
-                      className="active:bg-gray-100"
-                    >
-                      Insurance Policy
-                    </SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </View>
+            {/* Type select dropdown */}
+            <TypeSelect
+              selectedType={selectedType}
+              setSelectedType={setSelectedType}
+            />
 
             {/* Document Name */}
             <View className="flex-col gap-1">
@@ -258,6 +161,7 @@ export default function UploadDocument() {
               )}
             </View>
 
+            {/* Recipients multi select */}
             <View className="w-full flex-col gap-1">
               <View className="flex-row gap-0.5">
                 <Label className="text-black">Recipients</Label>
@@ -271,74 +175,16 @@ export default function UploadDocument() {
                 </View>
               </View>
 
-              <MultiSelect
-                ref={multiRef}
-                style={multiSelectStyles.dropdown}
-                placeholderStyle={multiSelectStyles.placeholderStyle}
-                selectedTextStyle={multiSelectStyles.selectedTextStyle}
-                inputSearchStyle={multiSelectStyles.inputSearchStyle}
-                iconStyle={multiSelectStyles.iconStyle}
-                data={contactOptions}
-                activeColor="#438BF7"
-                labelField="label"
-                valueField="value"
-                placeholder="Select recipients"
+              <RecipientsMultiSelect
+                options={contactOptions}
                 value={selectedContacts}
-                maxSelect={5}
-                search
-                searchPlaceholder="Search..."
-                onChange={(item: any) => {
-                  setSelectedContacts(item);
-                }}
-                renderLeftIcon={() => (
-                  <AntDesign
-                    style={multiSelectStyles.icon}
-                    color="black"
-                    name="user"
-                    size={20}
-                  />
-                )}
-                renderInputSearch={(onSearch) => (
-                  <View className="h-auto flex-row items-center p-1 gap-1">
-                    <Input
-                      className="flex-1 bg-white border-gray-200 text-black"
-                      placeholder="Search here"
-                      onChangeText={onSearch}
-                      autoCorrect={false}
-                    />
-                    <Button
-                      className="w-[90px] bg-button"
-                      onPress={() => multiRef.current?.close()}
-                    >
-                      <Text className="text-white font-bold">Confirm</Text>
-                    </Button>
-                  </View>
-                )}
-                renderItem={renderItem}
-                renderSelectedItem={(item, unSelect) => (
-                  <TouchableOpacity
-                    onPress={() => unSelect && unSelect(item)}
-                    activeOpacity={0.8}
-                  >
-                    <View style={multiSelectStyles.selectedStyle}>
-                      <Text style={multiSelectStyles.textSelectedStyle}>
-                        {item.label}
-                      </Text>
-                      <MaterialIcons
-                        name="delete-forever"
-                        size={20}
-                        color="white"
-                      />
-                    </View>
-                  </TouchableOpacity>
-                )}
+                onChange={setSelectedContacts}
               />
             </View>
 
             {/* Description */}
             <View className="flex-col gap-1">
               <Label className="text-black">Description</Label>
-
               <Controller
                 name="description"
                 control={control}

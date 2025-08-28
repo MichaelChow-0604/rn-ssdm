@@ -8,7 +8,6 @@ import {
   TouchableOpacity,
   Image,
 } from "react-native";
-import * as ImagePicker from "expo-image-picker";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { useState } from "react";
 import { Card } from "~/components/ui/card";
@@ -22,6 +21,7 @@ import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { pickImage } from "~/lib/pick-image";
 
 type ProfileFormFields = z.infer<typeof profileSchema>;
 
@@ -42,16 +42,9 @@ export default function EditProfile() {
     },
   });
 
-  const pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images", "videos"],
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 1,
-    });
-    if (!result.canceled) {
-      setLocalPic(result.assets[0].uri);
-    }
+  const handlePickImage = async () => {
+    const uri = await pickImage();
+    if (uri) setLocalPic(uri);
   };
 
   const handleSave = handleSubmit((data) => {
@@ -81,7 +74,7 @@ export default function EditProfile() {
               <TouchableOpacity
                 className="rounded-full"
                 activeOpacity={0.8}
-                onPress={pickImage}
+                onPress={handlePickImage}
               >
                 <Image
                   source={
@@ -112,6 +105,7 @@ export default function EditProfile() {
               </Text>
             </View>
 
+            {/* First Name */}
             <View className="flex-col gap-3">
               <View className="flex-col gap-1">
                 <View className="flex-row gap-0.5">
@@ -138,6 +132,7 @@ export default function EditProfile() {
                 )}
               </View>
 
+              {/* Last Name */}
               <View className="flex-col gap-1">
                 <View className="flex-row gap-0.5">
                   <Label className="text-gray-500">Last Name</Label>

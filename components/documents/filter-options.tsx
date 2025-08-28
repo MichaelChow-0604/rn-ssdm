@@ -5,6 +5,11 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import FilterBottomSheet from "./filter-bottom-sheet";
 import { FilterOption } from "~/lib/types";
 
+interface FilterButtonProps {
+  type: FilterOption;
+  label: string;
+}
+
 export default function FilterOptions() {
   const bottomSheetRef = useRef<BottomSheetModal>(null);
   const [selectedFilter, setSelectedFilter] = useState<FilterOption | null>(
@@ -34,8 +39,26 @@ export default function FilterOptions() {
     setSelectedFilter(null);
   }, []);
 
+  // Filter button component
+  function FilterButton({ type, label }: FilterButtonProps) {
+    return (
+      <TouchableOpacity
+        className={`border flex-1 py-2 flex items-center justify-center rounded-lg h-16 ${
+          isApplied(type) ? "border-button border-2" : "border-gray-300"
+        }`}
+        activeOpacity={0.7}
+        onPress={() => handlePresentModalPress(type)}
+      >
+        <Text style={styles.label} className="text-center px-2">
+          {label}
+        </Text>
+      </TouchableOpacity>
+    );
+  }
+
   return (
     <View className="flex-row items-center justify-between gap-2">
+      {/* Filter bottom sheet */}
       <FilterBottomSheet
         ref={bottomSheetRef}
         selectedFilter={selectedFilter}
@@ -45,58 +68,33 @@ export default function FilterOptions() {
         }}
       />
 
+      {/* Clear filter button */}
       <TouchableOpacity
         activeOpacity={0.7}
+        // If filter is applied, clear it
         onPress={() => appliedFilter !== null && handleClearFilter()}
       >
         {appliedFilter === null ? (
+          // No filter applied
           <MaterialCommunityIcons
             name="filter-outline"
             size={24}
             color="black"
           />
         ) : (
+          // Filter applied
           <MaterialCommunityIcons name="filter" size={24} color="#438BF7" />
         )}
       </TouchableOpacity>
 
-      <TouchableOpacity
-        className={`border flex-1 py-2 flex items-center justify-center rounded-lg h-16 ${
-          isApplied("documentType")
-            ? "border-button border-2"
-            : "border-gray-300"
-        }`}
-        activeOpacity={0.7}
-        onPress={() => handlePresentModalPress("documentType")}
-      >
-        <Text style={styles.label} className="text-center px-2">
-          Document Type
-        </Text>
-      </TouchableOpacity>
+      {/* Document type filter button */}
+      <FilterButton type="documentType" label="Document Type" />
 
-      <TouchableOpacity
-        className={`border flex-1 py-2 flex items-center justify-center rounded-lg h-16 ${
-          isApplied("category") ? "border-button border-2" : "border-gray-300"
-        }`}
-        activeOpacity={0.7}
-        onPress={() => handlePresentModalPress("category")}
-      >
-        <Text style={styles.label} className="px-2 text-center">
-          Category
-        </Text>
-      </TouchableOpacity>
+      {/* Category filter button */}
+      <FilterButton type="category" label="Category" />
 
-      <TouchableOpacity
-        className={`border flex-1 py-2 flex items-center justify-center rounded-lg h-16 ${
-          isApplied("uploadDate") ? "border-button border-2" : "border-gray-300"
-        }`}
-        activeOpacity={0.7}
-        onPress={() => handlePresentModalPress("uploadDate")}
-      >
-        <Text style={styles.label} className="px-2 text-center">
-          Upload Date
-        </Text>
-      </TouchableOpacity>
+      {/* Upload date filter button */}
+      <FilterButton type="uploadDate" label="Upload Date" />
     </View>
   );
 }

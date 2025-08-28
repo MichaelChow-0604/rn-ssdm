@@ -3,9 +3,7 @@ import {
   Platform,
   SafeAreaView,
   ScrollView,
-  StyleSheet,
   Text,
-  TouchableOpacity,
   View,
 } from "react-native";
 import { BackButton } from "~/components/back-button";
@@ -14,7 +12,7 @@ import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { Button } from "~/components/ui/button";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocalSearchParams } from "expo-router";
 import {
   getDocumentById,
@@ -26,14 +24,10 @@ import {
   getContacts,
   StoredContact,
 } from "~/lib/storage/contact";
-import { IMultiSelectRef, MultiSelect } from "react-native-element-dropdown";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { EditAlert } from "~/components/pop-up/edit-alert";
-
-interface MultiOption {
-  label: string;
-  value: string; // contact id
-}
+import { formatDateLong } from "~/lib/utils";
+import { MultiOption } from "~/lib/types";
+import { RecipientsMultiSelect } from "~/components/documents/recipient-multi-select";
 
 export default function EditDocument() {
   const { documentId } = useLocalSearchParams<{ documentId: string }>();
@@ -46,8 +40,10 @@ export default function EditDocument() {
 
   const [contactOptions, setContactOptions] = useState<MultiOption[]>([]);
   const [selectedRecipients, setSelectedRecipients] = useState<string[]>([]);
-  const multiRef = useRef<IMultiSelectRef>(null!);
 
+  const [editAlertOpen, setEditAlertOpen] = useState(false);
+
+  // Load document
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -74,7 +70,7 @@ export default function EditDocument() {
     };
   }, [documentId]);
 
-  // load all contacts as options
+  // Load all contacts as options
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -92,19 +88,9 @@ export default function EditDocument() {
     [recipientContacts]
   );
 
-  function formatDateLong(ts: number) {
-    const d = new Date(ts);
-    const day = d.getDate();
-    const month = d.toLocaleString("en-US", { month: "short" });
-    const year = d.getFullYear();
-    return `${day} ${month} ${year}`;
-  }
-
   function handleEdit() {
     setIsEditing(true);
   }
-
-  const [editAlertOpen, setEditAlertOpen] = useState(false);
 
   async function handleSave() {
     if (!documentId || !doc) {
@@ -112,6 +98,7 @@ export default function EditDocument() {
       return;
     }
 
+    // Check if no recipients are selected
     if (selectedRecipients.length === 0) {
       setEditAlertOpen(true);
       return;
@@ -199,69 +186,10 @@ export default function EditDocument() {
             <View className="flex-col gap-1">
               <Label className="text-black">Recipients</Label>
               {isEditing ? (
-                <MultiSelect
-                  ref={multiRef}
-                  style={styles.dropdown}
-                  placeholderStyle={styles.placeholderStyle}
-                  selectedTextStyle={styles.selectedTextStyle}
-                  inputSearchStyle={styles.inputSearchStyle}
-                  iconStyle={styles.iconStyle}
-                  data={contactOptions}
-                  activeColor="#438BF7"
-                  labelField="label"
-                  valueField="value"
-                  placeholder="Select recipients"
+                <RecipientsMultiSelect
+                  options={contactOptions}
                   value={selectedRecipients}
-                  maxSelect={5}
-                  search
-                  searchPlaceholder="Search..."
-                  onChange={(vals: any) => setSelectedRecipients(vals)}
-                  renderLeftIcon={() => (
-                    <AntDesign
-                      style={styles.icon}
-                      color="black"
-                      name="user"
-                      size={20}
-                    />
-                  )}
-                  renderItem={(item: MultiOption) => (
-                    <View style={styles.item}>
-                      <Text style={styles.selectedTextStyle}>{item.label}</Text>
-                    </View>
-                  )}
-                  renderSelectedItem={(item, unSelect) => (
-                    <TouchableOpacity
-                      onPress={() => unSelect && unSelect(item)}
-                      activeOpacity={0.8}
-                    >
-                      <View style={styles.selectedStyle}>
-                        <Text style={styles.textSelectedStyle}>
-                          {item.label}
-                        </Text>
-                        <MaterialIcons
-                          name="delete-forever"
-                          size={20}
-                          color="white"
-                        />
-                      </View>
-                    </TouchableOpacity>
-                  )}
-                  renderInputSearch={(onSearch) => (
-                    <View className="h-auto flex-row items-center p-1 gap-1">
-                      <Input
-                        className="flex-1 bg-white border-gray-200"
-                        placeholder="Search here"
-                        onChangeText={onSearch}
-                        autoCorrect={false}
-                      />
-                      <Button
-                        className="w-[90px] bg-button"
-                        onPress={() => multiRef.current?.close()}
-                      >
-                        <Text className="text-white font-bold">Confirm</Text>
-                      </Button>
-                    </View>
-                  )}
+                  onChange={setSelectedRecipients}
                 />
               ) : (
                 <Textarea
@@ -343,61 +271,3 @@ export default function EditDocument() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { padding: 16 },
-  dropdown: {
-    height: 50,
-    backgroundColor: "white",
-    borderRadius: 12,
-    padding: 12,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.41,
-    elevation: 2,
-  },
-  placeholderStyle: {
-    fontSize: 16,
-  },
-  selectedTextStyle: {
-    fontSize: 14,
-  },
-  iconStyle: {
-    width: 20,
-    height: 20,
-  },
-  inputSearchStyle: {
-    height: 40,
-    fontSize: 16,
-  },
-  icon: {
-    marginRight: 5,
-  },
-  item: {
-    padding: 17,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  selectedStyle: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 14,
-    backgroundColor: "#438BF7",
-    marginTop: 8,
-    marginRight: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  textSelectedStyle: {
-    marginRight: 5,
-    fontSize: 16,
-    color: "white",
-    fontWeight: "bold",
-  },
-});

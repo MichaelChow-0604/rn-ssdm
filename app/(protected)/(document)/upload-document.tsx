@@ -1,43 +1,30 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  StyleSheet,
   Text,
-  TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import {
-  Option,
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
+import { Option } from "~/components/ui/select";
 import { uploadDocumentSchema } from "~/schema/upload-document";
 import { AntDesign } from "@expo/vector-icons";
-import { IMultiSelectRef, MultiSelect } from "react-native-element-dropdown";
 import { getContacts } from "~/lib/storage/contact";
 import { router, useFocusEffect } from "expo-router";
 import * as DocumentPicker from "expo-document-picker";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { Button } from "~/components/ui/button";
 import { BackButton } from "~/components/back-button";
 import { Textarea } from "~/components/ui/textarea";
 import * as z from "zod";
-
-interface MultiOption {
-  label: string;
-  value: string; // contact id
-}
+import { RecipientsMultiSelect } from "~/components/documents/recipient-multi-select";
+import { MultiOption } from "~/lib/types";
+import { SelectDropdown } from "~/components/select-dropdown";
+import { CATEGORIES, TYPES } from "~/constants/select-data";
 
 type UploadDocumentFormFields = z.infer<typeof uploadDocumentSchema>;
 
@@ -51,7 +38,7 @@ export default function UploadDocument() {
     value: "will",
   });
 
-  const [contactOptions, setContactOptions] = useState<Option[]>([]);
+  const [contactOptions, setContactOptions] = useState<MultiOption[]>([]);
   const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
 
@@ -76,12 +63,6 @@ export default function UploadDocument() {
         cancelled = true;
       };
     }, [])
-  );
-
-  const renderItem = (item: MultiOption) => (
-    <View style={styles.item}>
-      <Text style={styles.selectedTextStyle}>{item.label}</Text>
-    </View>
   );
 
   const {
@@ -118,8 +99,6 @@ export default function UploadDocument() {
     });
   };
 
-  const multiRef = useRef<IMultiSelectRef>(null!);
-
   return (
     <SafeAreaView className="flex-1 bg-white">
       <KeyboardAvoidingView
@@ -140,96 +119,21 @@ export default function UploadDocument() {
 
           {/* Form */}
           <View className="flex-col gap-4 w-[80%]">
-            {/* Category */}
-            <View className="flex-col gap-1">
-              <View className="flex-row gap-0.5">
-                <Label className="text-black">Category</Label>
-                <Text className="text-red-500 font-bold">*</Text>
-              </View>
-              <Select
-                defaultValue={{ label: "Legal", value: "legal" }}
-                value={selectedCategory}
-                onValueChange={setSelectedCategory}
-              >
-                <SelectTrigger className="bg-white w-full border-gray-200">
-                  <SelectValue
-                    className="text-black font-medium text-lg"
-                    placeholder="Select Category"
-                  />
-                </SelectTrigger>
+            {/* Category select dropdown */}
+            <SelectDropdown
+              label="Category"
+              options={CATEGORIES}
+              selectedOption={selectedCategory}
+              setSelectedOption={setSelectedCategory}
+            />
 
-                <SelectContent className="w-[80%] bg-white border-gray-200">
-                  <SelectGroup>
-                    <SelectItem
-                      label="Legal"
-                      value="legal"
-                      className="active:bg-gray-100"
-                    >
-                      Legal
-                    </SelectItem>
-                    <SelectItem
-                      label="Insurance"
-                      value="insurance"
-                      className="active:bg-gray-100"
-                    >
-                      Insurance
-                    </SelectItem>
-                    <SelectItem
-                      label="Medical"
-                      value="medical"
-                      className="active:bg-gray-100"
-                    >
-                      Medical
-                    </SelectItem>
-                    <SelectItem
-                      label="Financials"
-                      value="financials"
-                      className="active:bg-gray-100"
-                    >
-                      Financials
-                    </SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </View>
-
-            {/* Type */}
-            <View className="flex-col gap-1">
-              <View className="flex-row gap-0.5">
-                <Label className="text-black">Type</Label>
-                <Text className="text-red-500 font-bold">*</Text>
-              </View>
-              <Select
-                defaultValue={{ label: "Will", value: "will" }}
-                value={selectedType}
-                onValueChange={setSelectedType}
-              >
-                <SelectTrigger className="bg-white w-full border-gray-200">
-                  <SelectValue
-                    className="text-black font-medium text-lg"
-                    placeholder="Select Type"
-                  />
-                </SelectTrigger>
-                <SelectContent className="w-[80%] bg-white border-gray-200">
-                  <SelectGroup>
-                    <SelectItem
-                      label="Will"
-                      value="will"
-                      className="active:bg-gray-100"
-                    >
-                      Will
-                    </SelectItem>
-                    <SelectItem
-                      label="Insurance Policy"
-                      value="insurance-policy"
-                      className="active:bg-gray-100"
-                    >
-                      Insurance Policy
-                    </SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </View>
+            {/* Type select dropdown */}
+            <SelectDropdown
+              label="Type"
+              options={TYPES}
+              selectedOption={selectedType}
+              setSelectedOption={setSelectedType}
+            />
 
             {/* Document Name */}
             <View className="flex-col gap-1">
@@ -261,6 +165,7 @@ export default function UploadDocument() {
               )}
             </View>
 
+            {/* Recipients multi select */}
             <View className="w-full flex-col gap-1">
               <View className="flex-row gap-0.5">
                 <Label className="text-black">Recipients</Label>
@@ -274,72 +179,16 @@ export default function UploadDocument() {
                 </View>
               </View>
 
-              <MultiSelect
-                ref={multiRef}
-                style={styles.dropdown}
-                placeholderStyle={styles.placeholderStyle}
-                selectedTextStyle={styles.selectedTextStyle}
-                inputSearchStyle={styles.inputSearchStyle}
-                iconStyle={styles.iconStyle}
-                data={contactOptions}
-                activeColor="#438BF7"
-                labelField="label"
-                valueField="value"
-                placeholder="Select recipients"
+              <RecipientsMultiSelect
+                options={contactOptions}
                 value={selectedContacts}
-                maxSelect={5}
-                search
-                searchPlaceholder="Search..."
-                onChange={(item: any) => {
-                  setSelectedContacts(item);
-                }}
-                renderLeftIcon={() => (
-                  <AntDesign
-                    style={styles.icon}
-                    color="black"
-                    name="user"
-                    size={20}
-                  />
-                )}
-                renderInputSearch={(onSearch) => (
-                  <View className="h-auto flex-row items-center p-1 gap-1">
-                    <Input
-                      className="flex-1 bg-white border-gray-200 text-black"
-                      placeholder="Search here"
-                      onChangeText={onSearch}
-                      autoCorrect={false}
-                    />
-                    <Button
-                      className="w-[90px] bg-button"
-                      onPress={() => multiRef.current?.close()}
-                    >
-                      <Text className="text-white font-bold">Confirm</Text>
-                    </Button>
-                  </View>
-                )}
-                renderItem={renderItem}
-                renderSelectedItem={(item, unSelect) => (
-                  <TouchableOpacity
-                    onPress={() => unSelect && unSelect(item)}
-                    activeOpacity={0.8}
-                  >
-                    <View style={styles.selectedStyle}>
-                      <Text style={styles.textSelectedStyle}>{item.label}</Text>
-                      <MaterialIcons
-                        name="delete-forever"
-                        size={20}
-                        color="white"
-                      />
-                    </View>
-                  </TouchableOpacity>
-                )}
+                onChange={setSelectedContacts}
               />
             </View>
 
             {/* Description */}
             <View className="flex-col gap-1">
               <Label className="text-black">Description</Label>
-
               <Controller
                 name="description"
                 control={control}
@@ -414,61 +263,3 @@ export default function UploadDocument() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { padding: 16 },
-  dropdown: {
-    height: 50,
-    backgroundColor: "white",
-    borderRadius: 12,
-    padding: 12,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.41,
-    elevation: 2,
-  },
-  placeholderStyle: {
-    fontSize: 16,
-  },
-  selectedTextStyle: {
-    fontSize: 14,
-  },
-  iconStyle: {
-    width: 20,
-    height: 20,
-  },
-  inputSearchStyle: {
-    height: 40,
-    fontSize: 16,
-  },
-  icon: {
-    marginRight: 5,
-  },
-  item: {
-    padding: 17,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  selectedStyle: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 14,
-    backgroundColor: "#438BF7",
-    marginTop: 8,
-    marginRight: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  textSelectedStyle: {
-    marginRight: 5,
-    fontSize: 16,
-    color: "white",
-    fontWeight: "bold",
-  },
-});

@@ -63,6 +63,7 @@ export default function DotDropdown({
         </DropdownMenuContent>
       </DropdownMenu>
 
+      {/* Pop up alert */}
       <MoveToTrashAlert
         visible={isMoveToTrashAlertOpen}
         onConfirm={handleMoveToTrash}

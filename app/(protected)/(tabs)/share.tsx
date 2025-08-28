@@ -5,18 +5,14 @@ import { shareSchema } from "~/schema/share-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback } from "react";
 import { useFocusEffect } from "expo-router";
-import {
-  ensureLocalFromAsset,
-  openFile,
-  resolveFileMeta,
-} from "~/lib/open-file";
 import { AccessProgressDialog } from "~/components/pop-up/access-progress";
+import { useShareUnlock } from "~/hooks/use-share-unlock";
 
 type ShareFormFields = z.infer<typeof shareSchema>;
 
-export default function SharePage() {
+export default function ShareTab() {
   const {
     control,
     handleSubmit,
@@ -30,13 +26,7 @@ export default function SharePage() {
     },
   });
 
-  const [dialogText, setDialogText] = useState("");
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [dialogStatus, setDialogStatus] = useState<"pending" | "success">(
-    "pending"
-  );
-
-  const timers = useRef<number[]>([]);
+  const { dialogOpen, dialogText, dialogStatus, begin } = useShareUnlock();
 
   // For temporary testing & demo
   const onSubmit = async (data: ShareFormFields) => {
@@ -44,33 +34,7 @@ export default function SharePage() {
 
     // pick any bundled asset
     const fileName = "ssdm.pdf";
-    const localUri = await ensureLocalFromAsset(
-      require(`~/assets/docs/${fileName}`),
-      fileName
-    );
-
-    const { mimeType, iosUTI } = resolveFileMeta(fileName);
-
-    const REQUEST_MS = 5000;
-    const OPEN_DELAY_MS = 2000;
-
-    setDialogOpen(true);
-    setDialogStatus("pending");
-    setDialogText("Requesting for access");
-
-    timers.current.push(
-      setTimeout(() => {
-        setDialogText("Unlock successful!");
-        setDialogStatus("success");
-      }, REQUEST_MS)
-    );
-
-    timers.current.push(
-      setTimeout(async () => {
-        setDialogOpen(false);
-        await openFile({ localUri, mimeType, iosUTI });
-      }, REQUEST_MS + OPEN_DELAY_MS)
-    );
+    await begin(require(`~/assets/docs/${fileName}`), fileName);
   };
 
   useFocusEffect(
@@ -81,13 +45,6 @@ export default function SharePage() {
       };
     }, [reset])
   );
-
-  useEffect(() => {
-    return () => {
-      timers.current.forEach((timer) => clearTimeout(timer));
-      timers.current = [];
-    };
-  }, []);
 
   return (
     <View className="flex-1 bg-white items-center justify-center">

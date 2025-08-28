@@ -1,4 +1,4 @@
 // Placeholder for the custom button
-export default function Custom() {
+export default function CustomTab() {
   return null;
 }

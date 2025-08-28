@@ -5,3 +5,8 @@ export interface Contact {
 }
 
 export type FilterOption = "documentType" | "category" | "uploadDate";
+
+export interface MultiOption {
+  label: string;
+  value: string; // contact id
+}

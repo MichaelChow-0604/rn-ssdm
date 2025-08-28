@@ -7,6 +7,28 @@ import {
   WHATSAPP_NOTIFICATION_MESSAGE,
 } from "~/constants/notification-message";
 
+const SECTIONS = [
+  { title: "Email", value: EMAIL_NOTIFICATION_MESSAGE },
+  { title: "WhatsApp", value: WHATSAPP_NOTIFICATION_MESSAGE },
+  { title: "SMS", value: SMS_NOTIFICATION_MESSAGE },
+] as const;
+
+function MessageSection({ title, value }: { title: string; value: string }) {
+  return (
+    <View className="flex-col gap-2 w-full">
+      <Text className="text-2xl font-bold text-center text-button">
+        {title}
+      </Text>
+      <Textarea
+        editable={false}
+        autoExpand={true}
+        value={value}
+        className="native:opacity-100 text-gray-700 bg-gray-100 native:text-sm"
+      />
+    </View>
+  );
+}
+
 export default function NotificationMessage() {
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -22,41 +44,9 @@ export default function NotificationMessage() {
         showsVerticalScrollIndicator={false}
         overScrollMode="never"
       >
-        <View className="flex-col gap-2 w-full">
-          <Text className="text-2xl font-bold text-center text-button">
-            Email
-          </Text>
-          <Textarea
-            editable={false}
-            autoExpand={true}
-            value={EMAIL_NOTIFICATION_MESSAGE}
-            className="native:opacity-100 text-gray-700 bg-gray-100 native:text-sm"
-          />
-        </View>
-
-        <View className="flex-col gap-2 w-full">
-          <Text className="text-2xl font-bold text-center text-button">
-            WhatsApp
-          </Text>
-          <Textarea
-            editable={false}
-            autoExpand={true}
-            value={WHATSAPP_NOTIFICATION_MESSAGE}
-            className="native:opacity-100 text-gray-700 bg-gray-100 native:text-sm"
-          />
-        </View>
-
-        <View className="flex-col gap-2 w-full">
-          <Text className="text-2xl font-bold text-center text-button">
-            SMS
-          </Text>
-          <Textarea
-            editable={false}
-            autoExpand={true}
-            value={SMS_NOTIFICATION_MESSAGE}
-            className="native:opacity-100 text-gray-700 bg-gray-100 native:text-sm"
-          />
-        </View>
+        {SECTIONS.map((s) => (
+          <MessageSection key={s.title} title={s.title} value={s.value} />
+        ))}
       </ScrollView>
     </SafeAreaView>
   );

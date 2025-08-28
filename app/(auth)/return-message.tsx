@@ -18,7 +18,7 @@ export default function ReturnMessagePage() {
   useEffect(() => {
     if (mode === "signin") {
       setTimeout(() => {
-        router.replace("/documents");
+        router.replace("/document");
       }, 2000);
     }
   }, [router, mode]);
@@ -36,9 +36,13 @@ export default function ReturnMessagePage() {
           />
         </View>
 
+        {/* Title */}
         <Text className="text-3xl font-bold my-4">{RETURN_SUCCESS}</Text>
+
+        {/* Description */}
         <Text className="text-lg text-center">{RETURN_MESSAGE_DESC}</Text>
 
+        {/* Back to sign in button */}
         {mode === "signup" && (
           <Button
             className="bg-button text-buttontext my-8 w-full"

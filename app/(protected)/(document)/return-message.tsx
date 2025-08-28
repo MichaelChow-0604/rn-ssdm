@@ -5,11 +5,9 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import { Button } from "~/components/ui/button";
 
 export default function ReturnMessage() {
-  const { mode, transactionId, uploadDate, uploadTime } = useLocalSearchParams<{
+  const { mode, transactionId } = useLocalSearchParams<{
     mode: "success" | "error";
     transactionId?: string;
-    uploadDate?: string;
-    uploadTime?: string;
   }>();
   const isSuccess = mode === "success";
 
@@ -23,29 +21,17 @@ export default function ReturnMessage() {
 
   const SuccessDescription = () => {
     return (
-      <View className="flex-col gap-4 w-full items-center">
-        <View className="flex-col gap-1 items-center w-[80%]">
+      <View className="flex-col gap-4 w-full items-center py-4">
+        <View className="flex-col gap-3 items-center w-[80%]">
           <View className="flex-row gap-1 items-center">
             <AntDesign name="file1" size={16} color="#6b7280" />
-            <Text className="text text-gray-500">Document Transaction ID:</Text>
+            <Text className="text text-gray-500 font-semibold">
+              Document Transaction ID:
+            </Text>
           </View>
 
           <Text className="text text-gray-500 text-center">
             {transactionId ?? "-"}
-          </Text>
-        </View>
-
-        <View className="flex-row gap-1 items-center">
-          <Feather name="calendar" size={16} color="#6b7280" />
-          <Text className="text text-gray-500">
-            Upload date: {uploadDate ?? "-"}
-          </Text>
-        </View>
-
-        <View className="flex-row gap-1 items-center">
-          <AntDesign name="clockcircleo" size={16} color="#6b7280" />
-          <Text className="text text-gray-500">
-            Upload time: {uploadTime ?? "-"}
           </Text>
         </View>
       </View>
@@ -54,7 +40,7 @@ export default function ReturnMessage() {
 
   const ErrorDescription = () => {
     return (
-      <Text className="text text-gray-500 text-center w-2/3">
+      <Text className="text text-gray-500 text-center w-2/3 py-4">
         Something went wrong! Please check your information and try again.
       </Text>
     );
@@ -62,7 +48,7 @@ export default function ReturnMessage() {
 
   const handleButtonPress = () => {
     if (isSuccess) {
-      router.replace("/documents");
+      router.replace("/document");
     } else {
       router.replace("../");
     }
@@ -92,10 +78,7 @@ export default function ReturnMessage() {
       {isSuccess ? <SuccessDescription /> : <ErrorDescription />}
 
       {/* Button */}
-      <Button
-        className="rounded-full bg-button mt-8"
-        onPress={handleButtonPress}
-      >
+      <Button className="rounded-full bg-button" onPress={handleButtonPress}>
         <Text className="text-white font-bold text-center">{buttonText}</Text>
       </Button>
     </SafeAreaView>

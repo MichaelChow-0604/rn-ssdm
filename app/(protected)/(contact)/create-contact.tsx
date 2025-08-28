@@ -22,8 +22,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "~/components/ui/button";
 import { router } from "expo-router";
 import { addContact } from "~/lib/storage/contact";
-import { RelationshipSelect } from "~/components/contact/create/relationship-select";
-import { DistributionCheckbox } from "~/components/contact/create/distribution-checkbox";
+import { RelationshipSelect } from "~/components/contact/relationship-select";
+import { DistributionCheckbox } from "~/components/contact/distribution-checkbox";
 import { pickImage } from "~/lib/pick-image";
 
 type NewContactFormFields = z.infer<typeof newContactSchema>;

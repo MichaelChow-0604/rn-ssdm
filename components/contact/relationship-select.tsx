@@ -12,24 +12,28 @@ import { AntDesign } from "@expo/vector-icons";
 import { RELATIONSHIP_OPTIONS } from "~/constants/select-data";
 
 interface RelationshipSelectProps {
-  selectedRelationship: Option;
-  setSelectedRelationship: (value: Option) => void;
+  selectedRelationship?: Option;
+  setSelectedRelationship: (value?: Option) => void;
+  disabled?: boolean;
 }
 
 export function RelationshipSelect({
   selectedRelationship,
   setSelectedRelationship,
+  disabled,
 }: RelationshipSelectProps) {
   return (
     <View className="flex-row gap-4 items-center justify-start">
       <AntDesign name="team" size={24} color="#438BF7" />
 
       <Select
-        defaultValue={RELATIONSHIP_OPTIONS[0]}
         value={selectedRelationship}
         onValueChange={setSelectedRelationship}
       >
-        <SelectTrigger className="bg-white w-[160px] border-gray-200">
+        <SelectTrigger
+          className="bg-white w-[160px] border-gray-200"
+          disabled={disabled}
+        >
           <SelectValue
             className="text-black font-medium text-lg"
             placeholder="Relationship"

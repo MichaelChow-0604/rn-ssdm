@@ -13,29 +13,20 @@ import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { Card, CardHeader } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import {
-  Option,
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
-import { Checkbox } from "~/components/ui/checkbox";
-import { useCallback, useMemo, useState } from "react";
+import { Option } from "~/components/ui/select";
+import { useEffect, useMemo, useState } from "react";
 import * as z from "zod";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "~/components/ui/button";
-import { router, useLocalSearchParams, useFocusEffect } from "expo-router";
-import {
-  getContact,
-  updateContact,
-  StoredContact,
-} from "~/lib/storage/contact";
+import { router, useLocalSearchParams } from "expo-router";
+import { updateContact } from "~/lib/storage/contact";
 import { newContactSchema } from "~/schema/new-contact-schema";
 import { pickImage } from "~/lib/pick-image";
+import { useContactDetail } from "~/hooks/use-contact-detail";
+import { fullName } from "~/lib/contacts/utils";
+import { RelationshipSelect } from "~/components/contact/relationship-select";
+import { DistributionCheckbox } from "~/components/contact/distribution-checkbox";
 
 const detailSchema = newContactSchema.extend({
   profilePicUri: z.string().nullable().optional(),
@@ -45,13 +36,8 @@ const detailSchema = newContactSchema.extend({
 
 type FormValues = z.infer<typeof detailSchema>;
 
-function fullName(c: Pick<StoredContact, "firstName" | "lastName">) {
-  return `${c.firstName} ${c.lastName}`.trim() || "Contact";
-}
-
 export default function ContactDetailPage() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const [contact, setContact] = useState<StoredContact | null>(null);
   const [isEditing, setIsEditing] = useState(false);
 
   const {
@@ -75,32 +61,24 @@ export default function ContactDetailPage() {
   });
 
   // Load contact on focus
-  useFocusEffect(
-    useCallback(() => {
-      let cancelled = false;
-      (async () => {
-        const c = await getContact(String(id));
-        if (!cancelled && c) {
-          setContact(c);
-          reset({
-            firstName: c.firstName,
-            lastName: c.lastName,
-            mobileNumber: c.mobileNumber,
-            email: c.email,
-            profilePicUri: c.profilePicUri ?? null,
-            relationship: c.relationship ?? null,
-            distributions: c.distributions?.length
-              ? c.distributions
-              : ["email"],
-          });
-          setIsEditing(false);
-        }
-      })();
-      return () => {
-        cancelled = true;
-      };
-    }, [id, reset])
-  );
+  const { contact, reload } = useContactDetail(String(id));
+
+  useEffect(() => {
+    if (!contact) return;
+
+    reset({
+      firstName: contact.firstName,
+      lastName: contact.lastName,
+      mobileNumber: contact.mobileNumber,
+      email: contact.email,
+      profilePicUri: contact.profilePicUri ?? null,
+      relationship: contact.relationship ?? null,
+      distributions: contact.distributions?.length
+        ? contact.distributions
+        : ["email"],
+    });
+    setIsEditing(false);
+  }, [contact, reset]);
 
   const values = watch();
   const title = useMemo(
@@ -115,10 +93,12 @@ export default function ContactDetailPage() {
 
   const onSave = handleSubmit(async (data) => {
     if (!contact) return;
+
     // email is mandatory
     const unique = Array.from(
       new Set(["email", ...data.distributions])
     ) as FormValues["distributions"];
+
     await updateContact(contact.id, {
       firstName: data.firstName.trim(),
       lastName: data.lastName.trim(),
@@ -129,20 +109,8 @@ export default function ContactDetailPage() {
       distributions: unique,
     });
     setIsEditing(false);
-    // reload to reflect stored normalization
-    const fresh = await getContact(contact.id);
-    if (fresh) {
-      setContact(fresh);
-      reset({
-        firstName: fresh.firstName,
-        lastName: fresh.lastName,
-        mobileNumber: fresh.mobileNumber,
-        email: fresh.email,
-        profilePicUri: fresh.profilePicUri ?? null,
-        relationship: fresh.relationship ?? null,
-        distributions: fresh.distributions,
-      });
-    }
+
+    await reload();
   });
 
   async function onDelete() {
@@ -154,19 +122,6 @@ export default function ContactDetailPage() {
       },
     });
   }
-
-  const isChecked = (k: "email" | "whatsapp" | "sms") =>
-    values.distributions.includes(k);
-  const toggle = (k: "email" | "whatsapp" | "sms") => {
-    if (!isEditing || k === "email") return;
-    const next = isChecked(k)
-      ? values.distributions.filter((d) => d !== k)
-      : [...values.distributions, k];
-    setValue(
-      "distributions",
-      Array.from(new Set(["email", ...next])) as FormValues["distributions"]
-    );
-  };
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -329,88 +284,53 @@ export default function ContactDetailPage() {
             </View>
 
             {/* Relationship */}
-            <View className="flex-row gap-4 items-center justify-start">
-              <AntDesign name="team" size={24} color="#438BF7" />
-              <Select
-                value={
-                  values.relationship
-                    ? {
-                        label:
-                          values.relationship.charAt(0).toUpperCase() +
-                          values.relationship.slice(1),
-                        value: values.relationship,
-                      }
-                    : undefined
-                }
-                onValueChange={(opt?: Option) =>
-                  setValue("relationship", opt?.value ?? null)
-                }
-              >
-                <SelectTrigger
-                  className="bg-white w-[160px] border-gray-200"
-                  disabled={!isEditing}
-                >
-                  <SelectValue
-                    className="text-black font-medium text-lg"
-                    placeholder="Relationship"
-                  />
-                </SelectTrigger>
-
-                <SelectContent className="w-[160px] bg-white border-gray-200">
-                  <SelectGroup>
-                    <SelectItem label="Family" value="family">
-                      Family
-                    </SelectItem>
-                    <SelectItem label="Friend" value="friend">
-                      Friend
-                    </SelectItem>
-                    <SelectItem label="Partner" value="partner">
-                      Partner
-                    </SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </View>
+            <RelationshipSelect
+              selectedRelationship={
+                values.relationship
+                  ? {
+                      label:
+                        values.relationship.charAt(0).toUpperCase() +
+                        values.relationship.slice(1),
+                      value: values.relationship,
+                    }
+                  : undefined
+              }
+              setSelectedRelationship={(opt?: Option) =>
+                setValue("relationship", opt?.value ?? null)
+              }
+              disabled={!isEditing}
+            />
 
             {/* Distribution */}
-            <View className="flex-row gap-4 items-center justify-start">
-              <AntDesign name="notification" size={24} color="#438BF7" />
-              <View className="flex-col gap-2">
-                {(["email", "whatsapp", "sms"] as const).map((k) => (
-                  <View key={k} className="flex-row gap-2 items-center">
-                    {k === "email" ? (
-                      <Checkbox
-                        checked
-                        onCheckedChange={() => {}}
-                        className="native:h-[16] native:w-[16] native:rounded-sm border-subtitle bg-subtitle"
-                      />
-                    ) : (
-                      <Checkbox
-                        checked={isChecked(k)}
-                        onCheckedChange={() => toggle(k)}
-                        disabled={!isEditing}
-                        className={`native:h-[16] native:w-[16] native:rounded-sm border-subtitle ${
-                          isChecked(k)
-                            ? "bg-button border-button"
-                            : "bg-white border-subtitle"
-                        }`}
-                      />
-                    )}
-                    <Text className="text-black font-semibold text-lg">
-                      {
-                        (
-                          {
-                            email: "Email (necessary)",
-                            whatsapp: "Whatsapp",
-                            sms: "SMS",
-                          } as const
-                        )[k]
-                      }
-                    </Text>
-                  </View>
-                ))}
-              </View>
-            </View>
+            <DistributionCheckbox
+              isWhatsappChecked={values.distributions.includes("whatsapp")}
+              setIsWhatsappChecked={(checked) => {
+                if (!isEditing) return;
+                const next = checked
+                  ? [...values.distributions, "whatsapp"]
+                  : values.distributions.filter((d) => d !== "whatsapp");
+                setValue(
+                  "distributions",
+                  Array.from(
+                    new Set(["email", ...next])
+                  ) as FormValues["distributions"]
+                );
+              }}
+              isSMSChecked={values.distributions.includes("sms")}
+              setIsSMSChecked={(checked) => {
+                if (!isEditing) return;
+                const next = checked
+                  ? [...values.distributions, "sms"]
+                  : values.distributions.filter((d) => d !== "sms");
+                setValue(
+                  "distributions",
+                  Array.from(
+                    new Set(["email", ...next])
+                  ) as FormValues["distributions"]
+                );
+              }}
+              disabled={!isEditing}
+            />
 
             {/* Dim overlay in view mode */}
             {!isEditing && (

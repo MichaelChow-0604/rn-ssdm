@@ -7,6 +7,7 @@ interface DistributionCheckboxProps {
   setIsWhatsappChecked: (value: boolean) => void;
   isSMSChecked: boolean;
   setIsSMSChecked: (value: boolean) => void;
+  disabled?: boolean;
 }
 
 export function DistributionCheckbox({
@@ -14,6 +15,7 @@ export function DistributionCheckbox({
   setIsWhatsappChecked,
   isSMSChecked,
   setIsSMSChecked,
+  disabled,
 }: DistributionCheckboxProps) {
   return (
     <View className="flex-row gap-4 items-center justify-start">
@@ -24,6 +26,7 @@ export function DistributionCheckbox({
         <View className="flex-row gap-2 items-center justify-start">
           <Checkbox
             checked={true}
+            disabled={true}
             onCheckedChange={() => {}}
             className="native:h-[16] native:w-[16] native:rounded-sm border-subtitle bg-subtitle"
           />
@@ -36,6 +39,7 @@ export function DistributionCheckbox({
         <View className="flex-row gap-2 items-center justify-start">
           <Checkbox
             checked={isWhatsappChecked}
+            disabled={disabled}
             onCheckedChange={setIsWhatsappChecked}
             className={`native:h-[16] native:w-[16] native:rounded-sm border-subtitle ${
               isWhatsappChecked
@@ -50,6 +54,7 @@ export function DistributionCheckbox({
         <View className="flex-row gap-2 items-center justify-start">
           <Checkbox
             checked={isSMSChecked}
+            disabled={disabled}
             onCheckedChange={setIsSMSChecked}
             className={`native:h-[16] native:w-[16] native:rounded-sm border-subtitle ${
               isSMSChecked

@@ -1,98 +1,18 @@
 import { router, useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
 import { View, Text, Image } from "react-native";
 import { Button } from "~/components/ui/button";
-import { removeContact } from "~/lib/storage/contact";
-import {
-  getDocuments,
-  StoredDocument,
-  updateDocument,
-} from "~/lib/storage/document";
-import {
-  getTrash,
-  TrashedDocument,
-  updateTrashedDocument,
-} from "~/lib/storage/trash";
+import { useDeleteContact } from "~/hooks/use-delete-contact";
 
 export default function DeleteConfirm() {
   const { id } = useLocalSearchParams();
   const contactId = String(id ?? "");
 
-  const [affectedActiveDocs, setAffectedActiveDocs] = useState<
-    StoredDocument[]
-  >([]);
-  const [affectedTrashedDocs, setAffectedTrashedDocs] = useState<
-    TrashedDocument[]
-  >([]);
-  const [blockedDocNames, setBlockedDocNames] = useState<string[]>([]);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      if (!contactId) return;
-      const [docs, trash] = await Promise.all([getDocuments(), getTrash()]);
-
-      const affectedActive = docs.filter((d) =>
-        d.recipients?.includes(contactId)
-      );
-      const affectedTrash = trash.filter((t) =>
-        t.recipients?.includes(contactId)
-      );
-
-      const blockedActive = affectedActive.filter(
-        (d) => (d.recipients?.filter(Boolean).length ?? 0) === 1
-      );
-      const blockedTrash = affectedTrash.filter(
-        (t) => (t.recipients?.filter(Boolean).length ?? 0) === 1
-      );
-
-      if (!cancelled) {
-        setAffectedActiveDocs(affectedActive);
-        setAffectedTrashedDocs(affectedTrash);
-        setBlockedDocNames([
-          ...blockedActive.map((d) => d.documentName),
-          ...blockedTrash.map((t) => t.documentName),
-        ]);
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [contactId]);
-
-  const canDelete = blockedDocNames.length === 0;
-  const affectedNames = [
-    ...affectedActiveDocs.map((d) => d.documentName),
-    ...affectedTrashedDocs.map((t) => t.documentName),
-  ];
+  const { blockedDocNames, affectedNames, canDelete, deleteContactAndCleanup } =
+    useDeleteContact(contactId);
 
   async function handleDelete() {
-    if (!contactId || !canDelete) {
-      return;
-    }
-
-    await removeContact(contactId);
-
-    if (affectedActiveDocs.length) {
-      await Promise.all(
-        affectedActiveDocs.map((d) =>
-          updateDocument(d.id, {
-            recipients: (d.recipients ?? []).filter((r) => r !== contactId),
-          })
-        )
-      );
-    }
-
-    if (affectedTrashedDocs.length) {
-      await Promise.all(
-        affectedTrashedDocs.map((t) =>
-          updateTrashedDocument(t.id, {
-            recipients: (t.recipients ?? []).filter((r) => r !== contactId),
-          })
-        )
-      );
-    }
+    if (!canDelete) return;
+    await deleteContactAndCleanup();
 
     router.replace("/contact-list");
   }

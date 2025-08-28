@@ -2,7 +2,7 @@ import { useCallback, useState } from "react";
 import { useFocusEffect } from "expo-router";
 import { getContacts, StoredContact } from "~/lib/storage/contact";
 
-export function useContacts() {
+export function useContactList() {
   const [contacts, setContacts] = useState<StoredContact[]>([]);
 
   useFocusEffect(

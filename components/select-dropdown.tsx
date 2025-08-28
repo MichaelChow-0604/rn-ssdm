@@ -10,44 +10,47 @@ import {
   Option,
 } from "~/components/ui/select";
 
-const CATEGORIES = [
-  { label: "Legal", value: "legal" },
-  { label: "Insurance", value: "insurance" },
-  { label: "Medical", value: "medical" },
-  { label: "Financials", value: "financials" },
-];
-
-interface CategorySelectProps {
-  selectedCategory: Option;
-  setSelectedCategory: (category: Option) => void;
+interface SelectDropdownProps {
+  label: string;
+  options: ReadonlyArray<NonNullable<Option>>;
+  selectedOption: Option;
+  setSelectedOption: (option: Option) => void;
 }
 
-export function CategorySelect({
-  selectedCategory,
-  setSelectedCategory,
-}: CategorySelectProps) {
+export function SelectDropdown({
+  label,
+  options,
+  selectedOption,
+  setSelectedOption,
+}: SelectDropdownProps) {
   return (
     <View className="flex-col gap-1">
+      {/* Label */}
       <View className="flex-row gap-0.5">
-        <Label className="text-black">Category</Label>
+        <Label className="text-black">{label}</Label>
         <Text className="text-red-500 font-bold">*</Text>
       </View>
+
       <Select
-        defaultValue={CATEGORIES[0]}
-        value={selectedCategory}
-        onValueChange={setSelectedCategory}
+        defaultValue={options[0]}
+        value={selectedOption}
+        onValueChange={setSelectedOption}
       >
         <SelectTrigger className="bg-white w-full border-gray-200">
           <SelectValue
             className="text-black font-medium text-lg"
-            placeholder="Select Category"
+            placeholder="Select Option"
           />
         </SelectTrigger>
 
         <SelectContent className="w-[80%] bg-white border-gray-200">
           <SelectGroup>
-            {CATEGORIES.map((category) => (
-              <CategorySelectItem key={category.value} {...category} />
+            {options.map((option) => (
+              <SelectDropdownItem
+                key={option.value}
+                label={option.label}
+                value={option.value}
+              />
             ))}
           </SelectGroup>
         </SelectContent>
@@ -56,12 +59,12 @@ export function CategorySelect({
   );
 }
 
-interface CategorySelectItemProps {
+interface SelectDropdownItemProps {
   label: string;
   value: string;
 }
 
-function CategorySelectItem({ label, value }: CategorySelectItemProps) {
+function SelectDropdownItem({ label, value }: SelectDropdownItemProps) {
   return (
     <SelectItem label={label} value={value} className="active:bg-gray-100" />
   );

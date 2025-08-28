@@ -23,8 +23,8 @@ import { Textarea } from "~/components/ui/textarea";
 import * as z from "zod";
 import { RecipientsMultiSelect } from "~/components/documents/recipient-multi-select";
 import { MultiOption } from "~/lib/types";
-import { CategorySelect } from "~/components/documents/upload/category-select";
-import { TypeSelect } from "~/components/documents/upload/type-select";
+import { SelectDropdown } from "~/components/select-dropdown";
+import { CATEGORIES, TYPES } from "~/constants/select-data";
 
 type UploadDocumentFormFields = z.infer<typeof uploadDocumentSchema>;
 
@@ -120,15 +120,19 @@ export default function UploadDocument() {
           {/* Form */}
           <View className="flex-col gap-4 w-[80%]">
             {/* Category select dropdown */}
-            <CategorySelect
-              selectedCategory={selectedCategory}
-              setSelectedCategory={setSelectedCategory}
+            <SelectDropdown
+              label="Category"
+              options={CATEGORIES}
+              selectedOption={selectedCategory}
+              setSelectedOption={setSelectedCategory}
             />
 
             {/* Type select dropdown */}
-            <TypeSelect
-              selectedType={selectedType}
-              setSelectedType={setSelectedType}
+            <SelectDropdown
+              label="Type"
+              options={TYPES}
+              selectedOption={selectedType}
+              setSelectedOption={setSelectedType}
             />
 
             {/* Document Name */}

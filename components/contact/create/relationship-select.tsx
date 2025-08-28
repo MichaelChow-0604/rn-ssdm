@@ -9,12 +9,7 @@ import {
   Option,
 } from "~/components/ui/select";
 import { AntDesign } from "@expo/vector-icons";
-
-const RELATIONSHIP_OPTIONS = [
-  { label: "Family", value: "family" },
-  { label: "Friend", value: "friend" },
-  { label: "Partner", value: "partner" },
-];
+import { RELATIONSHIP_OPTIONS } from "~/constants/select-data";
 
 interface RelationshipSelectProps {
   selectedRelationship: Option;
@@ -28,6 +23,7 @@ export function RelationshipSelect({
   return (
     <View className="flex-row gap-4 items-center justify-start">
       <AntDesign name="team" size={24} color="#438BF7" />
+
       <Select
         defaultValue={RELATIONSHIP_OPTIONS[0]}
         value={selectedRelationship}
@@ -39,6 +35,7 @@ export function RelationshipSelect({
             placeholder="Relationship"
           />
         </SelectTrigger>
+
         <SelectContent className="w-[160px] bg-white border-gray-200">
           <SelectGroup>
             {RELATIONSHIP_OPTIONS.map((option) => (

@@ -20,11 +20,11 @@ import * as z from "zod";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "~/components/ui/button";
-import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import { addContact } from "~/lib/storage/contact";
 import { RelationshipSelect } from "~/components/contact/create/relationship-select";
 import { DistributionCheckbox } from "~/components/contact/create/distribution-checkbox";
+import { pickImage } from "~/lib/pick-image";
 
 type NewContactFormFields = z.infer<typeof newContactSchema>;
 
@@ -37,18 +37,9 @@ export default function CreateContactPage() {
     value: "family",
   });
 
-  const pickImage = async () => {
-    // No permissions request is necessary for launching the image library
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images", "videos"],
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      setProfilePic(result.assets[0].uri);
-    }
+  const handlePickImage = async () => {
+    const uri = await pickImage();
+    if (uri) setProfilePic(uri);
   };
 
   const {
@@ -110,7 +101,7 @@ export default function CreateContactPage() {
               <TouchableOpacity
                 className="rounded-full"
                 activeOpacity={0.8}
-                onPress={pickImage}
+                onPress={handlePickImage}
               >
                 <Image
                   source={

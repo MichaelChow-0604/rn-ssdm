@@ -10,12 +10,12 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { router } from "expo-router";
 import { useMemo } from "react";
 import { Contact } from "~/lib/types";
-import { useContacts } from "~/hooks/use-contacts";
+import { useContactList } from "~/hooks/use-contact-list";
 import { buildSections, toListItem } from "~/lib/contacts/utils";
 import { ContactRow } from "~/components/contact/contact-row";
 
 export default function ContactListTab() {
-  const contacts = useContacts();
+  const contacts = useContactList();
 
   const items = useMemo<Contact[]>(() => contacts.map(toListItem), [contacts]);
   const sections = useMemo(() => buildSections(items), [items]);

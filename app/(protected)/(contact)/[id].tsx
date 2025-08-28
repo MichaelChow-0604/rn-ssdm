@@ -28,7 +28,6 @@ import * as z from "zod";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "~/components/ui/button";
-import * as ImagePicker from "expo-image-picker";
 import { router, useLocalSearchParams, useFocusEffect } from "expo-router";
 import {
   getContact,
@@ -36,6 +35,7 @@ import {
   StoredContact,
 } from "~/lib/storage/contact";
 import { newContactSchema } from "~/schema/new-contact-schema";
+import { pickImage } from "~/lib/pick-image";
 
 const detailSchema = newContactSchema.extend({
   profilePicUri: z.string().nullable().optional(),
@@ -108,15 +108,10 @@ export default function ContactDetailPage() {
     [contact]
   );
 
-  async function pickImage() {
-    if (!isEditing) return;
-    const res = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images"],
-      allowsEditing: true,
-      quality: 1,
-    });
-    if (!res.canceled) setValue("profilePicUri", res.assets[0].uri);
-  }
+  const handlePickImage = async () => {
+    const uri = await pickImage();
+    if (uri) setValue("profilePicUri", uri);
+  };
 
   const onSave = handleSubmit(async (data) => {
     if (!contact) return;
@@ -205,7 +200,7 @@ export default function ContactDetailPage() {
               <TouchableOpacity
                 className="rounded-full"
                 activeOpacity={isEditing ? 0.8 : 1}
-                onPress={pickImage}
+                onPress={handlePickImage}
               >
                 <Image
                   source={

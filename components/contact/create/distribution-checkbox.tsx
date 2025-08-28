@@ -18,7 +18,9 @@ export function DistributionCheckbox({
   return (
     <View className="flex-row gap-4 items-center justify-start">
       <AntDesign name="notification" size={24} color="#438BF7" />
+
       <View className="flex-col gap-2">
+        {/* Email */}
         <View className="flex-row gap-2 items-center justify-start">
           <Checkbox
             checked={true}
@@ -29,6 +31,8 @@ export function DistributionCheckbox({
             Email (Necessary)
           </Text>
         </View>
+
+        {/* Whatsapp */}
         <View className="flex-row gap-2 items-center justify-start">
           <Checkbox
             checked={isWhatsappChecked}
@@ -41,6 +45,8 @@ export function DistributionCheckbox({
           />
           <Text className="text-black font-semibold text-lg">Whatsapp</Text>
         </View>
+
+        {/* SMS */}
         <View className="flex-row gap-2 items-center justify-start">
           <Checkbox
             checked={isSMSChecked}

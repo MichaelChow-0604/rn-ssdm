@@ -120,6 +120,7 @@ export default function EditProfile() {
                       className="bg-white text-black border-gray-200"
                       placeholder="First name"
                       onChangeText={onChange}
+                      autoCorrect={false}
                       onBlur={onBlur}
                       value={value}
                     />
@@ -146,6 +147,7 @@ export default function EditProfile() {
                       className="bg-white text-black border-gray-200"
                       placeholder="Last name"
                       onChangeText={onChange}
+                      autoCorrect={false}
                       onBlur={onBlur}
                       value={value}
                     />

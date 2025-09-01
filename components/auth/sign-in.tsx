@@ -136,6 +136,7 @@ export default function SignIn({ setIsSignIn }: SignInProps) {
                 onChangeText={onChange}
                 onBlur={onBlur}
                 value={value}
+                autoCorrect={false}
                 placeholder={EMAIL_PLACEHOLDER}
                 placeholderClassName="text-placeholder"
                 className="bg-textfield border-0 text-black"

@@ -150,6 +150,7 @@ export default function UploadDocument() {
                     onChangeText={onChange}
                     onBlur={onBlur}
                     value={value}
+                    autoCorrect={false}
                     className="bg-white text-black border-gray-200"
                     placeholderClassName="text-placeholder"
                     placeholder="Enter Document Name"

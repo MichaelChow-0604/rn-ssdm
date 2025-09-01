@@ -116,6 +116,7 @@ export default function SignUp({ setIsSignIn }: SignUpProps) {
                   onChangeText={onChange}
                   onBlur={onBlur}
                   value={value}
+                  autoCorrect={false}
                   className="bg-textfield border-0 text-black"
                   placeholderClassName="text-placeholder"
                   placeholder={FIRST_NAME_PLACEHOLDER}
@@ -140,6 +141,7 @@ export default function SignUp({ setIsSignIn }: SignUpProps) {
                   onChangeText={onChange}
                   onBlur={onBlur}
                   value={value}
+                  autoCorrect={false}
                   className="bg-textfield border-0 text-black"
                   placeholderClassName="text-placeholder"
                   placeholder={LAST_NAME_PLACEHOLDER}
@@ -164,6 +166,7 @@ export default function SignUp({ setIsSignIn }: SignUpProps) {
                   onChangeText={onChange}
                   onBlur={onBlur}
                   value={value}
+                  autoCorrect={false}
                   className="bg-textfield border-0 text-black"
                   placeholderClassName="text-placeholder"
                   placeholder={EMAIL_PLACEHOLDER}

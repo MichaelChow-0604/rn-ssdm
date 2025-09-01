@@ -193,6 +193,7 @@ export default function ContactDetailPage() {
                         onChangeText={onChange}
                         onBlur={onBlur}
                         value={value}
+                        autoCorrect={false}
                         placeholder="First name"
                         className="bg-white text-black border-gray-200"
                         editable={isEditing}
@@ -215,6 +216,7 @@ export default function ContactDetailPage() {
                         onChangeText={onChange}
                         onBlur={onBlur}
                         value={value}
+                        autoCorrect={false}
                         placeholder="Last name"
                         className="bg-white text-black border-gray-200"
                         editable={isEditing}
@@ -269,6 +271,7 @@ export default function ContactDetailPage() {
                       onChangeText={onChange}
                       onBlur={onBlur}
                       value={value}
+                      autoCorrect={false}
                       placeholder="Email"
                       className="bg-white text-black border-gray-200"
                       editable={isEditing}

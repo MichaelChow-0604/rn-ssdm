@@ -96,6 +96,7 @@ export default function ShareTab() {
                   className="bg-gray-100 text-black flex-1 border-gray-200"
                   onChangeText={onChange}
                   onBlur={onBlur}
+                  autoCorrect={false}
                   value={value}
                 />
               )}

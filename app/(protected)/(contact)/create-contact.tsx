@@ -143,6 +143,7 @@ export default function CreateContactPage() {
                         onChangeText={onChange}
                         onBlur={onBlur}
                         value={value}
+                        autoCorrect={false}
                         className="bg-white text-black border-gray-200"
                         placeholderClassName="text-placeholder"
                         placeholder="First name"
@@ -168,6 +169,7 @@ export default function CreateContactPage() {
                         onChangeText={onChange}
                         onBlur={onBlur}
                         value={value}
+                        autoCorrect={false}
                         className="bg-white text-black border-gray-200"
                         placeholderClassName="text-placeholder"
                         placeholder="Last name"
@@ -227,6 +229,7 @@ export default function CreateContactPage() {
                       onChangeText={onChange}
                       onBlur={onBlur}
                       value={value}
+                      autoCorrect={false}
                       placeholder="Email"
                       className="bg-white text-black border-gray-200"
                     />

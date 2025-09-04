@@ -13,7 +13,7 @@ export default function AccountDeleted() {
 
   useEffect(() => {
     setIsAuthenticated(false);
-  }, []);
+  });
 
   return (
     <SafeAreaView className="flex-1 bg-white">

@@ -10,7 +10,8 @@
     "ios": "expo start -c --ios",
     "web": "expo start -c --web",
     "clean": "rm -rf .expo node_modules",
-    "postinstall": "npx tailwindcss -i ./global.css -o ./node_modules/.cache/nativewind/global.css"
+    "postinstall": "npx tailwindcss -i ./global.css -o ./node_modules/.cache/nativewind/global.css",
+    "lint": "expo lint"
   },
   "dependencies": {
     "@gorhom/bottom-sheet": "^5.1.8",
@@ -34,8 +35,10 @@
     "@rn-primitives/tabs": "^1.2.0",
     "@rn-primitives/tooltip": "~1.2.0",
     "@shopify/flash-list": "1.7.6",
+    "babel-plugin-react-compiler": "19.0.0-beta-af1b7da-20250417",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "eslint-plugin-react-compiler": "19.1.0-rc.2",
     "expo": "^53.0.20",
     "expo-asset": "~11.1.7",
     "expo-blur": "~14.1.5",
@@ -77,6 +80,8 @@
   "devDependencies": {
     "@babel/core": "^7.28.0",
     "@types/react": "~19.0.14",
+    "eslint": "^9.34.0",
+    "eslint-config-expo": "~9.2.0",
     "typescript": "^5.8.3"
   },
   "private": true

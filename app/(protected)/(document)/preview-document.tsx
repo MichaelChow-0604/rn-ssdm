@@ -108,7 +108,7 @@ export default function PreviewDocument() {
         duration: 300,
         useNativeDriver: true, // animates opacity on UI thread
       }).start();
-    }, [visible]);
+    }, [visible, opacity]);
 
     return (
       <View

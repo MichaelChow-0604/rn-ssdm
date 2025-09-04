@@ -1,4 +1,4 @@
-import { SafeAreaView, View, Text, Image } from "react-native";
+import { SafeAreaView, View, Text } from "react-native";
 import { BackButton } from "~/components/back-button";
 import { Button } from "~/components/ui/button";
 import { useState } from "react";

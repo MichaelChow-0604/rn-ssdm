@@ -1,8 +1,7 @@
 import { Button } from "../ui/button";
-import { Animated, Text } from "react-native";
+import { Animated, Text, StyleSheet } from "react-native";
 import { Card, CardContent } from "../ui/card";
 import { Portal } from "@rn-primitives/portal";
-import { StyleSheet } from "react-native";
 import { useAnimatedModal } from "~/hooks/use-animated-modal";
 
 interface AcceptAlertProps {

@@ -29,6 +29,8 @@ import {
 } from "~/lib/password-validation";
 import { PasswordInput } from "../password/password-input";
 import { PasswordRequirements } from "../password/password-requirement";
+import { api } from "~/lib/axios";
+import { beautifyResponse } from "~/lib/utils";
 
 interface SignUpProps {
   setIsSignIn: (isSignIn: boolean) => void;
@@ -77,12 +79,23 @@ export default function SignUp({ setIsSignIn }: SignUpProps) {
     };
   }, [watchedPassword]);
 
-  const onSubmit = (data: SignUpFormFields) => {
+  const onSubmit = async (formData: SignUpFormFields) => {
+    // Check if the terms and conditions are accepted
     if (checked) {
-      router.push({
-        pathname: "/otp-verification",
-        params: { email: data.email, mode: "signup" },
-      });
+      try {
+        const { data, status } = await api.post("/api/v1/users", formData);
+
+        // User registered successfully, now proceed to OTP verification
+        if (status === 200) {
+          console.log("USER REGISTERED SUCCESSFULLY", beautifyResponse(data));
+          router.push({
+            pathname: "/otp-verification",
+            params: { email: data.email, mode: "signup" },
+          });
+        }
+      } catch (error) {
+        console.log("ERRORRRRRRRRRRRRRRRRRR", error);
+      }
     } else {
       setShowAcceptTerms(true);
     }

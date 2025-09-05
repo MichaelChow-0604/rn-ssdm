@@ -7,7 +7,6 @@ import {
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
-  Pressable,
 } from "react-native";
 import { OtpInput } from "react-native-otp-entry";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -26,12 +25,18 @@ import {
   VERIFY,
 } from "~/constants/auth-placeholders";
 import { useAuth } from "~/context/auth-context";
+import { api } from "~/lib/axios";
+import { beautifyResponse } from "~/lib/utils";
+import { useCooldown } from "~/hooks/use-cooldown";
+import { ResendLink } from "~/components/auth/resend-link";
 
 export default function OTPVerificationPage() {
   const { email, mode } = useLocalSearchParams();
   const [otp, setOtp] = useState("");
   const router = useRouter();
+
   const timerRef = useRef<CountdownTimerRef>(null);
+  const { secondsLeft: resendCooldown, start: startCooldown } = useCooldown(60);
 
   const { setIsAuthenticated } = useAuth();
 
@@ -44,18 +49,48 @@ export default function OTPVerificationPage() {
     // Add your resend code logic here
   };
 
-  const handleResendCode = () => {
-    // Call the resetTimer function from the timer component
+  const handleResendCode = async () => {
+    if (resendCooldown > 0) return;
+
+    // Sync start: reset OTP timer and start 10s cooldown together
     timerRef.current?.resetTimer();
-    handleTimerReset();
+    startCooldown();
+
+    try {
+      const { data, status } = await api.post(
+        "/api/v1/users/resend-confirmation",
+        { email }
+      );
+
+      if (status === 200) {
+        console.log("OTP RESEND SUCCESSFULLY", beautifyResponse(data));
+        // No extra reset here; already synced at start
+      }
+      // Do NOT cancel cooldown on non-200; keep rate-limit consistent
+    } catch (error) {
+      console.log("ERRORRRRRRRRRRRRRRRRRR", error);
+      // Do NOT cancel cooldown; still enforce 10s
+    }
   };
 
-  const handleVerify = () => {
-    setIsAuthenticated(true);
-    router.replace({
-      pathname: "/return-message",
-      params: { mode },
-    });
+  const handleVerify = async () => {
+    try {
+      const { data, status } = await api.post("/api/v1/users/confirmation", {
+        email,
+        confirmationCode: otp,
+      });
+
+      if (status === 200) {
+        console.log("OTP VERIFIED SUCCESSFULLY", beautifyResponse(data));
+        setIsAuthenticated(true);
+        router.replace({
+          pathname: "/return-message",
+          params: { mode },
+        });
+      }
+    } catch (error) {
+      console.log("ERRORRRRRRRRRRRRRRRRRR", error);
+    }
   };
 
   return (
@@ -73,12 +108,17 @@ export default function OTPVerificationPage() {
 
           {/* Description */}
           <Text className="text-subtitle text-center text-lg">
-            {OTP_VERIFICATION_DESC} {email}
+            {OTP_VERIFICATION_DESC}
+          </Text>
+
+          {/* Email */}
+          <Text className="text-subtitle text-center text-lg font-semibold">
+            {email}
           </Text>
 
           {/* OTP Input */}
           <OtpInput
-            numberOfDigits={4}
+            numberOfDigits={6}
             focusColor="#438BF7"
             theme={{
               containerStyle: {
@@ -108,7 +148,7 @@ export default function OTPVerificationPage() {
           <View className="flex flex-col gap-4 w-full">
             <Button
               className="bg-button text-buttontext"
-              disabled={otp.length !== 4}
+              disabled={otp.length !== 6}
               onPress={handleVerify}
             >
               <Text className="text-white font-bold">{VERIFY}</Text>
@@ -130,11 +170,11 @@ export default function OTPVerificationPage() {
               {DIDNT_GET_CODE}
             </Text>
 
-            <Pressable onPress={handleResendCode}>
-              <Text className="text-button text-center text-lg font-bold">
-                {RESEND}
-              </Text>
-            </Pressable>
+            <ResendLink
+              label={RESEND}
+              cooldownSeconds={resendCooldown}
+              onPress={handleResendCode}
+            />
           </View>
         </KeyboardAvoidingView>
       </TouchableWithoutFeedback>

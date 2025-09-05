@@ -37,3 +37,7 @@ export function formatDateLong(ts: number) {
   const year = d.getFullYear();
   return `${day} ${month} ${year}`;
 }
+
+export function beautifyResponse(response: any) {
+  return JSON.stringify(response, null, 2);
+}

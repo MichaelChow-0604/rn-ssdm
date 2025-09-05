@@ -4,6 +4,7 @@ import React, {
   useState,
   useImperativeHandle,
   forwardRef,
+  useRef,
 } from "react";
 import { Text, View } from "react-native";
 
@@ -11,15 +12,11 @@ interface CountdownTimerProps {
   initialTime?: number; // in seconds, default 300 (5 minutes)
   onExpire?: () => void;
   onReset?: () => void;
-  showResendButton?: boolean;
-  resendButtonText?: string;
   className?: string;
 }
 
 export interface CountdownTimerRef {
   resetTimer: () => void;
-  isTimerActive: boolean;
-  timeLeft: number;
 }
 
 export const CountdownTimer = forwardRef<
@@ -28,6 +25,11 @@ export const CountdownTimer = forwardRef<
 >(({ initialTime = 300, onExpire, onReset, className = "" }, ref) => {
   const [timeLeft, setTimeLeft] = useState(initialTime);
   const [isTimerActive, setIsTimerActive] = useState(true);
+
+  const onExpireRef = useRef(onExpire);
+  useEffect(() => {
+    onExpireRef.current = onExpire;
+  }, [onExpire]);
 
   // Format time as MM:SS
   const formatTime = useCallback((seconds: number) => {
@@ -45,40 +47,32 @@ export const CountdownTimer = forwardRef<
     onReset?.();
   }, [initialTime, onReset]);
 
-  // Expose resetTimer function and state to parent component
+  // Expose only resetTimer (stable handle)
   useImperativeHandle(
     ref,
     () => ({
       resetTimer,
-      isTimerActive,
-      timeLeft,
     }),
-    [resetTimer, isTimerActive, timeLeft]
+    [resetTimer]
   );
 
-  // Timer countdown effect
+  // Timer countdown effect (decoupled from parent renders)
   useEffect(() => {
-    let interval: ReturnType<typeof setInterval>;
+    if (!isTimerActive) return;
 
-    if (isTimerActive && timeLeft > 0) {
-      interval = setInterval(() => {
-        setTimeLeft((prevTime) => {
-          if (prevTime <= 1) {
-            setIsTimerActive(false);
-            onExpire?.();
-            return 0;
-          }
-          return prevTime - 1;
-        });
-      }, 1000);
-    }
+    const interval = setInterval(() => {
+      setTimeLeft((prevTime) => {
+        if (prevTime <= 1) {
+          setIsTimerActive(false);
+          onExpireRef.current?.();
+          return 0;
+        }
+        return prevTime - 1;
+      });
+    }, 1000);
 
-    return () => {
-      if (interval) {
-        clearInterval(interval);
-      }
-    };
-  }, [isTimerActive, timeLeft, onExpire]);
+    return () => clearInterval(interval);
+  }, [isTimerActive]);
 
   return (
     <View

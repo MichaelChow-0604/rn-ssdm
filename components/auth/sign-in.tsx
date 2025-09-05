@@ -20,6 +20,8 @@ import {
   SIGN_IN,
   SIGN_UP,
 } from "~/constants/auth-placeholders";
+import { api } from "~/lib/axios";
+import { beautifyResponse } from "~/lib/utils";
 
 interface SignInProps {
   // For toggling the state in the parent AuthPage component
@@ -64,16 +66,20 @@ export default function SignIn({ setIsSignIn }: SignInProps) {
 
   const watchedEmail = watch("email");
 
-  const onSignInSubmit = (data: SignInFormFields) => {
-    console.log("Sign in data:", data);
+  const onSignInSubmit = async (formData: SignInFormFields) => {
+    try {
+      const { data, status } = await api.post("/api/v1/tokens", formData);
 
-    router.push({
-      pathname: "/(auth)/otp-verification",
-      params: {
-        email: data.email,
-        mode: "signin",
-      },
-    });
+      if (status === 200) {
+        console.log("SIGN IN SUCCESSFULLY", beautifyResponse(data));
+        router.push({
+          pathname: "/(auth)/otp-verification",
+          params: { email: data.email, mode: "signin" },
+        });
+      }
+    } catch (error) {
+      console.log("ERRORRRRRRRRRRRRRRRRRR", error);
+    }
   };
 
   const handleSignIn = () => {

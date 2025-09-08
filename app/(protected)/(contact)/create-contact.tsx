@@ -14,7 +14,7 @@ import { Card, CardHeader } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { Option } from "~/components/ui/select";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { newContactSchema } from "~/schema/new-contact-schema";
 import * as z from "zod";
 import { Controller, useForm } from "react-hook-form";
@@ -25,6 +25,10 @@ import { addContact } from "~/lib/storage/contact";
 import { RelationshipSelect } from "~/components/contact/relationship-select";
 import { DistributionCheckbox } from "~/components/contact/distribution-checkbox";
 import { pickImage } from "~/lib/pick-image";
+import PhoneInput, {
+  ICountry,
+  getCountryByCca2,
+} from "react-native-international-phone-number";
 
 type NewContactFormFields = z.infer<typeof newContactSchema>;
 
@@ -57,6 +61,10 @@ export default function CreateContactPage() {
   });
 
   const onSubmit = (data: NewContactFormFields) => {
+    // E.g. +852 1234 5678
+    const country = selectedCountry ?? getCountryByCca2("HK");
+    const phoneNumber = `${country?.idd?.root ?? ""} ${data.mobileNumber}`;
+
     const distributions: ("email" | "whatsapp" | "sms")[] = ["email"];
     if (isWhatsappChecked) distributions.push("whatsapp");
     if (isSMSChecked) distributions.push("sms");
@@ -66,7 +74,8 @@ export default function CreateContactPage() {
         firstName: data.firstName.trim(),
         lastName: data.lastName.trim(),
         fullName: `${data.firstName.trim()} ${data.lastName.trim()}`,
-        mobileNumber: data.mobileNumber.trim(),
+        // Remove spaces
+        mobileNumber: phoneNumber.replace(/ /g, ""),
         email: data.email.trim(),
         profilePicUri: profilePic,
         relationship: selectedRelationship?.value ?? null,
@@ -75,6 +84,18 @@ export default function CreateContactPage() {
       router.back();
     })();
   };
+
+  const [selectedCountry, setSelectedCountry] = useState<ICountry | undefined>(
+    undefined
+  );
+
+  function handleSelectedCountry(country: ICountry) {
+    setSelectedCountry(country);
+  }
+
+  useEffect(() => {
+    if (!selectedCountry) setSelectedCountry(getCountryByCca2("HK"));
+  }, [selectedCountry]);
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -195,19 +216,26 @@ export default function CreateContactPage() {
                   name="mobileNumber"
                   control={control}
                   rules={{ required: true }}
-                  render={({ field: { onChange, onBlur, value } }) => (
-                    <Input
-                      keyboardType="number-pad"
-                      onChangeText={onChange}
-                      onBlur={onBlur}
-                      value={value}
-                      className="bg-white text-black border-gray-200"
+                  render={({ field: { onChange, value } }) => (
+                    <PhoneInput
+                      phoneInputStyles={{
+                        container: {
+                          flex: 1,
+                          borderColor: "#e5e7eb",
+                        },
+                        input: {
+                          color: "black",
+                        },
+                      }}
+                      defaultCountry="HK"
                       placeholder="Mobile number"
+                      value={value}
+                      onChangePhoneNumber={onChange}
+                      selectedCountry={selectedCountry}
+                      onChangeSelectedCountry={handleSelectedCountry}
                     />
                   )}
                 />
-
-                {/* Mobile number validation error */}
                 {errors.mobileNumber && (
                   <Text className="text-redtext text-sm">
                     {errors.mobileNumber.message}

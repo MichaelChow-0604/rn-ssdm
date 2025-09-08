@@ -66,6 +66,7 @@
     "react-native": "0.79.5",
     "react-native-element-dropdown": "^2.12.4",
     "react-native-gesture-handler": "~2.24.0",
+    "react-native-international-phone-number": "^0.10.5",
     "react-native-otp-entry": "^1.8.5",
     "react-native-popup-menu": "^0.18.0",
     "react-native-reanimated": "~3.17.5",

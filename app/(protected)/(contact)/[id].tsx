@@ -28,6 +28,11 @@ import { fullName } from "~/lib/contacts/utils";
 import { RelationshipSelect } from "~/components/contact/relationship-select";
 import { DistributionCheckbox } from "~/components/contact/distribution-checkbox";
 import { RELATIONSHIP_OPTIONS } from "~/constants/select-data";
+import PhoneInput, {
+  ICountry,
+  getCountryByCca2,
+  getCountryByPhoneNumber,
+} from "react-native-international-phone-number";
 
 const detailSchema = newContactSchema.extend({
   profilePicUri: z.string().nullable().optional(),
@@ -40,6 +45,9 @@ type FormValues = z.infer<typeof detailSchema>;
 export default function ContactDetailPage() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [isEditing, setIsEditing] = useState(false);
+  const [selectedCountry, setSelectedCountry] = useState<ICountry | undefined>(
+    undefined
+  );
 
   const {
     control,
@@ -67,10 +75,17 @@ export default function ContactDetailPage() {
   useEffect(() => {
     if (!contact) return;
 
+    const country = getCountryByPhoneNumber(contact.mobileNumber);
+    setSelectedCountry(country);
+
+    const national = country?.idd?.root
+      ? contact.mobileNumber.replace(country.idd.root, "")
+      : contact.mobileNumber;
+
     reset({
       firstName: contact.firstName,
       lastName: contact.lastName,
-      mobileNumber: contact.mobileNumber,
+      mobileNumber: national,
       email: contact.email,
       profilePicUri: contact.profilePicUri ?? null,
       relationship: contact.relationship ?? null,
@@ -101,7 +116,10 @@ export default function ContactDetailPage() {
   const onSave = handleSubmit(async (data) => {
     if (!contact) return;
 
-    // email is mandatory
+    const phoneNumber = `${selectedCountry?.idd?.root ?? ""} ${
+      data.mobileNumber
+    }`.replace(/ /g, "");
+
     const unique = Array.from(
       new Set(["email", ...data.distributions])
     ) as FormValues["distributions"];
@@ -109,7 +127,7 @@ export default function ContactDetailPage() {
     await updateContact(contact.id, {
       firstName: data.firstName.trim(),
       lastName: data.lastName.trim(),
-      mobileNumber: data.mobileNumber.trim(),
+      mobileNumber: phoneNumber,
       email: data.email.trim(),
       profilePicUri: data.profilePicUri ?? null,
       relationship: data.relationship ?? null,
@@ -246,15 +264,22 @@ export default function ContactDetailPage() {
                 <Controller
                   name="mobileNumber"
                   control={control}
-                  render={({ field: { onChange, onBlur, value } }) => (
-                    <Input
-                      keyboardType="number-pad"
-                      onChangeText={onChange}
-                      onBlur={onBlur}
+                  rules={{
+                    required: true,
+                  }}
+                  render={({ field: { onChange, value } }) => (
+                    <PhoneInput
+                      phoneInputStyles={{
+                        container: { flex: 1, borderColor: "#e5e7eb" },
+                        input: { color: "black" },
+                      }}
+                      defaultCountry="HK"
                       value={value}
+                      onChangePhoneNumber={onChange}
+                      selectedCountry={selectedCountry}
+                      onChangeSelectedCountry={setSelectedCountry}
                       placeholder="Mobile number"
-                      className="bg-white text-black border-gray-200"
-                      editable={isEditing}
+                      disabled={!isEditing}
                     />
                   )}
                 />

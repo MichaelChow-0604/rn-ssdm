@@ -27,6 +27,7 @@ import { useContactDetail } from "~/hooks/use-contact-detail";
 import { fullName } from "~/lib/contacts/utils";
 import { RelationshipSelect } from "~/components/contact/relationship-select";
 import { DistributionCheckbox } from "~/components/contact/distribution-checkbox";
+import { RELATIONSHIP_OPTIONS } from "~/constants/select-data";
 
 const detailSchema = newContactSchema.extend({
   profilePicUri: z.string().nullable().optional(),
@@ -85,6 +86,12 @@ export default function ContactDetailPage() {
     () => (contact ? fullName(contact) : "Contact"),
     [contact]
   );
+
+  const relationshipLabel = useMemo(() => {
+    if (!values.relationship) return undefined;
+    return RELATIONSHIP_OPTIONS.find((o) => o.value === values.relationship)
+      ?.label;
+  }, [values.relationship]);
 
   const handlePickImage = async () => {
     const uri = await pickImage();
@@ -287,22 +294,30 @@ export default function ContactDetailPage() {
             </View>
 
             {/* Relationship */}
-            <RelationshipSelect
-              selectedRelationship={
-                values.relationship
-                  ? {
-                      label:
-                        values.relationship.charAt(0).toUpperCase() +
-                        values.relationship.slice(1),
-                      value: values.relationship,
-                    }
-                  : undefined
-              }
-              setSelectedRelationship={(opt?: Option) =>
-                setValue("relationship", opt?.value ?? null)
-              }
-              disabled={!isEditing}
-            />
+            {isEditing ? (
+              <RelationshipSelect
+                selectedRelationship={
+                  values.relationship
+                    ? RELATIONSHIP_OPTIONS.find(
+                        (o) => o.value === values.relationship
+                      )
+                    : undefined
+                }
+                setSelectedRelationship={(opt?: Option) =>
+                  setValue("relationship", opt?.value ?? null)
+                }
+                disabled={!isEditing}
+              />
+            ) : (
+              <View className="flex-row gap-4 items-center justify-start">
+                <AntDesign name="team" size={24} color="#438BF7" />
+                <Input
+                  value={relationshipLabel ?? "Relationship"}
+                  className="bg-white text-black font-bold border-gray-200 w-[160px]"
+                  editable={false}
+                />
+              </View>
+            )}
 
             {/* Distribution */}
             <DistributionCheckbox

@@ -22,6 +22,7 @@ import {
 } from "~/constants/auth-placeholders";
 import { api } from "~/lib/axios";
 import { beautifyResponse } from "~/lib/utils";
+import { useTokenStore } from "~/store/use-token-store";
 
 interface SignInProps {
   // For toggling the state in the parent AuthPage component
@@ -32,6 +33,7 @@ type SignInFormFields = z.infer<typeof signInSchema>;
 
 export default function SignIn({ setIsSignIn }: SignInProps) {
   const router = useRouter();
+  const setTokens = useTokenStore((s) => s.setTokens);
 
   // Sign in validation form
   const {
@@ -71,7 +73,18 @@ export default function SignIn({ setIsSignIn }: SignInProps) {
       const { data, status } = await api.post("/api/v1/tokens", formData);
 
       if (status === 200) {
+        setTokens({
+          email: data.email,
+          accessToken: data.accessToken,
+          refreshToken: data.refreshToken,
+          idToken: data.idToken,
+        });
+
         console.log("SIGN IN SUCCESSFULLY", beautifyResponse(data));
+        console.log(
+          "INFO STORED IN TOKEN STORE",
+          useTokenStore.getState().tokens
+        );
         router.push({
           pathname: "/(auth)/otp-verification",
           params: { email: data.email, mode: "signin" },

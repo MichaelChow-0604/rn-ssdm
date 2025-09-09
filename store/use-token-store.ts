@@ -4,7 +4,7 @@ interface Tokens {
   idToken: string;
   accessToken: string;
   refreshToken: string;
-  email?: string; // needed by /tokens/renewal
+  email: string; // needed by /tokens/renewal
 }
 
 interface TokenStore {
@@ -19,7 +19,7 @@ export const useTokenStore = create<TokenStore>((set, get) => ({
     idToken: "",
     accessToken: "",
     refreshToken: "",
-    email: undefined,
+    email: "",
   },
   setTokens: (tokens) => set({ tokens }),
   setAccessToken: (accessToken) =>
@@ -30,7 +30,7 @@ export const useTokenStore = create<TokenStore>((set, get) => ({
         idToken: "",
         accessToken: "",
         refreshToken: "",
-        email: undefined,
+        email: "",
       },
     }),
 }));

@@ -23,6 +23,7 @@ import {
 import { api } from "~/lib/http/axios";
 import { beautifyResponse } from "~/lib/utils";
 import { useTokenStore } from "~/store/use-token-store";
+import { SignInResponse } from "~/lib/http/response-type/auth";
 
 interface SignInProps {
   // For toggling the state in the parent AuthPage component
@@ -68,26 +69,18 @@ export default function SignIn({ setIsSignIn }: SignInProps) {
 
   const watchedEmail = watch("email");
 
-  const onSignInSubmit = async (formData: SignInFormFields) => {
+  const onSignInSubmit = async (formData: SignInFormFields): Promise<void> => {
     try {
-      const { data, status } = await api.post("/api/v1/tokens", formData);
+      const { data, status } = await api.post<SignInResponse>(
+        "/api/v1/tokens",
+        formData
+      );
+      const { email, session } = data;
 
       if (status === 200) {
-        setTokens({
-          email: data.email,
-          accessToken: data.accessToken,
-          refreshToken: data.refreshToken,
-          idToken: data.idToken,
-        });
-
-        console.log("SIGN IN SUCCESSFULLY", beautifyResponse(data));
-        console.log(
-          "INFO STORED IN TOKEN STORE",
-          useTokenStore.getState().tokens
-        );
         router.push({
           pathname: "/(auth)/otp-verification",
-          params: { email: data.email, mode: "signin" },
+          params: { email, session, mode: "signin" },
         });
       }
     } catch (error) {

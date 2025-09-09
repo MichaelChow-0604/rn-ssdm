@@ -29,9 +29,11 @@ import { api } from "~/lib/http/axios";
 import { beautifyResponse } from "~/lib/utils";
 import { useCooldown } from "~/hooks/use-cooldown";
 import { ResendLink } from "~/components/auth/resend-link";
+import { SignInOTPResponse } from "~/lib/http/response-type/auth";
+import { useTokenStore } from "~/store/use-token-store";
 
 export default function OTPVerificationPage() {
-  const { email, mode } = useLocalSearchParams();
+  const { email, session, mode } = useLocalSearchParams();
   const [otp, setOtp] = useState("");
   const router = useRouter();
 
@@ -73,15 +75,29 @@ export default function OTPVerificationPage() {
     }
   };
 
-  const handleVerify = async () => {
+  const handleVerify = async (): Promise<void> => {
     try {
-      const { data, status } = await api.post("/api/v1/users/confirmation", {
-        email,
-        confirmationCode: otp,
-      });
+      const { data, status } = await api.post<SignInOTPResponse>(
+        "/api/v1/users/confirmation",
+        {
+          email,
+          session,
+          confirmationCode: otp,
+        }
+      );
 
       if (status === 200) {
         console.log("OTP VERIFIED SUCCESSFULLY", beautifyResponse(data));
+
+        // Set the tokens in the store
+        useTokenStore.getState().setTokens({
+          email: email as string,
+          accessToken: data.accessToken,
+          refreshToken: data.refreshToken,
+          idToken: data.idToken,
+        });
+
+        // Set the user as authenticated
         setIsAuthenticated(true);
         router.replace({
           pathname: "/return-message",

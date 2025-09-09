@@ -17,4 +17,4 @@ export const NAV_THEME = {
   },
 };
 
-export const API_URL = "http://192.168.50.98:3000";
+export const API_URL = "http://192.168.50.192:3000";

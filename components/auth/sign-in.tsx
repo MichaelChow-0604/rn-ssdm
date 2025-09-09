@@ -20,7 +20,7 @@ import {
   SIGN_IN,
   SIGN_UP,
 } from "~/constants/auth-placeholders";
-import { api } from "~/lib/axios";
+import { api } from "~/lib/http/axios";
 import { beautifyResponse } from "~/lib/utils";
 import { useTokenStore } from "~/store/use-token-store";
 

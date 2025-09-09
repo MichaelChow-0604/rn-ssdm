@@ -7,7 +7,7 @@ import {
   TableRow,
 } from "~/components/ui/table";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { FlatList, Image, Text, View } from "react-native";
+import { FlatList, Image, Text, View, Platform } from "react-native";
 import DotDropdown from "./dot-dropdown";
 import { useCallback, useState } from "react";
 import { getDocuments, StoredDocument } from "~/lib/storage/document";
@@ -101,7 +101,11 @@ export default function DocumentListTable() {
 function EmptyDocumentList() {
   return (
     <View className="flex-1 items-center justify-center">
-      <Text className="text-center text-gray-400 text-2xl font-bold">
+      <Text
+        className={`text-center text-gray-400 text-2xl font-bold ${
+          Platform.OS === "ios" ? "mb-24" : ""
+        }`}
+      >
         No document yet
       </Text>
     </View>

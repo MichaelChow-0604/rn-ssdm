@@ -25,7 +25,7 @@ import {
   VERIFY,
 } from "~/constants/auth-placeholders";
 import { useAuth } from "~/context/auth-context";
-import { api } from "~/lib/axios";
+import { api } from "~/lib/http/axios";
 import { beautifyResponse } from "~/lib/utils";
 import { useCooldown } from "~/hooks/use-cooldown";
 import { ResendLink } from "~/components/auth/resend-link";

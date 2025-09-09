@@ -228,7 +228,7 @@ export default function CreateContactPage() {
                         },
                       }}
                       defaultCountry="HK"
-                      placeholder="Mobile number"
+                      placeholder="Mobile no."
                       value={value}
                       onChangePhoneNumber={onChange}
                       selectedCountry={selectedCountry}

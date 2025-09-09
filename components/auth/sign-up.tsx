@@ -29,7 +29,7 @@ import {
 } from "~/lib/password-validation";
 import { PasswordInput } from "../password/password-input";
 import { PasswordRequirements } from "../password/password-requirement";
-import { api } from "~/lib/axios";
+import { api } from "~/lib/http/axios";
 import { beautifyResponse } from "~/lib/utils";
 
 interface SignUpProps {

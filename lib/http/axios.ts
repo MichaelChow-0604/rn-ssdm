@@ -51,7 +51,7 @@ api.interceptors.response.use(
     console.log("ERRORRRRRRRRRRRRRRRRRR", error);
     const response = error.response;
     const originalRequest = error.config as
-      | (AxiosRequestConfig & { _retry?: boolean })
+      | (AxiosRequestConfig & { retried?: boolean })
       | undefined;
 
     if (!response || !originalRequest) return Promise.reject(error);
@@ -62,8 +62,8 @@ api.interceptors.response.use(
     if (isPublicPath(url) || isRenewalPath(url)) return Promise.reject(error);
     if (status === 403) return Promise.reject(error);
 
-    if (status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
+    if (status === 401 && !originalRequest.retried) {
+      originalRequest.retried = true;
 
       if (isRefreshing) {
         return new Promise((resolve, reject) => {

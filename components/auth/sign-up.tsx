@@ -31,6 +31,7 @@ import { PasswordInput } from "../password/password-input";
 import { PasswordRequirements } from "../password/password-requirement";
 import { api } from "~/lib/http/axios";
 import { beautifyResponse } from "~/lib/utils";
+import { SignUpResponse } from "~/lib/http/response-type/auth";
 
 interface SignUpProps {
   setIsSignIn: (isSignIn: boolean) => void;
@@ -79,18 +80,22 @@ export default function SignUp({ setIsSignIn }: SignUpProps) {
     };
   }, [watchedPassword]);
 
-  const onSubmit = async (formData: SignUpFormFields) => {
+  const onSubmit = async (formData: SignUpFormFields): Promise<void> => {
     // Check if the terms and conditions are accepted
     if (checked) {
       try {
-        const { data, status } = await api.post("/api/v1/users", formData);
+        const { data, status } = await api.post<SignUpResponse>(
+          "/api/v1/users",
+          formData
+        );
+        const { email } = data;
 
         // User registered successfully, now proceed to OTP verification
         if (status === 200) {
           console.log("USER REGISTERED SUCCESSFULLY", beautifyResponse(data));
           router.push({
             pathname: "/otp-verification",
-            params: { email: data.email, mode: "signup" },
+            params: { email, mode: "signup" },
           });
         }
       } catch (error) {

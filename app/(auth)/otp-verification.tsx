@@ -29,7 +29,11 @@ import { api } from "~/lib/http/axios";
 import { beautifyResponse } from "~/lib/utils";
 import { useCooldown } from "~/hooks/use-cooldown";
 import { ResendLink } from "~/components/auth/resend-link";
-import { SignInOTPResponse } from "~/lib/http/response-type/auth";
+import {
+  ResendOTPResponse,
+  SignInOTPResponse,
+  SignUpOTPResponse,
+} from "~/lib/http/response-type/auth";
 import { useTokenStore } from "~/store/use-token-store";
 
 export default function OTPVerificationPage() {
@@ -51,7 +55,7 @@ export default function OTPVerificationPage() {
     // Add your resend code logic here
   };
 
-  const handleResendCode = async () => {
+  const handleResendCode = async (): Promise<void> => {
     if (resendCooldown > 0) return;
 
     // Sync start: reset OTP timer and start 10s cooldown together
@@ -59,7 +63,7 @@ export default function OTPVerificationPage() {
     startCooldown();
 
     try {
-      const { data, status } = await api.post(
+      const { data, status } = await api.post<ResendOTPResponse>(
         "/api/v1/users/resend-confirmation",
         { email }
       );
@@ -75,10 +79,10 @@ export default function OTPVerificationPage() {
     }
   };
 
-  const handleVerify = async (): Promise<void> => {
+  const handleSignInOTPVerify = async (): Promise<void> => {
     try {
       const { data, status } = await api.post<SignInOTPResponse>(
-        "/api/v1/users/confirmation",
+        "/api/v1/tokens/confirmation",
         {
           email,
           session,
@@ -106,6 +110,38 @@ export default function OTPVerificationPage() {
       }
     } catch (error) {
       console.log("ERRORRRRRRRRRRRRRRRRRR", error);
+    }
+  };
+
+  const handleSignUpOTPVerify = async (): Promise<void> => {
+    try {
+      const { data, status } = await api.post<SignUpOTPResponse>(
+        "/api/v1/users/confirmation",
+        {
+          email,
+          confirmationCode: otp,
+        }
+      );
+
+      if (status === 200) {
+        console.log("OTP VERIFIED SUCCESSFULLY", beautifyResponse(data));
+        router.replace({
+          pathname: "/return-message",
+          params: { mode },
+        });
+      }
+    } catch (error) {
+      console.log("ERRORRRRRRRRRRRRRRRRRR", error);
+    }
+  };
+
+  const handleVerify = () => {
+    if (mode === "signin") {
+      handleSignInOTPVerify();
+    } else if (mode === "signup") {
+      handleSignUpOTPVerify();
+    } else {
+      throw new Error("Invalid mode");
     }
   };
 

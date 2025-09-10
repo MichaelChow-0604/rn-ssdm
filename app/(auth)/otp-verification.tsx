@@ -25,16 +25,17 @@ import {
   VERIFY,
 } from "~/constants/auth-placeholders";
 import { useAuth } from "~/context/auth-context";
-import { api } from "~/lib/http/axios";
-import { beautifyResponse } from "~/lib/utils";
 import { useCooldown } from "~/hooks/use-cooldown";
 import { ResendLink } from "~/components/auth/resend-link";
-import {
-  ResendOTPResponse,
-  SignInOTPResponse,
-  SignUpOTPResponse,
-} from "~/lib/http/response-type/auth";
 import { useTokenStore } from "~/store/use-token-store";
+import {
+  confirmSignIn,
+  confirmSignUp,
+  resendConfirmation,
+} from "~/lib/http/endpoints/auth";
+import { useMutation } from "@tanstack/react-query";
+import { LoadingOverlay } from "~/components/loading-overlay";
+import { toast } from "sonner-native";
 
 export default function OTPVerificationPage() {
   const { email, session, mode } = useLocalSearchParams();
@@ -55,94 +56,69 @@ export default function OTPVerificationPage() {
     // Add your resend code logic here
   };
 
-  const handleResendCode = async (): Promise<void> => {
-    if (resendCooldown > 0) return;
+  const resendMutation = useMutation({
+    mutationKey: ["auth", "resend-confirmation"],
+    mutationFn: (email: string) => resendConfirmation(email),
+    onSuccess: () => toast.success("New OTP sent to your email."),
+    onError: () => toast.error("Failed to resend OTP. Please try again."),
+  });
 
-    // Sync start: reset OTP timer and start 10s cooldown together
+  const confirmSignInMutation = useMutation({
+    mutationKey: ["auth", "confirm-sign-in"],
+    mutationFn: confirmSignIn,
+    onSuccess: (data) => {
+      // Store tokens in zustand for subsequent requests
+      useTokenStore.getState().setTokens({
+        email: String(email),
+        accessToken: data.accessToken,
+        refreshToken: data.refreshToken,
+        idToken: data.idToken,
+      });
+      setIsAuthenticated(true);
+      router.replace({ pathname: "/return-message", params: { mode } });
+    },
+    onError: () => toast.error("Invalid OTP. Please try again."),
+  });
+
+  const confirmSignUpMutation = useMutation({
+    mutationKey: ["auth", "confirm-sign-up"],
+    mutationFn: confirmSignUp,
+    onSuccess: () => {
+      router.replace({ pathname: "/return-message", params: { mode } });
+    },
+    onError: () => toast.error("Invalid OTP. Please try again."),
+  });
+
+  const isVerifying =
+    confirmSignInMutation.isPending || confirmSignUpMutation.isPending;
+
+  const handleResendCode = (): void => {
+    if (resendCooldown > 0 || resendMutation.isPending) return;
     timerRef.current?.resetTimer();
     startCooldown();
-
-    try {
-      const { data, status } = await api.post<ResendOTPResponse>(
-        "/api/v1/users/resend-confirmation",
-        { email }
-      );
-
-      if (status === 200) {
-        console.log("OTP RESEND SUCCESSFULLY", beautifyResponse(data));
-        // No extra reset here; already synced at start
-      }
-      // Do NOT cancel cooldown on non-200; keep rate-limit consistent
-    } catch (error) {
-      console.log("ERRORRRRRRRRRRRRRRRRRR", error);
-      // Do NOT cancel cooldown; still enforce 10s
-    }
-  };
-
-  const handleSignInOTPVerify = async (): Promise<void> => {
-    try {
-      const { data, status } = await api.post<SignInOTPResponse>(
-        "/api/v1/tokens/confirmation",
-        {
-          email,
-          session,
-          confirmationCode: otp,
-        }
-      );
-
-      if (status === 200) {
-        console.log("OTP VERIFIED SUCCESSFULLY", beautifyResponse(data));
-
-        // Set the tokens in the store
-        useTokenStore.getState().setTokens({
-          email: email as string,
-          accessToken: data.accessToken,
-          refreshToken: data.refreshToken,
-          idToken: data.idToken,
-        });
-
-        // Set the user as authenticated
-        setIsAuthenticated(true);
-        router.replace({
-          pathname: "/return-message",
-          params: { mode },
-        });
-      }
-    } catch (error) {
-      console.log("ERRORRRRRRRRRRRRRRRRRR", error);
-    }
-  };
-
-  const handleSignUpOTPVerify = async (): Promise<void> => {
-    try {
-      const { data, status } = await api.post<SignUpOTPResponse>(
-        "/api/v1/users/confirmation",
-        {
-          email,
-          confirmationCode: otp,
-        }
-      );
-
-      if (status === 200) {
-        console.log("OTP VERIFIED SUCCESSFULLY", beautifyResponse(data));
-        router.replace({
-          pathname: "/return-message",
-          params: { mode },
-        });
-      }
-    } catch (error) {
-      console.log("ERRORRRRRRRRRRRRRRRRRR", error);
-    }
+    resendMutation.mutate(String(email));
   };
 
   const handleVerify = () => {
+    Keyboard.dismiss();
     if (mode === "signin") {
-      handleSignInOTPVerify();
-    } else if (mode === "signup") {
-      handleSignUpOTPVerify();
-    } else {
-      throw new Error("Invalid mode");
+      confirmSignInMutation.mutate({
+        email: String(email),
+        session: String(session),
+        confirmationCode: otp,
+      });
+      return;
     }
+
+    if (mode === "signup") {
+      confirmSignUpMutation.mutate({
+        email: String(email),
+        confirmationCode: otp,
+      });
+      return;
+    }
+
+    throw new Error("Invalid mode");
   };
 
   return (
@@ -152,6 +128,8 @@ export default function OTPVerificationPage() {
           className="flex-1 items-center px-8 justify-center"
           behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
+          <LoadingOverlay visible={isVerifying} label="Verifying..." />
+
           {/* Header */}
           <AntDesign name="Safety" size={100} color="#438BF7" />
           <Text className="text-4xl font-bold py-4">
@@ -171,6 +149,7 @@ export default function OTPVerificationPage() {
           {/* OTP Input */}
           <OtpInput
             numberOfDigits={6}
+            autoFocus={false}
             focusColor="#438BF7"
             theme={{
               containerStyle: {
@@ -196,17 +175,21 @@ export default function OTPVerificationPage() {
             className="mt-1 mb-4"
           />
 
-          {/* Verify Button */}
           <View className="flex flex-col gap-4 w-full">
+            {/* Verify Button */}
             <Button
               className="bg-button text-buttontext"
-              disabled={otp.length !== 6}
+              disabled={
+                otp.length !== 6 ||
+                confirmSignInMutation.isPending ||
+                confirmSignUpMutation.isPending
+              }
               onPress={handleVerify}
             >
               <Text className="text-white font-bold">{VERIFY}</Text>
             </Button>
 
-            {/* Resend Code Button */}
+            {/* Cancel Button */}
             <Button
               className="border-button bg-white active:bg-slate-100"
               variant="outline"

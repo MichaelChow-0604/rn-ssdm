@@ -22,16 +22,21 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { logout } from "~/lib/http/endpoints/auth";
 import { toast } from "sonner-native";
+import { useTokenStore } from "~/store/use-token-store";
 
 export default function ProfileTab() {
   const { profile } = useProfile();
   const { setIsAuthenticated } = useAuth();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const { clearTokens } = useTokenStore();
 
   const logoutMutation = useMutation({
     mutationKey: ["logout"],
     mutationFn: logout,
-    onSuccess: () => setIsAuthenticated(false),
+    onSuccess: () => {
+      clearTokens();
+      setIsAuthenticated(false);
+    },
     onError: () => toast.error("Failed to logout. Please try again later."),
   });
 

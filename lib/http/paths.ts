@@ -5,6 +5,7 @@ export const PUBLIC_PATHS = [
   "/api/v1/users/confirmation",
   "/api/v1/users/resend-confirmation",
   "/api/v1/tokens",
+  "/api/v1/tokens/confirmation",
 ];
 
 export const RENEWAL_PATH = "/api/v1/tokens/renewal";
@@ -21,7 +22,7 @@ function getPathname(url?: string) {
 }
 
 function isPathMatch(pathname: string, target: string) {
-  return pathname === target || pathname.startsWith(`${target}/`);
+  return pathname === target;
 }
 
 export function isPublicPath(url?: string) {

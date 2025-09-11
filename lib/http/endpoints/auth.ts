@@ -1,3 +1,4 @@
+import { useTokenStore } from "~/store/use-token-store";
 import { api } from "../axios";
 import {
   ConfirmSignInPayload,
@@ -55,6 +56,15 @@ export async function confirmSignIn(
 }
 
 export async function logout(): Promise<LogoutResponse> {
-  const { data } = await api.post<LogoutResponse>("/api/v1/tokens/revocation");
+  const { tokens } = useTokenStore.getState();
+  const { data } = await api.post<LogoutResponse>(
+    "/api/v1/tokens/revocation",
+    undefined,
+    {
+      headers: {
+        "X-Access-Token": tokens.accessToken,
+      },
+    }
+  );
   return data;
 }

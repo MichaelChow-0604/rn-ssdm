@@ -1,4 +1,11 @@
-import { Image, Pressable, ScrollView, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Image,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
 import { useMemo, useState } from "react";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
@@ -29,9 +36,9 @@ import {
 } from "~/lib/password-validation";
 import { PasswordInput } from "../password/password-input";
 import { PasswordRequirements } from "../password/password-requirement";
-import { api } from "~/lib/http/axios";
-import { beautifyResponse } from "~/lib/utils";
-import { SignUpResponse } from "~/lib/http/response-type/auth";
+import { signUp } from "~/lib/http/endpoints/auth";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner-native";
 
 interface SignUpProps {
   setIsSignIn: (isSignIn: boolean) => void;
@@ -44,6 +51,20 @@ export default function SignUp({ setIsSignIn }: SignUpProps) {
   const [showAcceptTerms, setShowAcceptTerms] = useState(false);
   const [openTNP, setOpenTNP] = useState(false);
   const router = useRouter();
+
+  const signUpMutation = useMutation({
+    mutationKey: ["auth", "sign-up"],
+    mutationFn: signUp,
+    onSuccess: ({ email }) => {
+      router.push({
+        pathname: "/(auth)/otp-verification",
+        params: { email, mode: "signup" },
+      });
+    },
+    onError: () => toast.error("Something went wrong. Please try again later."),
+  });
+
+  const isSigningUp = signUpMutation.isPending || signUpMutation.isSuccess;
 
   const methods = useForm<SignUpFormFields>({
     defaultValues: {
@@ -80,27 +101,10 @@ export default function SignUp({ setIsSignIn }: SignUpProps) {
     };
   }, [watchedPassword]);
 
-  const onSubmit = async (formData: SignUpFormFields): Promise<void> => {
+  const onSubmit = (formData: SignUpFormFields): void => {
     // Check if the terms and conditions are accepted
     if (checked) {
-      try {
-        const { data, status } = await api.post<SignUpResponse>(
-          "/api/v1/users",
-          formData
-        );
-        const { email } = data;
-
-        // User registered successfully, now proceed to OTP verification
-        if (status === 200) {
-          console.log("USER REGISTERED SUCCESSFULLY", beautifyResponse(data));
-          router.push({
-            pathname: "/otp-verification",
-            params: { email, mode: "signup" },
-          });
-        }
-      } catch (error) {
-        console.log("ERRORRRRRRRRRRRRRRRRRR", error);
-      }
+      signUpMutation.mutate(formData);
     } else {
       setShowAcceptTerms(true);
     }
@@ -243,8 +247,13 @@ export default function SignUp({ setIsSignIn }: SignUpProps) {
         <Button
           className="bg-button mt-4 rounded-xl"
           onPress={handleSubmit(onSubmit)}
+          disabled={isSigningUp}
         >
-          <Text className="text-white font-semibold">{SIGN_UP}</Text>
+          {isSigningUp ? (
+            <ActivityIndicator size="small" color="white" />
+          ) : (
+            <Text className="text-white font-semibold">{SIGN_UP}</Text>
+          )}
         </Button>
 
         {/* Sign up switch */}

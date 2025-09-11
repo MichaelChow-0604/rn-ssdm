@@ -1,4 +1,12 @@
-import { Image, Pressable, Text, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  Image,
+  Keyboard,
+  Pressable,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Button } from "../ui/button";
@@ -20,10 +28,9 @@ import {
   SIGN_IN,
   SIGN_UP,
 } from "~/constants/auth-placeholders";
-import { api } from "~/lib/http/axios";
-import { beautifyResponse } from "~/lib/utils";
-import { useTokenStore } from "~/store/use-token-store";
-import { SignInResponse } from "~/lib/http/response-type/auth";
+import { useMutation } from "@tanstack/react-query";
+import { signIn } from "~/lib/http/endpoints/auth";
+import { toast } from "sonner-native";
 
 interface SignInProps {
   // For toggling the state in the parent AuthPage component
@@ -34,7 +41,20 @@ type SignInFormFields = z.infer<typeof signInSchema>;
 
 export default function SignIn({ setIsSignIn }: SignInProps) {
   const router = useRouter();
-  const setTokens = useTokenStore((s) => s.setTokens);
+
+  const signInMutation = useMutation({
+    mutationKey: ["auth", "sign-in"],
+    mutationFn: signIn,
+    onSuccess: ({ email, session }) => {
+      router.push({
+        pathname: "/(auth)/otp-verification",
+        params: { email, session, mode: "signin" },
+      });
+    },
+    onError: () => toast.error("Invalid credentials. User not found."),
+  });
+
+  const isSigningIn = signInMutation.isPending || signInMutation.isSuccess;
 
   // Sign in validation form
   const {
@@ -69,23 +89,9 @@ export default function SignIn({ setIsSignIn }: SignInProps) {
 
   const watchedEmail = watch("email");
 
-  const onSignInSubmit = async (formData: SignInFormFields): Promise<void> => {
-    try {
-      const { data, status } = await api.post<SignInResponse>(
-        "/api/v1/tokens",
-        formData
-      );
-      const { email, session } = data;
-
-      if (status === 200) {
-        router.push({
-          pathname: "/(auth)/otp-verification",
-          params: { email, session, mode: "signin" },
-        });
-      }
-    } catch (error) {
-      console.log("ERRORRRRRRRRRRRRRRRRRR", error);
-    }
+  const onSignInSubmit = (formData: SignInFormFields): void => {
+    Keyboard.dismiss();
+    signInMutation.mutate(formData);
   };
 
   const handleSignIn = () => {
@@ -206,8 +212,16 @@ export default function SignIn({ setIsSignIn }: SignInProps) {
       </TouchableOpacity>
 
       {/* Sign in Button */}
-      <Button className="bg-button mt-4 rounded-xl" onPress={handleSignIn}>
-        <Text className="text-white font-semibold">{SIGN_IN}</Text>
+      <Button
+        className="bg-button mt-4 rounded-xl"
+        onPress={handleSignIn}
+        disabled={isSigningIn}
+      >
+        {isSigningIn ? (
+          <ActivityIndicator size="small" color="white" />
+        ) : (
+          <Text className="text-white font-semibold">{SIGN_IN}</Text>
+        )}
       </Button>
 
       {/* Sign up switch */}

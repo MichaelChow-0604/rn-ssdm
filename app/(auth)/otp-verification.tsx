@@ -33,14 +33,17 @@ import {
   confirmSignUp,
   resendConfirmation,
 } from "~/lib/http/endpoints/auth";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { LoadingOverlay } from "~/components/loading-overlay";
 import { toast } from "sonner-native";
+import { contactKeys } from "~/lib/http/keys/contact";
+import { getContacts } from "~/lib/http/endpoints/contact";
 
 export default function OTPVerificationPage() {
   const { email, session, mode } = useLocalSearchParams();
   const [otp, setOtp] = useState("");
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const timerRef = useRef<CountdownTimerRef>(null);
   const { secondsLeft: resendCooldown, start: startCooldown } = useCooldown(60);
@@ -74,6 +77,14 @@ export default function OTPVerificationPage() {
         refreshToken: data.refreshToken,
         idToken: data.idToken,
       });
+
+      // Warm contacts in the background (no await needed)
+      queryClient.prefetchQuery({
+        queryKey: contactKeys.list(),
+        queryFn: getContacts,
+        staleTime: 5 * 60 * 1000,
+      });
+
       setIsAuthenticated(true);
       router.replace({ pathname: "/return-message", params: { mode } });
     },

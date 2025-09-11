@@ -9,3 +9,15 @@ export interface CreateContactResponse {
   message: string;
   timestamp: string;
 }
+
+interface ContactSummary {
+  id: number;
+  firstName: string;
+  lastName: string;
+}
+
+export interface GetContactsResponse {
+  contactSummaries: ContactSummary[];
+  message: string;
+  timestamp: string;
+}

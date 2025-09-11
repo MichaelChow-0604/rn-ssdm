@@ -1,6 +1,9 @@
 import { api } from "../axios";
 import { CreateContactPayload } from "../request-type/contact";
-import { CreateContactResponse } from "../response-type/contact";
+import {
+  CreateContactResponse,
+  GetContactsResponse,
+} from "../response-type/contact";
 
 export async function createContact(
   payload: CreateContactPayload
@@ -9,5 +12,10 @@ export async function createContact(
     "/api/v1/contacts",
     payload
   );
+  return data;
+}
+
+export async function getContacts(): Promise<GetContactsResponse> {
+  const { data } = await api.get<GetContactsResponse>("/api/v1/contacts");
   return data;
 }

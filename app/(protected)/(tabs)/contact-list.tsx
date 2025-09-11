@@ -8,17 +8,36 @@ import {
 import SearchBar from "~/components/search-bar";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { router } from "expo-router";
-import { useMemo } from "react";
 import { Contact } from "~/lib/types";
 import { useContactList } from "~/hooks/use-contact-list";
-import { buildSections, toListItem } from "~/lib/contacts/utils";
+import { buildSections } from "~/lib/contacts/utils";
 import { ContactRow } from "~/components/contact/contact-row";
+import { useQuery } from "@tanstack/react-query";
+import { contactKeys } from "~/lib/http/keys/contact";
+import { getContacts } from "~/lib/http/endpoints/contact";
+import { beautifyResponse } from "~/lib/utils";
+import { useEffect } from "react";
 
 export default function ContactListTab() {
-  const contacts = useContactList();
+  const { data, isLoading, isError } = useQuery({
+    queryKey: contactKeys.list(),
+    queryFn: getContacts,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+  });
 
-  const items = useMemo<Contact[]>(() => contacts.map(toListItem), [contacts]);
-  const sections = useMemo(() => buildSections(items), [items]);
+  const items: Contact[] = (data?.contactSummaries ?? []).map((s) => ({
+    id: String(s.id),
+    name: `${s.firstName} ${s.lastName}`.trim(),
+  }));
+
+  useEffect(() => {
+    if (data) {
+      console.log(data);
+    }
+  }, [data]);
+
+  const sections = buildSections(items);
 
   return (
     <SafeAreaView className="flex-1 bg-white">

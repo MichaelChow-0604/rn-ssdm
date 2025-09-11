@@ -56,7 +56,7 @@ export default function SignUp({ setIsSignIn }: SignUpProps) {
     mutationKey: ["auth", "sign-up"],
     mutationFn: signUp,
     onSuccess: ({ email }) => {
-      router.push({
+      router.replace({
         pathname: "/(auth)/otp-verification",
         params: { email, mode: "signup" },
       });

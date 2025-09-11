@@ -41,3 +41,8 @@ export interface RefreshResponse {
   idToken: string;
   tokenType: string;
 }
+
+export interface LogoutResponse {
+  message: string;
+  timestamp: string;
+}

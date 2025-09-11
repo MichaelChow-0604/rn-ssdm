@@ -11,9 +11,9 @@ export const TYPES = [
 ];
 
 export const RELATIONSHIP_OPTIONS = [
-  { label: "Family", value: "family" },
-  { label: "Friend", value: "friend" },
-  { label: "Business Partner", value: "business-partner" },
-  { label: "Business Advisor", value: "business-advisor" },
-  { label: "Legal Advisor", value: "legal-advisor" },
+  { label: "Family", value: "FAMILY" },
+  { label: "Friend", value: "FRIEND" },
+  { label: "Business Partner", value: "BUSINESS_PARTNER" },
+  { label: "Business Advisor", value: "BUSINESS_ADVISOR" },
+  { label: "Legal Advisor", value: "LEGAL_ADVISOR" },
 ];

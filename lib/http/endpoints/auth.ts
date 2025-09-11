@@ -6,6 +6,7 @@ import {
   SignUpPayload,
 } from "../request-type/auth";
 import {
+  LogoutResponse,
   ResendOTPResponse,
   SignInOTPResponse,
   SignInResponse,
@@ -50,5 +51,10 @@ export async function confirmSignIn(
     "/api/v1/tokens/confirmation",
     payload
   );
+  return data;
+}
+
+export async function logout(): Promise<LogoutResponse> {
+  const { data } = await api.post<LogoutResponse>("/api/v1/tokens/revocation");
   return data;
 }

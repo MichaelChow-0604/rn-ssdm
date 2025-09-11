@@ -37,7 +37,7 @@ import PhoneInput, {
 const detailSchema = newContactSchema.extend({
   profilePicUri: z.string().nullable().optional(),
   relationship: z.string().nullable().optional(),
-  distributions: z.array(z.enum(["email", "whatsapp", "sms"])).min(1),
+  distributions: z.array(z.enum(["EMAIL", "WHATSAPP", "SMS"])).min(1),
 });
 
 type FormValues = z.infer<typeof detailSchema>;
@@ -60,11 +60,11 @@ export default function ContactDetailPage() {
     defaultValues: {
       firstName: "",
       lastName: "",
-      mobileNumber: "",
+      phone: "",
       email: "",
       profilePicUri: null,
       relationship: null,
-      distributions: ["email"],
+      distributions: ["EMAIL"],
     },
     resolver: zodResolver(detailSchema), // use the matching schema
   });
@@ -75,23 +75,23 @@ export default function ContactDetailPage() {
   useEffect(() => {
     if (!contact) return;
 
-    const country = getCountryByPhoneNumber(contact.mobileNumber);
+    const country = getCountryByPhoneNumber(contact.phone);
     setSelectedCountry(country);
 
     const national = country?.idd?.root
-      ? contact.mobileNumber.replace(country.idd.root, "")
-      : contact.mobileNumber;
+      ? contact.phone.replace(country.idd.root, "")
+      : contact.phone;
 
     reset({
       firstName: contact.firstName,
       lastName: contact.lastName,
-      mobileNumber: national,
+      phone: national,
       email: contact.email,
       profilePicUri: contact.profilePicUri ?? null,
       relationship: contact.relationship ?? null,
       distributions: contact.distributions?.length
         ? contact.distributions
-        : ["email"],
+        : ["EMAIL"],
     });
     setIsEditing(false);
   }, [contact, reset]);
@@ -117,7 +117,7 @@ export default function ContactDetailPage() {
     if (!contact) return;
 
     const phoneNumber = `${selectedCountry?.idd?.root ?? ""} ${
-      data.mobileNumber
+      data.phone
     }`.replace(/ /g, "");
 
     const unique = Array.from(
@@ -127,7 +127,7 @@ export default function ContactDetailPage() {
     await updateContact(contact.id, {
       firstName: data.firstName.trim(),
       lastName: data.lastName.trim(),
-      mobileNumber: phoneNumber,
+      phone: phoneNumber,
       email: data.email.trim(),
       profilePicUri: data.profilePicUri ?? null,
       relationship: data.relationship ?? null,
@@ -262,7 +262,7 @@ export default function ContactDetailPage() {
               <AntDesign name="phone" size={24} color="#438BF7" />
               <View className="flex-col gap-1 flex-1">
                 <Controller
-                  name="mobileNumber"
+                  name="phone"
                   control={control}
                   rules={{
                     required: true,
@@ -283,9 +283,9 @@ export default function ContactDetailPage() {
                     />
                   )}
                 />
-                {errors.mobileNumber && (
+                {errors.phone && (
                   <Text className="text-redtext text-sm">
-                    {errors.mobileNumber.message}
+                    {errors.phone.message}
                   </Text>
                 )}
               </View>
@@ -346,12 +346,12 @@ export default function ContactDetailPage() {
 
             {/* Distribution */}
             <DistributionCheckbox
-              isWhatsappChecked={values.distributions.includes("whatsapp")}
+              isWhatsappChecked={values.distributions.includes("WHATSAPP")}
               setIsWhatsappChecked={(checked) => {
                 if (!isEditing) return;
                 const next = checked
-                  ? [...values.distributions, "whatsapp"]
-                  : values.distributions.filter((d) => d !== "whatsapp");
+                  ? [...values.distributions, "WHATSAPP"]
+                  : values.distributions.filter((d) => d !== "WHATSAPP");
                 setValue(
                   "distributions",
                   Array.from(
@@ -359,16 +359,16 @@ export default function ContactDetailPage() {
                   ) as FormValues["distributions"]
                 );
               }}
-              isSMSChecked={values.distributions.includes("sms")}
+              isSMSChecked={values.distributions.includes("SMS")}
               setIsSMSChecked={(checked) => {
                 if (!isEditing) return;
                 const next = checked
-                  ? [...values.distributions, "sms"]
-                  : values.distributions.filter((d) => d !== "sms");
+                  ? [...values.distributions, "SMS"]
+                  : values.distributions.filter((d) => d !== "SMS");
                 setValue(
                   "distributions",
                   Array.from(
-                    new Set(["email", ...next])
+                    new Set(["EMAIL", ...next])
                   ) as FormValues["distributions"]
                 );
               }}

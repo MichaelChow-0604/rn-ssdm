@@ -5,11 +5,11 @@ export interface StoredContact {
   firstName: string;
   lastName: string;
   fullName: string;
-  mobileNumber: string;
+  phone: string;
   email: string;
   profilePicUri?: string | null;
   relationship?: string | null;
-  distributions: Array<"email" | "whatsapp" | "sms">;
+  distributions: Array<"EMAIL" | "WHATSAPP" | "SMS">;
   createdAt: number;
 }
 

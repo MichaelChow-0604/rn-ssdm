@@ -32,10 +32,10 @@ api.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
     if (!isPublicPath(config.url) && !isRenewalPath(config.url)) {
       const { tokens } = useTokenStore.getState();
-      if (tokens.accessToken) {
+      if (tokens.idToken) {
         (config.headers ??= new AxiosHeaders()).set(
           "Authorization",
-          `Bearer ${tokens.accessToken}`
+          `Bearer ${tokens.idToken}`
         );
       }
     }

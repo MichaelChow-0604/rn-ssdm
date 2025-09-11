@@ -19,11 +19,21 @@ import {
   moreItems,
   supportItems,
 } from "~/constants/profile-navigation";
+import { useMutation } from "@tanstack/react-query";
+import { logout } from "~/lib/http/endpoints/auth";
+import { toast } from "sonner-native";
 
 export default function ProfileTab() {
   const { profile } = useProfile();
   const { setIsAuthenticated } = useAuth();
   const [dialogOpen, setDialogOpen] = useState(false);
+
+  const logoutMutation = useMutation({
+    mutationKey: ["logout"],
+    mutationFn: logout,
+    onSuccess: () => setIsAuthenticated(false),
+    onError: () => toast.error("Failed to logout. Please try again later."),
+  });
 
   return (
     <SafeAreaView className="flex-1 bg-blue-100">
@@ -81,7 +91,7 @@ export default function ProfileTab() {
       <LogoutConfirm
         visible={dialogOpen}
         onCancel={() => setDialogOpen(false)}
-        onConfirm={() => setIsAuthenticated(false)}
+        onConfirm={() => logoutMutation.mutate()}
       />
     </SafeAreaView>
   );

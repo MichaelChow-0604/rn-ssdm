@@ -14,6 +14,7 @@ export interface SignInPayload {
   email: string;
   password: string;
 }
+
 export interface ConfirmSignInPayload {
   email: string;
   session: string;

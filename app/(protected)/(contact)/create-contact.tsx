@@ -21,7 +21,6 @@ import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "~/components/ui/button";
 import { router } from "expo-router";
-import { addContact } from "~/lib/storage/contact";
 import { RelationshipSelect } from "~/components/contact/relationship-select";
 import { DistributionCheckbox } from "~/components/contact/distribution-checkbox";
 import { pickImage } from "~/lib/pick-image";
@@ -29,6 +28,10 @@ import PhoneInput, {
   ICountry,
   getCountryByCca2,
 } from "react-native-international-phone-number";
+import { useMutation } from "@tanstack/react-query";
+import { createContact } from "~/lib/http/endpoints/contact";
+import { toast } from "sonner-native";
+import { beautifyResponse } from "~/lib/utils";
 
 type NewContactFormFields = z.infer<typeof newContactSchema>;
 
@@ -38,8 +41,41 @@ export default function CreateContactPage() {
   const [isSMSChecked, setIsSMSChecked] = useState(false);
   const [selectedRelationship, setSelectedRelationship] = useState<Option>({
     label: "Family",
-    value: "family",
+    value: "FAMILY",
   });
+
+  const createContactMutation = useMutation({
+    mutationKey: ["contact", "create"],
+    mutationFn: createContact,
+    onSuccess: (data) => {
+      router.back();
+      console.log(beautifyResponse(data));
+    },
+    onError: () =>
+      toast.error("Failed to create contact. Please try again later."),
+  });
+
+  const isCreatingContact =
+    createContactMutation.isPending || createContactMutation.isSuccess;
+
+  const onSubmit = (data: NewContactFormFields) => {
+    // E.g. +852 1234 5678
+    const country = selectedCountry ?? getCountryByCca2("HK");
+    const phoneNumber = `${country?.idd?.root ?? ""} ${data.phone}`;
+
+    const distributions: ("EMAIL" | "WHATSAPP" | "SMS")[] = ["EMAIL"];
+    if (isWhatsappChecked) distributions.push("WHATSAPP");
+    if (isSMSChecked) distributions.push("SMS");
+
+    createContactMutation.mutate({
+      firstName: data.firstName.trim(),
+      lastName: data.lastName.trim(),
+      phone: phoneNumber.replace(/ /g, ""),
+      email: data.email.trim(),
+      relationship: selectedRelationship?.value ?? "",
+      communication_option: distributions,
+    });
+  };
 
   const handlePickImage = async () => {
     const uri = await pickImage();
@@ -54,36 +90,11 @@ export default function CreateContactPage() {
     defaultValues: {
       firstName: "",
       lastName: "",
-      mobileNumber: "",
+      phone: "",
       email: "",
     },
     resolver: zodResolver(newContactSchema),
   });
-
-  const onSubmit = (data: NewContactFormFields) => {
-    // E.g. +852 1234 5678
-    const country = selectedCountry ?? getCountryByCca2("HK");
-    const phoneNumber = `${country?.idd?.root ?? ""} ${data.mobileNumber}`;
-
-    const distributions: ("email" | "whatsapp" | "sms")[] = ["email"];
-    if (isWhatsappChecked) distributions.push("whatsapp");
-    if (isSMSChecked) distributions.push("sms");
-
-    void (async () => {
-      await addContact({
-        firstName: data.firstName.trim(),
-        lastName: data.lastName.trim(),
-        fullName: `${data.firstName.trim()} ${data.lastName.trim()}`,
-        // Remove spaces
-        mobileNumber: phoneNumber.replace(/ /g, ""),
-        email: data.email.trim(),
-        profilePicUri: profilePic,
-        relationship: selectedRelationship?.value ?? null,
-        distributions,
-      });
-      router.back();
-    })();
-  };
 
   const [selectedCountry, setSelectedCountry] = useState<ICountry | undefined>(
     undefined
@@ -213,7 +224,7 @@ export default function CreateContactPage() {
               <AntDesign name="phone" size={24} color="#438BF7" />
               <View className="flex-col gap-1 flex-1">
                 <Controller
-                  name="mobileNumber"
+                  name="phone"
                   control={control}
                   rules={{ required: true }}
                   render={({ field: { onChange, value } }) => (
@@ -236,9 +247,9 @@ export default function CreateContactPage() {
                     />
                   )}
                 />
-                {errors.mobileNumber && (
+                {errors.phone && (
                   <Text className="text-redtext text-sm">
-                    {errors.mobileNumber.message}
+                    {errors.phone.message}
                   </Text>
                 )}
               </View>

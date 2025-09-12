@@ -1,4 +1,5 @@
-import { SafeAreaView, View, Text } from "react-native";
+import { View, Text } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { BackButton } from "~/components/back-button";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { Button } from "~/components/ui/button";

@@ -13,7 +13,7 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Option } from "~/components/ui/select";
 import { uploadDocumentSchema } from "~/schema/upload-document";
-import { AntDesign } from "@expo/vector-icons";
+import { AntDesign, Feather } from "@expo/vector-icons";
 import { getContacts } from "~/lib/storage/contact";
 import { router, useFocusEffect } from "expo-router";
 import * as DocumentPicker from "expo-document-picker";
@@ -173,7 +173,7 @@ export default function UploadDocument() {
                 <Text className="text-red-500 font-bold">*</Text>
 
                 <View className="flex-row gap-1 items-center ml-auto">
-                  <AntDesign name="exclamationcircleo" color="black" />
+                  <Feather name="alert-circle" color="black" />
                   <Text className="text-sm font-semibold text-subtitle">
                     Up to 5 recipients
                   </Text>
@@ -211,7 +211,7 @@ export default function UploadDocument() {
           <View className="w-[80%] mt-4">
             {/* Title */}
             <View className="flex-row gap-2 items-center justify-center py-4">
-              <AntDesign name="clouduploado" size={24} color="black" />
+              <Feather name="upload-cloud" size={24} color="black" />
               <Text className="text-2xl font-bold">Upload Document</Text>
             </View>
 

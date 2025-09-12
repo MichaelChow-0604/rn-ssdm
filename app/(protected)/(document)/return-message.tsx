@@ -1,5 +1,6 @@
 import { router, useLocalSearchParams } from "expo-router";
-import { Text, SafeAreaView, View } from "react-native";
+import { Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import Feather from "@expo/vector-icons/Feather";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { Button } from "~/components/ui/button";

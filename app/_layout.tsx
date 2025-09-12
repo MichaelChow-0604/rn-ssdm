@@ -27,7 +27,7 @@ export default function RootLayout() {
           </AuthProvider>
         </BottomSheetModalProvider>
       </QueryClientProvider>
-      
+
       <Toaster theme="dark" />
       <PortalHost />
     </GestureHandlerRootView>

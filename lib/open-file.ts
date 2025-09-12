@@ -1,7 +1,7 @@
-import * as FileSystem from "expo-file-system";
+import * as FileSystem from "expo-file-system/legacy";
 import * as Sharing from "expo-sharing";
 import { Asset } from "expo-asset";
-import { Platform } from "react-native";
+import { Alert, Platform } from "react-native";
 
 interface OpenFileOptions {
   localUri: string;
@@ -9,13 +9,35 @@ interface OpenFileOptions {
   iosUTI?: string; // e.g. "com.adobe.pdf"
 }
 
-export async function openFile({ localUri, iosUTI }: OpenFileOptions) {
-  // Universal fallback: share sheet
-  if (await Sharing.isAvailableAsync()) {
-    await Sharing.shareAsync(
-      localUri,
-      Platform.OS === "ios" ? { UTI: iosUTI } : undefined
-    );
+export async function openFile({
+  localUri,
+  mimeType,
+  iosUTI,
+}: OpenFileOptions) {
+  try {
+    const info = await FileSystem.getInfoAsync(localUri);
+    if (!info.exists) {
+      throw new Error(`File does not exist at ${localUri}`);
+    }
+
+    const available = await Sharing.isAvailableAsync();
+    if (!available) {
+      Alert.alert(
+        "Sharing unavailable",
+        "Sharing is not available on this device. Please try again on a physical device or update iOS."
+      );
+      return;
+    }
+
+    const options =
+      Platform.OS === "ios"
+        ? { UTI: iosUTI } // iOS only uses UTI
+        : { mimeType };
+
+    await Sharing.shareAsync(localUri, options as any);
+  } catch (err) {
+    console.error("openFile error:", err);
+    Alert.alert("Unable to open file", "Please try again.");
   }
 }
 
@@ -55,7 +77,6 @@ export async function ensureLocalFromAsset(
   const asset = Asset.fromModule(moduleId);
   await asset.downloadAsync();
   const sourceUri = asset.localUri ?? asset.uri;
-  // Optional: copy to a predictable cache path
   const target = FileSystem.cacheDirectory + fileName;
   await FileSystem.copyAsync({ from: sourceUri, to: target });
   return target;

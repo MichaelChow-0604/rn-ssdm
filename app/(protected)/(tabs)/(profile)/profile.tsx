@@ -1,12 +1,12 @@
 import {
   View,
   Text,
-  SafeAreaView,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   Image,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Card } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { useProfile } from "~/context/profile-context";

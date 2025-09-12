@@ -2,7 +2,7 @@ import { View, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { BackButton } from "~/components/back-button";
 import TrashListTable from "~/components/trash/trash-list-table";
-import AntDesign from "@expo/vector-icons/AntDesign";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
 
 export default function Trash() {
   return (
@@ -21,7 +21,7 @@ export default function Trash() {
       {/* Warning */}
       <View className="flex-row items-center justify-center py-2">
         <View className="w-[15%] flex items-center justify-center">
-          <AntDesign name="exclamationcircleo" size={24} color="#E42D2D" />
+          <FontAwesome name="exclamation-circle" size={24} color="#E42D2D" />
         </View>
         <Text className="text-sm text-redtext w-[80%]">
           After a period of 30 days, the system automatically and permanently

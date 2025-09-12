@@ -237,7 +237,13 @@ export default function SignUp({ setIsSignIn }: SignUpProps) {
           />
           <Text className="text-subtitle text-sm">
             {SIGN_UP_DESCRIPTION}{" "}
-            <Text className="text-buttontext" onPress={() => setOpenTNP(true)}>
+            <Text
+              className="text-buttontext"
+              onPress={() => {
+                console.log("tapped.");
+                setOpenTNP(true);
+              }}
+            >
               terms & policy.
             </Text>
           </Text>

@@ -15,7 +15,7 @@ import {
   CountdownTimerRef,
 } from "~/components/countdown-timer";
 import { Button } from "~/components/ui/button";
-import AntDesign from "@expo/vector-icons/AntDesign";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import {
   CANCEL,
   DIDNT_GET_CODE,
@@ -142,7 +142,11 @@ export default function OTPVerificationPage() {
           <LoadingOverlay visible={isVerifying} label="Verifying..." />
 
           {/* Header */}
-          <AntDesign name="Safety" size={100} color="#438BF7" />
+          <MaterialCommunityIcons
+            name="shield-account"
+            size={100}
+            color="#438BF7"
+          />
           <Text className="text-4xl font-bold py-4">
             {OTP_VERIFICATION_TITLE_2}
           </Text>

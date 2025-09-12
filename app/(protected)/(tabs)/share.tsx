@@ -1,4 +1,4 @@
-import { View, Text, Image } from "react-native";
+import { View, Text, Image, Keyboard } from "react-native";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { shareSchema } from "~/schema/share-schema";
@@ -26,11 +26,12 @@ export default function ShareTab() {
     },
   });
 
-  const { dialogOpen, dialogText, dialogStatus, begin } = useShareUnlock();
+  const { dialogOpen, dialogText, dialogStatus, begin, onDialogDismiss } =
+    useShareUnlock();
 
   // For temporary testing & demo
   const onSubmit = async (data: ShareFormFields) => {
-    console.log(data);
+    Keyboard.dismiss();
 
     // pick any bundled asset
     const fileName = "ssdm.pdf";
@@ -123,6 +124,7 @@ export default function ShareTab() {
         visible={dialogOpen}
         text={dialogText}
         status={dialogStatus}
+        onDismiss={onDialogDismiss}
       />
     </View>
   );

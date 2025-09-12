@@ -11,7 +11,6 @@ export default function TabsLayout() {
       screenOptions={{
         headerTitle: "SSDM",
         headerTitleAlign: "center",
-        animation: "shift",
         headerShadowVisible: false,
         tabBarStyle:
           Platform.OS === "ios"

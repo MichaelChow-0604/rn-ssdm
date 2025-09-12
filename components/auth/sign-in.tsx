@@ -28,9 +28,11 @@ import {
   SIGN_IN,
   SIGN_UP,
 } from "~/constants/auth-placeholders";
-import { useMutation } from "@tanstack/react-query";
 import { signIn } from "~/lib/http/endpoints/auth";
 import { toast } from "sonner-native";
+import { SignInResponse } from "~/lib/http/response-type/auth";
+import { SignInPayload } from "~/lib/http/request-type/auth";
+import { useApiMutation } from "~/lib/http/use-api-mutation";
 
 interface SignInProps {
   // For toggling the state in the parent AuthPage component
@@ -42,7 +44,7 @@ type SignInFormFields = z.infer<typeof signInSchema>;
 export default function SignIn({ setIsSignIn }: SignInProps) {
   const router = useRouter();
 
-  const signInMutation = useMutation({
+  const signInMutation = useApiMutation<SignInResponse, SignInPayload>({
     mutationKey: ["auth", "sign-in"],
     mutationFn: signIn,
     onSuccess: ({ email, session }) => {
@@ -51,7 +53,15 @@ export default function SignIn({ setIsSignIn }: SignInProps) {
         params: { email, session, mode: "signin" },
       });
     },
-    onError: () => toast.error("Invalid credentials. User not found."),
+    onError: ({ status }) => {
+      switch (status) {
+        case 400:
+          toast.error("Invalid credentials. User not found.");
+          break;
+        default:
+          toast.error("Something went wrong. Please try again later.");
+      }
+    },
   });
 
   const isSigningIn = signInMutation.isPending || signInMutation.isSuccess;
@@ -111,6 +121,7 @@ export default function SignIn({ setIsSignIn }: SignInProps) {
     });
 
     if (isEmailValid) {
+      console.log("gg");
       // Navigate to forget password flow
       router.push({
         pathname: "/(auth)/(forget-password)/otp-verification-forget",

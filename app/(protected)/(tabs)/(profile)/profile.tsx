@@ -19,10 +19,11 @@ import {
   moreItems,
   supportItems,
 } from "~/constants/profile-navigation";
-import { useMutation } from "@tanstack/react-query";
 import { logout } from "~/lib/http/endpoints/auth";
 import { toast } from "sonner-native";
 import { useTokenStore } from "~/store/use-token-store";
+import { useApiMutation } from "~/lib/http/use-api-mutation";
+import { LogoutResponse } from "~/lib/http/response-type/auth";
 
 export default function ProfileTab() {
   const { profile } = useProfile();
@@ -30,7 +31,7 @@ export default function ProfileTab() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const { clearTokens } = useTokenStore();
 
-  const logoutMutation = useMutation({
+  const logoutMutation = useApiMutation<LogoutResponse, void>({
     mutationKey: ["logout"],
     mutationFn: logout,
     onSuccess: () => {

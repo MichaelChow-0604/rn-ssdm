@@ -21,3 +21,26 @@ export interface GetContactsResponse {
   message: string;
   timestamp: string;
 }
+
+interface Contact {
+  id: number;
+  email: string;
+  phone: string;
+  firstName: string;
+  lastName: string;
+  relationship: string;
+  contactOptions: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface GetContactResponse {
+  contact: Contact;
+  message: string;
+  timestamp: string;
+}
+
+export interface DeleteContactResponse {
+  message: string;
+  timestamp: string;
+}

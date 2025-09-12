@@ -23,13 +23,13 @@ export default function RootLayout() {
                 <Stack.Screen name="(auth)" />
                 <Stack.Screen name="(protected)" />
               </Stack>
+              <PortalHost />
             </ProfileProvider>
           </AuthProvider>
         </BottomSheetModalProvider>
       </QueryClientProvider>
 
       <Toaster theme="dark" />
-      <PortalHost />
     </GestureHandlerRootView>
   );
 }

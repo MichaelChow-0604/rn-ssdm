@@ -1,39 +1,38 @@
 import {
+  ActivityIndicator,
   SectionList,
   Text,
   TouchableOpacity,
   View,
-  SafeAreaView,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import SearchBar from "~/components/search-bar";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { Contact } from "~/lib/types";
 import { buildSections } from "~/lib/contacts/utils";
 import { ContactRow } from "~/components/contact/contact-row";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { contactKeys } from "~/lib/http/keys/contact";
-import { getContacts } from "~/lib/http/endpoints/contact";
-import { useEffect } from "react";
+import { getContactById, getContacts } from "~/lib/http/endpoints/contact";
 
 export default function ContactListTab() {
-  const { data, isLoading, isError } = useQuery({
+  const queryClient = useQueryClient();
+  const { data, isLoading, refetch } = useQuery({
     queryKey: contactKeys.list(),
     queryFn: getContacts,
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
   });
 
+  useFocusEffect(() => {
+    refetch();
+  });
+
   const items: Contact[] = (data?.contactSummaries ?? []).map((s) => ({
     id: String(s.id),
     name: `${s.firstName} ${s.lastName}`.trim(),
   }));
-
-  useEffect(() => {
-    if (data) {
-      console.log(data);
-    }
-  }, [data]);
 
   const sections = buildSections(items);
 
@@ -58,28 +57,39 @@ export default function ContactListTab() {
       </View>
 
       {/* Contact list */}
-      <SectionList
-        sections={sections}
-        keyExtractor={(item) => item.id}
-        stickySectionHeadersEnabled
-        contentContainerStyle={{
-          flexGrow: 1,
-        }}
-        ListEmptyComponent={<EmptyState />}
-        renderSectionHeader={({ section }) => (
-          <SectionHeader title={section.title} />
-        )}
-        renderItem={({ item }) => (
-          <ContactRow
-            id={item.id}
-            name={item.name}
-            avatarUri={item.avatarUri}
-            onPress={(id) => router.push({ pathname: "/[id]", params: { id } })}
-          />
-        )}
-        initialNumToRender={20}
-        windowSize={10}
-      />
+      {isLoading ? (
+        <ActivityIndicator size="small" color="#438BF7" />
+      ) : (
+        <SectionList
+          sections={sections}
+          keyExtractor={(item) => item.id}
+          stickySectionHeadersEnabled
+          contentContainerStyle={{
+            flexGrow: 1,
+          }}
+          ListEmptyComponent={<EmptyState />}
+          renderSectionHeader={({ section }) => (
+            <SectionHeader title={section.title} />
+          )}
+          renderItem={({ item }) => (
+            <ContactRow
+              id={item.id}
+              name={item.name}
+              avatarUri={item.avatarUri}
+              onPress={(id) => {
+                queryClient.prefetchQuery({
+                  queryKey: contactKeys.detail(id),
+                  queryFn: () => getContactById(id),
+                  staleTime: 5 * 60 * 1000,
+                });
+                router.push({ pathname: "/[id]", params: { id: String(id) } });
+              }}
+            />
+          )}
+          initialNumToRender={20}
+          windowSize={10}
+        />
+      )}
     </SafeAreaView>
   );
 }

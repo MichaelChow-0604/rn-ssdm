@@ -35,6 +35,7 @@ export function RelationshipSelect({
         <SelectTrigger
           className="bg-white w-[160px] border-gray-200"
           disabled={disabled}
+          onPress={() => console.log("tapped")}
         >
           <SelectValue
             className="text-black font-medium text-lg"

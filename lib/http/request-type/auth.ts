@@ -1,12 +1,14 @@
 export interface SignUpPayload {
   firstName: string;
   lastName: string;
+  phone?: string;
   email: string;
   password: string;
 }
 
 export interface ConfirmSignUpPayload {
   email: string;
+  session: string;
   confirmationCode: string;
 }
 

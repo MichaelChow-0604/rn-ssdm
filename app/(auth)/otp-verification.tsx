@@ -41,6 +41,7 @@ import { getContacts } from "~/lib/http/endpoints/contact";
 
 export default function OTPVerificationPage() {
   const { email, session, mode } = useLocalSearchParams();
+  const [currentSession, setCurrentSession] = useState(session);
   const [otp, setOtp] = useState("");
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -62,8 +63,13 @@ export default function OTPVerificationPage() {
   const resendMutation = useMutation({
     mutationKey: ["auth", "resend-confirmation"],
     mutationFn: (email: string) => resendConfirmation(email),
-    onSuccess: () => toast.success("New OTP sent to your email."),
-    onError: () => toast.error("Failed to resend OTP. Please try again."),
+    onSuccess: ({ session: newSession }) => {
+      console.log("Old session", currentSession);
+      console.log("New session", newSession);
+      setCurrentSession(newSession);
+      toast.success("New OTP sent to your email.");
+    },
+    onError: (err) => toast.error(err.message),
   });
 
   const confirmSignInMutation = useMutation({
@@ -88,7 +94,9 @@ export default function OTPVerificationPage() {
       setIsAuthenticated(true);
       router.replace({ pathname: "/return-message", params: { mode } });
     },
-    onError: () => toast.error("Invalid OTP. Please try again."),
+    onError: () => {
+      toast.error("Invalid OTP. Please try again.");
+    },
   });
 
   const confirmSignUpMutation = useMutation({
@@ -115,7 +123,7 @@ export default function OTPVerificationPage() {
     if (mode === "signin") {
       confirmSignInMutation.mutate({
         email: String(email),
-        session: String(session),
+        session: String(currentSession),
         confirmationCode: otp,
       });
       return;
@@ -124,6 +132,7 @@ export default function OTPVerificationPage() {
     if (mode === "signup") {
       confirmSignUpMutation.mutate({
         email: String(email),
+        session: String(currentSession),
         confirmationCode: otp,
       });
       return;

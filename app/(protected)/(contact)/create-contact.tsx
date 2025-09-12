@@ -1,13 +1,14 @@
 import {
   Image,
-  SafeAreaView,
   Text,
   TouchableOpacity,
   View,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { BackButton } from "~/components/back-button";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { Card, CardHeader } from "~/components/ui/card";
@@ -28,10 +29,11 @@ import PhoneInput, {
   ICountry,
   getCountryByCca2,
 } from "react-native-international-phone-number";
-import { useMutation } from "@tanstack/react-query";
 import { createContact } from "~/lib/http/endpoints/contact";
 import { toast } from "sonner-native";
-import { beautifyResponse } from "~/lib/utils";
+import { useApiMutation } from "~/lib/http/use-api-mutation";
+import { CreateContactResponse } from "~/lib/http/response-type/contact";
+import { CreateContactPayload } from "~/lib/http/request-type/contact";
 
 type NewContactFormFields = z.infer<typeof newContactSchema>;
 
@@ -44,12 +46,14 @@ export default function CreateContactPage() {
     value: "FAMILY",
   });
 
-  const createContactMutation = useMutation({
+  const createContactMutation = useApiMutation<
+    CreateContactResponse,
+    CreateContactPayload
+  >({
     mutationKey: ["contact", "create"],
     mutationFn: createContact,
     onSuccess: (data) => {
       router.back();
-      console.log(beautifyResponse(data));
     },
     onError: () =>
       toast.error("Failed to create contact. Please try again later."),
@@ -304,8 +308,13 @@ export default function CreateContactPage() {
             <Button
               className="w-[80%] self-center bg-button text-white"
               onPress={handleSubmit(onSubmit)}
+              disabled={isCreatingContact}
             >
-              <Text className="font-bold text-white">SAVE</Text>
+              {isCreatingContact ? (
+                <ActivityIndicator size="small" color="white" />
+              ) : (
+                <Text className="font-bold text-white">SAVE</Text>
+              )}
             </Button>
           </View>
         </ScrollView>

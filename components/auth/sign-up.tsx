@@ -37,8 +37,10 @@ import {
 import { PasswordInput } from "../password/password-input";
 import { PasswordRequirements } from "../password/password-requirement";
 import { signUp } from "~/lib/http/endpoints/auth";
-import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner-native";
+import { useApiMutation } from "~/lib/http/use-api-mutation";
+import { SignUpResponse } from "~/lib/http/response-type/auth";
+import { SignUpPayload } from "~/lib/http/request-type/auth";
 
 interface SignUpProps {
   setIsSignIn: (isSignIn: boolean) => void;
@@ -52,16 +54,24 @@ export default function SignUp({ setIsSignIn }: SignUpProps) {
   const [openTNP, setOpenTNP] = useState(false);
   const router = useRouter();
 
-  const signUpMutation = useMutation({
+  const signUpMutation = useApiMutation<SignUpResponse, SignUpPayload>({
     mutationKey: ["auth", "sign-up"],
     mutationFn: signUp,
-    onSuccess: ({ email }) => {
+    onSuccess: ({ email, session }) => {
       router.replace({
         pathname: "/(auth)/otp-verification",
-        params: { email, mode: "signup" },
+        params: { email, session, mode: "signup" },
       });
     },
-    onError: () => toast.error("Something went wrong. Please try again later."),
+    onError: ({ status }) => {
+      switch (status) {
+        case 400:
+          toast.error("User already exists.");
+          break;
+        default:
+          toast.error("Something went wrong. Please try again later.");
+      }
+    },
   });
 
   const isSigningUp = signUpMutation.isPending || signUpMutation.isSuccess;
@@ -237,13 +247,7 @@ export default function SignUp({ setIsSignIn }: SignUpProps) {
           />
           <Text className="text-subtitle text-sm">
             {SIGN_UP_DESCRIPTION}{" "}
-            <Text
-              className="text-buttontext"
-              onPress={() => {
-                console.log("tapped.");
-                setOpenTNP(true);
-              }}
-            >
+            <Text className="text-buttontext" onPress={() => setOpenTNP(true)}>
               terms & policy.
             </Text>
           </Text>

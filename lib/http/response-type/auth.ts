@@ -1,22 +1,28 @@
 export interface SignUpResponse {
-  id: number;
   userSub: string;
-  email: string;
-  phone: string;
   firstName: string;
   lastName: string;
+  phone: string;
+  email: string;
   status: string;
+  session: string;
   createdAt: string;
   updatedAt: string;
+  message: string;
+  timestamp: string;
 }
 
 export interface SignUpOTPResponse {
   email: string;
-  session: string;
+  message: string;
+  timestamp: string;
 }
 
 export interface ResendOTPResponse {
   email: string;
+  session: string;
+  message: string;
+  timestamp: string;
 }
 
 export interface SignInResponse {

@@ -9,13 +9,11 @@ import SearchBar from "~/components/search-bar";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { router } from "expo-router";
 import { Contact } from "~/lib/types";
-import { useContactList } from "~/hooks/use-contact-list";
 import { buildSections } from "~/lib/contacts/utils";
 import { ContactRow } from "~/components/contact/contact-row";
 import { useQuery } from "@tanstack/react-query";
 import { contactKeys } from "~/lib/http/keys/contact";
 import { getContacts } from "~/lib/http/endpoints/contact";
-import { beautifyResponse } from "~/lib/utils";
 import { useEffect } from "react";
 
 export default function ContactListTab() {

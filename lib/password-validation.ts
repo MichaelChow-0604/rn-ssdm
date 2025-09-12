@@ -5,5 +5,5 @@ export function validatePasswordUppercase(password: string) {
   return /[A-Z]/.test(password);
 }
 export function validatePasswordSpecialChar(password: string) {
-  return /[0-9!@#$%^&*(),.?":{}|<>]/.test(password);
+  return /[0-9]/.test(password) && /[!@#$%^&*(),.?":{}|<>]/.test(password);
 }

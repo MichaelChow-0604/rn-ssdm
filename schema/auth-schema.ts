@@ -16,9 +16,11 @@ export const signUpSchema = z
       .regex(/[A-Z]/, {
         message: "Password must contain at least 1 uppercase letter",
       })
-      .regex(/[0-9!@#$%^&*(),.?":{}|<>]/, {
-        message:
-          "Password must contain at least one number or special character",
+      .regex(/[0-9]/, {
+        message: "Password must contain at least 1 number",
+      })
+      .regex(/[!@#$%^&*(),.?":{}|<>]/, {
+        message: "Password must contain at least 1 special character",
       }),
     confirmPassword: z.string().min(1, {
       message: "Confirm password is required",
@@ -54,9 +56,11 @@ export const newPasswordSchema = z
       .regex(/[A-Z]/, {
         message: "Password must contain at least 1 uppercase letter",
       })
-      .regex(/[0-9!@#$%^&*(),.?":{}|<>]/, {
-        message:
-          "Password must contain at least one number or special character",
+      .regex(/[0-9]/, {
+        message: "Password must contain at least 1 number",
+      })
+      .regex(/[!@#$%^&*(),.?":{}|<>]/, {
+        message: "Password must contain at least 1 special character",
       }),
     confirmPassword: z
       .string()
@@ -76,9 +80,11 @@ export const changePasswordSchema = z
       .regex(/[A-Z]/, {
         message: "Password must contain at least 1 uppercase letter",
       })
-      .regex(/[0-9!@#$%^&*(),.?":{}|<>]/, {
-        message:
-          "Password must contain at least one number or special character",
+      .regex(/[0-9]/, {
+        message: "Password must contain at least 1 number",
+      })
+      .regex(/[!@#$%^&*(),.?":{}|<>]/, {
+        message: "Password must contain at least 1 special character",
       }),
     confirmPassword: z
       .string()

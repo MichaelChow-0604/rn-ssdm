@@ -24,14 +24,25 @@ import {
 } from "~/lib/contacts/hooks";
 
 export default function PreviewDocument() {
-  const { documentName, description, category, type, fileName } =
-    useLocalSearchParams<{
-      documentName: string;
-      description: string;
-      category: string;
-      type: string;
-      fileName: string;
-    }>();
+  const {
+    title,
+    description,
+    category,
+    type,
+    fileName,
+    id,
+    reference_number,
+    remarks,
+  } = useLocalSearchParams<{
+    title: string;
+    description: string;
+    category: string;
+    type: string;
+    fileName: string;
+    id: string;
+    reference_number: string;
+    remarks: string;
+  }>();
 
   const { recipients } = useLocalSearchParams<{ recipients: string }>();
 
@@ -66,25 +77,25 @@ export default function PreviewDocument() {
           .pop()
           ?.toLowerCase() ?? "";
 
-      const saved = await addDocument({
-        documentName: String(documentName ?? ""),
-        description: String(description ?? ""),
-        category: String(category ?? ""),
-        type: String(type ?? ""),
-        fileName: String(fileName ?? ""),
-        fileExtension: fileExt,
-        recipients: ids,
-      });
+      // const saved = await addDocument({
+      //   documentName: String(title ?? ""),
+      //   description: String(description ?? ""),
+      //   category: String(category ?? ""),
+      //   type: String(type ?? ""),
+      //   fileName: String(fileName ?? ""),
+      //   fileExtension: fileExt,
+      //   recipients: ids,
+      // });
 
-      await sleep(4000);
+      // await sleep(4000);
 
-      router.replace({
-        pathname: "/return-message",
-        params: {
-          mode: "success",
-          transactionId: saved.transactionId,
-        },
-      });
+      // router.replace({
+      //   pathname: "/return-message",
+      //   params: {
+      //     mode: "success",
+      //     transactionId: saved.transactionId,
+      //   },
+      // });
     } catch {
       router.replace({
         pathname: "/return-message",
@@ -174,13 +185,35 @@ export default function PreviewDocument() {
               />
             </View>
 
-            {/* Document Name */}
+            {/* Title */}
             <View className="flex-col gap-1">
-              <Label className="text-black">Document Name</Label>
+              <Label className="text-black">Title</Label>
               <Input
                 className="text-black bg-gray-300 opacity-100 border-0"
-                placeholder="Enter Document Name"
-                value={documentName as string}
+                placeholder="Enter Title"
+                value={title as string}
+                editable={false}
+              />
+            </View>
+
+            {/* ID */}
+            <View className="flex-col gap-1">
+              <Label className="text-black">ID</Label>
+              <Input
+                className="text-black bg-gray-300 opacity-100 border-0"
+                placeholder="Enter ID"
+                value={id as string}
+                editable={false}
+              />
+            </View>
+
+            {/* Reference Number */}
+            <View className="flex-col gap-1">
+              <Label className="text-black">Reference Number</Label>
+              <Input
+                className="text-black bg-gray-300 opacity-100 border-0"
+                placeholder="Enter Reference Number"
+                value={reference_number as string}
                 editable={false}
               />
             </View>
@@ -202,6 +235,16 @@ export default function PreviewDocument() {
               <Textarea
                 className="text-black bg-gray-300 opacity-100 border-0"
                 value={description as string}
+                editable={false}
+              />
+            </View>
+
+            {/* Remarks */}
+            <View className="flex-col gap-1">
+              <Label className="text-black">Remarks</Label>
+              <Textarea
+                className="text-black bg-gray-300 opacity-100 border-0"
+                value={remarks as string}
                 editable={false}
               />
             </View>

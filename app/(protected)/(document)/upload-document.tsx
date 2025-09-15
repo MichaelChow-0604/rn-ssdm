@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   KeyboardAvoidingView,
@@ -12,10 +12,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Option } from "~/components/ui/select";
-import { uploadDocumentSchema } from "~/schema/upload-document";
+import { uploadDocumentSchema } from "~/schema/upload-document-schema";
 import { Feather } from "@expo/vector-icons";
-import { getContacts } from "~/lib/storage/contact";
-import { router, useFocusEffect } from "expo-router";
+import { router } from "expo-router";
 import * as DocumentPicker from "expo-document-picker";
 import { Button } from "~/components/ui/button";
 import { BackButton } from "~/components/back-button";
@@ -47,23 +46,6 @@ export default function UploadDocument() {
     setSelectedFile(result?.assets?.[0]?.name ?? null);
   };
 
-  useFocusEffect(
-    useCallback(() => {
-      let cancelled = false;
-      (async () => {
-        const contacts = await getContacts();
-        if (cancelled) return;
-        const opts = contacts.map((c) => ({
-          label: c.fullName,
-          value: c.id,
-        }));
-      })();
-      return () => {
-        cancelled = true;
-      };
-    }, [])
-  );
-
   const {
     control,
     handleSubmit,
@@ -71,29 +53,37 @@ export default function UploadDocument() {
     watch,
   } = useForm({
     defaultValues: {
-      documentName: "",
+      title: "",
       description: "",
+      id: "",
+      reference_number: "",
+      remarks: "",
     },
     resolver: zodResolver(uploadDocumentSchema),
   });
 
-  const watchedDocumentName = watch("documentName");
-  const hasDocName = !!watchedDocumentName?.trim();
+  const watchedTitle = watch("title");
+  const watchedId = watch("id");
+  const hasTitle = !!watchedTitle?.trim();
+  const hasId = !!watchedId?.trim();
   const hasRecipients = selectedContacts.length > 0;
   const hasFile = !!selectedFile;
 
-  const isUploadDisabled = !(hasDocName && hasRecipients && hasFile);
+  const isUploadDisabled = !(hasTitle && hasId && hasRecipients && hasFile);
 
   const onSubmit = (data: UploadDocumentFormFields) => {
     router.push({
       pathname: "/preview-document",
       params: {
-        documentName: data.documentName,
+        title: data.title,
         description: data.description,
         category: selectedCategory?.label,
         type: selectedType?.label,
         recipients: JSON.stringify(selectedContacts), // serialize
         fileName: selectedFile ?? "",
+        id: data.id,
+        reference_number: data.reference_number,
+        remarks: data.remarks,
       },
     });
   };
@@ -137,11 +127,11 @@ export default function UploadDocument() {
             {/* Document Name */}
             <View className="flex-col gap-1">
               <View className="flex-row gap-0.5">
-                <Label className="text-black">Document Name</Label>
+                <Label className="text-black">Title</Label>
                 <Text className="text-red-500 font-bold">*</Text>
               </View>
               <Controller
-                name="documentName"
+                name="title"
                 control={control}
                 rules={{ required: true }}
                 render={({ field: { onChange, onBlur, value } }) => (
@@ -152,15 +142,72 @@ export default function UploadDocument() {
                     autoCorrect={false}
                     className="bg-white text-black border-gray-200"
                     placeholderClassName="text-placeholder"
-                    placeholder="Enter Document Name"
+                    placeholder="Enter Title"
                   />
                 )}
               />
 
               {/* Last Name validation error */}
-              {errors.documentName && (
+              {errors.title && (
                 <Text className="text-redtext text-sm">
-                  {errors.documentName.message}
+                  {errors.title.message}
+                </Text>
+              )}
+            </View>
+
+            {/* ID */}
+            <View className="flex-col gap-1">
+              <View className="flex-row gap-0.5">
+                <Label className="text-black">ID</Label>
+                <Text className="text-red-500 font-bold">*</Text>
+              </View>
+              <Controller
+                name="id"
+                control={control}
+                rules={{ required: true }}
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <Input
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    value={value}
+                    autoCorrect={false}
+                    className="bg-white text-black border-gray-200"
+                    placeholderClassName="text-placeholder"
+                    placeholder="Enter ID"
+                  />
+                )}
+              />
+
+              {/* ID validation error */}
+              {errors.id && (
+                <Text className="text-redtext text-sm">
+                  {errors.id.message}
+                </Text>
+              )}
+            </View>
+
+            {/* Reference Number */}
+            <View className="flex-col gap-1">
+              <Label className="text-black">Reference Number</Label>
+              <Controller
+                name="reference_number"
+                control={control}
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <Input
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    value={value}
+                    placeholderClassName="text-placeholder"
+                    placeholder="Enter Reference Number"
+                    className="bg-white text-black border-gray-200"
+                  />
+                )}
+              />
+
+              {/* Reference Number validation error */}
+              {errors.reference_number && (
+                <Text className="text-redtext text-sm">
+                  {errors.reference_number.message}
                 </Text>
               )}
             </View>
@@ -199,6 +246,25 @@ export default function UploadDocument() {
                     value={value}
                     placeholderClassName="text-placeholder"
                     placeholder="Enter Description"
+                    className="bg-white text-black border-gray-200"
+                  />
+                )}
+              />
+            </View>
+
+            {/* Remarks */}
+            <View className="flex-col gap-1">
+              <Label className="text-black">Remarks</Label>
+              <Controller
+                name="remarks"
+                control={control}
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <Textarea
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    value={value}
+                    placeholderClassName="text-placeholder"
+                    placeholder="Enter Remarks"
                     className="bg-white text-black border-gray-200"
                   />
                 )}

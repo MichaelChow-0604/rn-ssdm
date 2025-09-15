@@ -19,7 +19,6 @@ import {
   signInSchema,
 } from "~/schema/auth-schema";
 import { useFocusEffect, useRouter } from "expo-router";
-import { useCallback } from "react";
 import {
   DONT_HAVE_ACCOUNT,
   EMAIL_PLACEHOLDER,
@@ -71,7 +70,8 @@ export default function SignIn({ setIsSignIn }: SignInProps) {
     control: signInControl,
     handleSubmit: handleSignInSubmit,
     formState: { errors: signInErrors },
-    watch,
+    getValues,
+    setError,
     clearErrors: clearSignInErrors,
   } = useForm({
     defaultValues: {
@@ -82,65 +82,46 @@ export default function SignIn({ setIsSignIn }: SignInProps) {
     mode: "onSubmit",
   });
 
-  // Forget password validation form
-  const {
-    formState: { errors: forgetPasswordErrors },
-    trigger: triggerForgetPassword,
-    setValue,
-    clearErrors: clearForgetPasswordErrors,
-    reset: resetForgetPassword,
-  } = useForm({
-    defaultValues: {
-      email: "",
-    },
-    resolver: zodResolver(forgetPasswordValidationSchema),
-    mode: "onSubmit",
-    shouldUnregister: false,
-  });
-
-  const watchedEmail = watch("email");
-
   const onSignInSubmit = (formData: SignInFormFields): void => {
     Keyboard.dismiss();
     signInMutation.mutate(formData);
   };
 
   const handleSignIn = () => {
-    // Clear forget password errors when sign-in is submitted
-    clearForgetPasswordErrors();
-    resetForgetPassword();
+    clearSignInErrors();
     handleSignInSubmit(onSignInSubmit)();
   };
 
   const handleForgetPassword = async () => {
-    // Set the email value in the forget password form
-    setValue("email", watchedEmail);
+    Keyboard.dismiss();
 
-    // Validate email field using the custom validation schema
-    const isEmailValid = await triggerForgetPassword("email", {
-      shouldFocus: false,
-    });
-    console.log(isEmailValid);
+    // Only email error should be visible in forget-password flow
+    clearSignInErrors(["password", "email"]);
 
-    if (isEmailValid) {
-      console.log("gg");
-      // Navigate to forget password flow
-      router.push({
-        pathname: "/(auth)/(forget-password)/otp-verification-forget",
-        params: {
-          email: watchedEmail,
-        },
-      });
+    const email = (getValues("email") || "").trim();
+
+    if (!email) {
+      setError("email", { message: "Please enter the email first" });
+      return;
     }
+
+    const result = forgetPasswordValidationSchema.safeParse({ email });
+    if (!result.success) {
+      const msg = result.error.issues[0]?.message ?? "Invalid email address";
+      setError("email", { type: "manual", message: msg });
+      return;
+    }
+
+    router.push({
+      pathname: "/(auth)/(forget-password)/otp-verification-forget",
+      params: {
+        email,
+      },
+    });
   };
 
   // Clear all errors when screen comes into focus (when navigating back)
-  useFocusEffect(
-    useCallback(() => {
-      clearSignInErrors();
-      clearForgetPasswordErrors();
-    }, [clearSignInErrors, clearForgetPasswordErrors])
-  );
+  useFocusEffect(() => clearSignInErrors());
 
   return (
     <View className="w-[80%]">
@@ -175,12 +156,7 @@ export default function SignIn({ setIsSignIn }: SignInProps) {
             )}
           />
           {/* Email validation error */}
-          {/* Show only the most recent error - prioritize forget password error */}
-          {forgetPasswordErrors.email ? (
-            <Text className="text-redtext text-sm">
-              {forgetPasswordErrors.email.message}
-            </Text>
-          ) : signInErrors.email ? (
+          {signInErrors.email ? (
             <Text className="text-redtext text-sm">
               {signInErrors.email.message}
             </Text>
@@ -207,7 +183,7 @@ export default function SignIn({ setIsSignIn }: SignInProps) {
             )}
           />
           {/* Only show password error if there's no forget password error */}
-          {!forgetPasswordErrors.email && signInErrors.password && (
+          {signInErrors.password && (
             <Text className="text-redtext text-sm">
               {signInErrors.password.message}
             </Text>

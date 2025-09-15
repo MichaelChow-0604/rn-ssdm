@@ -1,13 +1,13 @@
 import {
   View,
   Text,
-  SafeAreaView,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   TouchableOpacity,
   Image,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { useState } from "react";
 import { Card } from "~/components/ui/card";

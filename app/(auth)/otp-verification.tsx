@@ -38,6 +38,10 @@ import { LoadingOverlay } from "~/components/loading-overlay";
 import { toast } from "sonner-native";
 import { contactKeys } from "~/lib/http/keys/contact";
 import { getContacts } from "~/lib/http/endpoints/contact";
+import ReLogin from "~/components/pop-up/re-login";
+import { useApiMutation } from "~/lib/http/use-api-mutation";
+import { SignInOTPResponse } from "~/lib/http/response-type/auth";
+import { ConfirmSignInPayload } from "~/lib/http/request-type/auth";
 
 export default function OTPVerificationPage() {
   const { email, session, mode } = useLocalSearchParams();
@@ -48,6 +52,9 @@ export default function OTPVerificationPage() {
 
   const timerRef = useRef<CountdownTimerRef>(null);
   const { secondsLeft: resendCooldown, start: startCooldown } = useCooldown(60);
+
+  const [loginCount, setLoginCount] = useState(0);
+  const [showReLogin, setShowReLogin] = useState(false);
 
   const { setIsAuthenticated } = useAuth();
 
@@ -72,31 +79,43 @@ export default function OTPVerificationPage() {
     onError: (err) => toast.error(err.message),
   });
 
-  const confirmSignInMutation = useMutation({
+  const confirmSignInMutation = useApiMutation<
+    SignInOTPResponse,
+    ConfirmSignInPayload
+  >({
     mutationKey: ["auth", "confirm-sign-in"],
     mutationFn: confirmSignIn,
     onSuccess: (data) => {
-      // Store tokens in zustand for subsequent requests
-      useTokenStore.getState().setTokens({
-        email: String(email),
-        accessToken: data.accessToken,
-        refreshToken: data.refreshToken,
-        idToken: data.idToken,
-      });
+      // If session is provided, it means the OTP is invalid, will give user 3 times to try
+      if (data.session) {
+        setLoginCount((prev) => {
+          const next = prev + 1;
+          if (next < 3) toast.error("Invalid OTP. Please try again.");
+          return next;
+        });
+        setCurrentSession(data.session);
+      } else {
+        // Store tokens in zustand for subsequent requests
+        useTokenStore.getState().setTokens({
+          email: String(email),
+          accessToken: data.accessToken,
+          refreshToken: data.refreshToken,
+          idToken: data.idToken,
+        });
 
-      // Warm contacts in the background (no await needed)
-      queryClient.prefetchQuery({
-        queryKey: contactKeys.list(),
-        queryFn: getContacts,
-        staleTime: 5 * 60 * 1000,
-      });
+        // Warm contacts in the background (no await needed)
+        queryClient.prefetchQuery({
+          queryKey: contactKeys.list(),
+          queryFn: getContacts,
+          staleTime: 5 * 60 * 1000,
+        });
 
-      setIsAuthenticated(true);
-      router.replace({ pathname: "/return-message", params: { mode } });
+        setIsAuthenticated(true);
+        router.replace({ pathname: "/return-message", params: { mode } });
+      }
     },
-    onError: () => {
-      toast.error("Invalid OTP. Please try again.");
-    },
+    // No need to handle error, it will be handled by the onDismiss function
+    onError: () => {},
   });
 
   const confirmSignUpMutation = useMutation({
@@ -111,6 +130,8 @@ export default function OTPVerificationPage() {
   const isVerifying =
     confirmSignInMutation.isPending || confirmSignUpMutation.isPending;
 
+  const showLoadingOverlay = isVerifying && !showReLogin;
+
   const handleResendCode = (): void => {
     if (resendCooldown > 0 || resendMutation.isPending) return;
     timerRef.current?.resetTimer();
@@ -120,6 +141,7 @@ export default function OTPVerificationPage() {
 
   const handleVerify = () => {
     Keyboard.dismiss();
+
     if (mode === "signin") {
       confirmSignInMutation.mutate({
         email: String(email),
@@ -141,6 +163,13 @@ export default function OTPVerificationPage() {
     throw new Error("Invalid mode");
   };
 
+  const onDismiss = () => {
+    // Invalid OTP 3 times, force user to re-login
+    if (loginCount >= 3) {
+      setShowReLogin(true);
+    }
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-white">
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -148,7 +177,12 @@ export default function OTPVerificationPage() {
           className="flex-1 items-center px-8 justify-center"
           behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
-          <LoadingOverlay visible={isVerifying} label="Verifying..." />
+          <ReLogin visible={showReLogin} />
+          <LoadingOverlay
+            visible={showLoadingOverlay}
+            label="Verifying..."
+            onDismiss={onDismiss}
+          />
 
           {/* Header */}
           <MaterialCommunityIcons
@@ -205,6 +239,7 @@ export default function OTPVerificationPage() {
               className="bg-button text-buttontext"
               disabled={
                 otp.length !== 6 ||
+                showReLogin ||
                 confirmSignInMutation.isPending ||
                 confirmSignUpMutation.isPending
               }

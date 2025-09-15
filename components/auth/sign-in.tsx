@@ -95,6 +95,7 @@ export default function SignIn({ setIsSignIn }: SignInProps) {
     },
     resolver: zodResolver(forgetPasswordValidationSchema),
     mode: "onSubmit",
+    shouldUnregister: false,
   });
 
   const watchedEmail = watch("email");
@@ -119,6 +120,7 @@ export default function SignIn({ setIsSignIn }: SignInProps) {
     const isEmailValid = await triggerForgetPassword("email", {
       shouldFocus: false,
     });
+    console.log(isEmailValid);
 
     if (isEmailValid) {
       console.log("gg");

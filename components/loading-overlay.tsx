@@ -3,15 +3,21 @@ import { ActivityIndicator, Modal, Text, View } from "react-native";
 interface LoadingOverlayProps {
   visible: boolean;
   label: string;
+  onDismiss: () => void;
 }
 
-export function LoadingOverlay({ visible, label }: LoadingOverlayProps) {
+export function LoadingOverlay({
+  visible,
+  label,
+  onDismiss,
+}: LoadingOverlayProps) {
   return (
     <Modal
       visible={visible}
       transparent
       animationType="fade"
       statusBarTranslucent
+      onDismiss={onDismiss}
     >
       <View
         className="flex-1 items-center justify-center bg-black/50"

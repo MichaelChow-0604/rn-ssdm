@@ -38,6 +38,7 @@ export interface SignInOTPResponse {
   idToken: string;
   refreshToken: string;
   tokenType: string;
+  session?: string;
 }
 
 export interface RefreshResponse {

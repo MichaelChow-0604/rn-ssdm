@@ -58,7 +58,7 @@ export default function OTPVerificationForgetPage() {
 
         {/* OTP Input */}
         <OtpInput
-          numberOfDigits={4}
+          numberOfDigits={6}
           focusColor="#438BF7"
           theme={{
             containerStyle: {
@@ -88,7 +88,7 @@ export default function OTPVerificationForgetPage() {
         <View className="flex flex-col gap-4 w-full">
           <Button
             className="bg-button text-buttontext"
-            disabled={otp.length !== 4}
+            disabled={otp.length !== 6}
             onPress={() => router.replace("/new-password")}
           >
             <Text className="text-white font-bold">{VERIFY}</Text>

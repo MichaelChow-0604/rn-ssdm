@@ -13,7 +13,7 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Option } from "~/components/ui/select";
 import { uploadDocumentSchema } from "~/schema/upload-document";
-import { AntDesign, Feather } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
 import { getContacts } from "~/lib/storage/contact";
 import { router, useFocusEffect } from "expo-router";
 import * as DocumentPicker from "expo-document-picker";
@@ -22,9 +22,9 @@ import { BackButton } from "~/components/back-button";
 import { Textarea } from "~/components/ui/textarea";
 import * as z from "zod";
 import { RecipientsMultiSelect } from "~/components/documents/recipient-multi-select";
-import { MultiOption } from "~/lib/types";
 import { SelectDropdown } from "~/components/select-dropdown";
 import { CATEGORIES, TYPES } from "~/constants/select-data";
+import { useContactsOptions } from "~/lib/contacts/hooks";
 
 type UploadDocumentFormFields = z.infer<typeof uploadDocumentSchema>;
 
@@ -38,7 +38,7 @@ export default function UploadDocument() {
     value: "will",
   });
 
-  const [contactOptions, setContactOptions] = useState<MultiOption[]>([]);
+  const { options: contactOptions } = useContactsOptions();
   const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
 
@@ -57,7 +57,6 @@ export default function UploadDocument() {
           label: c.fullName,
           value: c.id,
         }));
-        setContactOptions(opts);
       })();
       return () => {
         cancelled = true;

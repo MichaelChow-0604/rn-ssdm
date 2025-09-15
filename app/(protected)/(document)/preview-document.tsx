@@ -14,11 +14,14 @@ import { router, useLocalSearchParams } from "expo-router";
 import { Label } from "~/components/ui/label";
 import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
-import { getContactById, StoredContact } from "~/lib/storage/contact";
 import { useMemo, useEffect, useState, useRef } from "react";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { Button } from "~/components/ui/button";
 import { addDocument } from "~/lib/storage/document";
+import {
+  useContactsOptions,
+  usePrefetchContactDetails,
+} from "~/lib/contacts/hooks";
 
 export default function PreviewDocument() {
   const { documentName, description, category, type, fileName } =
@@ -31,9 +34,6 @@ export default function PreviewDocument() {
     }>();
 
   const { recipients } = useLocalSearchParams<{ recipients: string }>();
-  const [recipientContacts, setRecipientContacts] = useState<StoredContact[]>(
-    []
-  );
 
   const ids = useMemo(() => {
     if (!recipients) return [];
@@ -44,17 +44,13 @@ export default function PreviewDocument() {
     }
   }, [recipients]);
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const results = await Promise.all(ids.map((id) => getContactById(id)));
-      if (!cancelled)
-        setRecipientContacts(results.filter(Boolean) as StoredContact[]);
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [ids]);
+  const { nameIndex } = useContactsOptions();
+  const recipientNames = ids
+    .map((id) => nameIndex[id])
+    .filter(Boolean)
+    .join(", ");
+
+  usePrefetchContactDetails(ids);
 
   const [isUploading, setIsUploading] = useState(false);
 
@@ -195,7 +191,7 @@ export default function PreviewDocument() {
               <Textarea
                 className="text-black bg-gray-300 opacity-100 border-0"
                 placeholder="Enter Recipients"
-                value={recipientContacts.map((c) => c.fullName).join(", ")}
+                value={recipientNames}
                 editable={false}
               />
             </View>
@@ -218,7 +214,7 @@ export default function PreviewDocument() {
             </Text>
 
             <View className="flex-row gap-2 items-center bg-gray-100 p-3 w-full my-2">
-              <AntDesign name="file1" size={20} color="#438BF7" />
+              <AntDesign name="file" size={20} color="#438BF7" />
               <Text className="text-black font-bold text-lg">{fileName}</Text>
             </View>
           </View>

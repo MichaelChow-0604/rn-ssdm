@@ -163,6 +163,9 @@ export default function ContactDetailPage() {
 
   async function onDelete() {
     if (!apiContact) return;
+
+    // TODO: Add confirmation dialog (integrate with doc-check)
+
     deleteContactMutation.mutate(String(apiContact.id));
   }
 
@@ -172,10 +175,12 @@ export default function ContactDetailPage() {
       <View className="h-[40%] bg-[#438BF7] rounded-br-[200px] absolute top-0 left-0 right-0" />
 
       {status === "pending" ? (
-        <ActivityIndicator size="small" color="#438BF7" />
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator size="small" color="#438BF7" />
+        </View>
       ) : (
         <KeyboardAvoidingView
-          className="flex-1 items-start px-4"
+          className="flex-1 px-4"
           behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
           {/* Header */}

@@ -52,9 +52,7 @@ export default function CreateContactPage() {
   >({
     mutationKey: ["contact", "create"],
     mutationFn: createContact,
-    onSuccess: (data) => {
-      router.back();
-    },
+    onSuccess: () => router.back(),
     onError: () =>
       toast.error("Failed to create contact. Please try again later."),
   });

@@ -8,6 +8,8 @@ import { AuthProvider } from "~/context/auth-context";
 import { ProfileProvider } from "~/context/profile-context";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner-native";
+import { Platform } from "react-native";
+import { FullWindowOverlay } from "react-native-screens";
 
 const queryClient = new QueryClient();
 

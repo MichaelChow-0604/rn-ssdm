@@ -72,9 +72,6 @@ export default function TermsAndConditions() {
           <Text>
             {TEMP_LONG_TEXT}
             {TEMP_LONG_TEXT}
-            {TEMP_LONG_TEXT}
-            {TEMP_LONG_TEXT}
-            {TEMP_LONG_TEXT}
           </Text>
         </View>
       </ScrollView>

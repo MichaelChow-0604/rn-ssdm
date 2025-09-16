@@ -30,14 +30,27 @@ export const supportItems = [
     to: "/help-support",
   },
   {
-    icon: <FontAwesome name="exclamation-circle" size={24} color="#4b5563" />,
-    label: "Terms and Disclaimer",
-    to: "/terms-disclaimer",
+    icon: (
+      <MaterialCommunityIcons
+        name="file-document-multiple-outline"
+        size={24}
+        color="#4b5563"
+      />
+    ),
+    label: "Terms and Conditions",
+    to: "/p-terms-and-conditions",
   },
   {
-    icon: <AntDesign name="lock" size={24} color="#4b5563" />,
+    icon: <FontAwesome name="exclamation-triangle" size={24} color="#4b5563" />,
+    label: "Disclaimer",
+    to: "/disclaimer",
+  },
+  {
+    icon: (
+      <MaterialCommunityIcons name="shield-lock" size={24} color="#4b5563" />
+    ),
     label: "Privacy Policy",
-    to: "/privacy",
+    to: "/privacy-policy",
   },
 ];
 

@@ -22,6 +22,7 @@ import {
   useContactsOptions,
   usePrefetchContactDetails,
 } from "~/lib/contacts/hooks";
+import { LoadingOverlay } from "~/components/loading-overlay";
 
 export default function PreviewDocument() {
   const {
@@ -87,15 +88,15 @@ export default function PreviewDocument() {
       //   recipients: ids,
       // });
 
-      // await sleep(4000);
-
-      // router.replace({
-      //   pathname: "/return-message",
-      //   params: {
-      //     mode: "success",
-      //     transactionId: saved.transactionId,
-      //   },
-      // });
+      await sleep(4000);
+      router.replace({
+        pathname: "/return-message",
+        params: {
+          mode: "success",
+          transactionId:
+            "0xd58d35bf1ca98c9d4d1e19cc16b4985e89c09c9cfa90b6ce4b287e7eae545c43",
+        },
+      });
     } catch {
       router.replace({
         pathname: "/return-message",
@@ -106,45 +107,15 @@ export default function PreviewDocument() {
     }
   };
 
-  function UploadingOverlay({ visible }: { visible: boolean }) {
-    const opacity = useRef(new Animated.Value(0)).current;
-
-    useEffect(() => {
-      Animated.timing(opacity, {
-        toValue: visible ? 0.7 : 0,
-        duration: 300,
-        useNativeDriver: true, // animates opacity on UI thread
-      }).start();
-    }, [visible, opacity]);
-
-    return (
-      <View
-        pointerEvents={visible ? "auto" : "none"}
-        style={[StyleSheet.absoluteFillObject, { zIndex: 50 }]}
-      >
-        {/* Dim-only layer */}
-        <Animated.View
-          pointerEvents="none"
-          style={[
-            StyleSheet.absoluteFillObject,
-            { backgroundColor: "black", opacity },
-          ]}
-        />
-        {/* Foreground content (not dimmed) */}
-        <View
-          style={[StyleSheet.absoluteFillObject]}
-          className="items-center justify-center"
-        >
-          <ActivityIndicator size="large" color="#438BF7" />
-          <Text className="text-white font-bold text-2xl">Uploading...</Text>
-        </View>
-      </View>
-    );
-  }
-
   return (
     <SafeAreaView className="flex-1 bg-white">
-      {isUploading && <UploadingOverlay visible={isUploading} />}
+      {isUploading && (
+        <LoadingOverlay
+          visible={isUploading}
+          label="Uploading..."
+          onDismiss={() => {}}
+        />
+      )}
       <KeyboardAvoidingView
         style={{ flexGrow: 1 }}
         behavior={Platform.select({ ios: "padding", android: "height" })}
@@ -168,7 +139,6 @@ export default function PreviewDocument() {
               <Label className="text-black">Category</Label>
               <Input
                 className="text-black bg-gray-300 opacity-100 border-0"
-                placeholder="Enter Category"
                 value={category as string}
                 editable={false}
               />
@@ -179,7 +149,6 @@ export default function PreviewDocument() {
               <Label className="text-black">Type</Label>
               <Input
                 className="text-black bg-gray-300 opacity-100 border-0"
-                placeholder="Enter Type"
                 value={type as string}
                 editable={false}
               />
@@ -190,7 +159,6 @@ export default function PreviewDocument() {
               <Label className="text-black">Title</Label>
               <Input
                 className="text-black bg-gray-300 opacity-100 border-0"
-                placeholder="Enter Title"
                 value={title as string}
                 editable={false}
               />
@@ -201,7 +169,6 @@ export default function PreviewDocument() {
               <Label className="text-black">ID</Label>
               <Input
                 className="text-black bg-gray-300 opacity-100 border-0"
-                placeholder="Enter ID"
                 value={id as string}
                 editable={false}
               />
@@ -212,7 +179,6 @@ export default function PreviewDocument() {
               <Label className="text-black">Reference Number</Label>
               <Input
                 className="text-black bg-gray-300 opacity-100 border-0"
-                placeholder="Enter Reference Number"
                 value={reference_number as string}
                 editable={false}
               />
@@ -223,7 +189,6 @@ export default function PreviewDocument() {
               <Label className="text-black">Recipients</Label>
               <Textarea
                 className="text-black bg-gray-300 opacity-100 border-0"
-                placeholder="Enter Recipients"
                 value={recipientNames}
                 editable={false}
               />

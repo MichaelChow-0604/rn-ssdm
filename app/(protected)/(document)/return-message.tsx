@@ -25,7 +25,7 @@ export default function ReturnMessage() {
       <View className="flex-col gap-4 w-full items-center py-4">
         <View className="flex-col gap-3 items-center w-[80%]">
           <View className="flex-row gap-1 items-center">
-            <AntDesign name="file1" size={16} color="#6b7280" />
+            <AntDesign name="file-protect" size={16} color="#6b7280" />
             <Text className="text text-gray-500 font-semibold">
               Document Transaction ID:
             </Text>

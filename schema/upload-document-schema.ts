@@ -9,9 +9,11 @@ export const uploadDocumentSchema = z.object({
     .regex(/^[a-zA-Z0-9]+$/, { message: "ID must be alphanumeric" }),
   reference_number: z
     .string()
+    .trim()
     .regex(/^[a-zA-Z0-9]+$/, {
       message: "Reference Number must be alphanumeric",
     })
-    .optional(),
+    .optional()
+    .or(z.literal("")),
   remarks: z.string().optional(),
 });

@@ -6,18 +6,15 @@ import {
   Text,
   View,
 } from "react-native";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Button } from "../ui/button";
-import { Checkbox } from "../ui/checkbox";
 import "~/global.css";
-import { TermsAndPolicies } from "../pop-up/terms-and-policies";
 import { signUpSchema } from "~/schema/auth-schema";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller, FormProvider } from "react-hook-form";
-import AcceptAlert from "../pop-up/accept-alert";
 import {
   EMAIL_PLACEHOLDER,
   FIRST_NAME_PLACEHOLDER,
@@ -26,7 +23,6 @@ import {
   PASSWORD_PLACEHOLDER,
   SIGN_IN,
   SIGN_UP,
-  SIGN_UP_DESCRIPTION,
 } from "~/constants/auth-placeholders";
 import { useRouter } from "expo-router";
 import {
@@ -49,9 +45,6 @@ interface SignUpProps {
 type SignUpFormFields = z.infer<typeof signUpSchema>;
 
 export default function SignUp({ setIsSignIn }: SignUpProps) {
-  const [checked, setChecked] = useState(false);
-  const [showAcceptTerms, setShowAcceptTerms] = useState(false);
-  const [openTNP, setOpenTNP] = useState(false);
   const router = useRouter();
 
   const signUpMutation = useApiMutation<SignUpResponse, SignUpPayload>({
@@ -112,20 +105,12 @@ export default function SignUp({ setIsSignIn }: SignUpProps) {
   }, [watchedPassword]);
 
   const onSubmit = (formData: SignUpFormFields): void => {
-    // Check if the terms and conditions are accepted
-    if (checked) {
-      signUpMutation.mutate(formData);
-    } else {
-      setShowAcceptTerms(true);
-    }
+    signUpMutation.mutate(formData);
   };
 
   return (
     <FormProvider {...methods}>
       <ScrollView className="w-[80%]" showsVerticalScrollIndicator={false}>
-        <TermsAndPolicies visible={openTNP} setOpen={setOpenTNP} />
-        <AcceptAlert visible={showAcceptTerms} setOpen={setShowAcceptTerms} />
-
         {/* Header */}
         <View className="items-center justify-center pt-12 pb-12 gap-2 w-full">
           <Image
@@ -236,26 +221,9 @@ export default function SignUp({ setIsSignIn }: SignUpProps) {
           />
         </View>
 
-        {/* Terms and Conditions */}
-        <View className="flex-row justify-center mt-4 gap-2">
-          <Checkbox
-            checked={checked}
-            onCheckedChange={() => setChecked(!checked)}
-            className={`native:h-[16] native:w-[16] native:rounded-none border-subtitle ${
-              checked ? "bg-black" : "bg-white"
-            }`}
-          />
-          <Text className="text-subtitle text-sm">
-            {SIGN_UP_DESCRIPTION}{" "}
-            <Text className="text-buttontext" onPress={() => setOpenTNP(true)}>
-              terms & policy.
-            </Text>
-          </Text>
-        </View>
-
         {/* Sign up Button */}
         <Button
-          className="bg-button mt-4 rounded-xl"
+          className="bg-button mt-8 rounded-xl"
           onPress={handleSubmit(onSubmit)}
           disabled={isSigningUp}
         >

@@ -8,8 +8,6 @@ import { AuthProvider } from "~/context/auth-context";
 import { ProfileProvider } from "~/context/profile-context";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner-native";
-import { Platform } from "react-native";
-import { FullWindowOverlay } from "react-native-screens";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +22,7 @@ export default function RootLayout() {
                 <Stack.Screen name="index" />
                 <Stack.Screen name="(auth)" />
                 <Stack.Screen name="(protected)" />
+                <Stack.Screen name="terms-and-conditions" />
               </Stack>
               <PortalHost />
             </ProfileProvider>

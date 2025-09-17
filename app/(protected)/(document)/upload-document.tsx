@@ -37,11 +37,11 @@ interface FileInfo {
 export default function UploadDocument() {
   const [selectedCategory, setSelectedCategory] = useState<Option>({
     label: "Legal",
-    value: "legal",
+    value: "LEGAL",
   });
   const [selectedType, setSelectedType] = useState<Option>({
     label: "Will",
-    value: "will",
+    value: "WILL",
   });
 
   const { options: contactOptions } = useContactsOptions();

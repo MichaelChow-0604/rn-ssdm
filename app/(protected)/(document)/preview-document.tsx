@@ -1,10 +1,7 @@
 import {
-  ActivityIndicator,
-  Animated,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  StyleSheet,
   Text,
   View,
 } from "react-native";
@@ -14,38 +11,47 @@ import { router, useLocalSearchParams } from "expo-router";
 import { Label } from "~/components/ui/label";
 import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
-import { useMemo, useEffect, useState, useRef } from "react";
+import { useMemo } from "react";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { Button } from "~/components/ui/button";
-import { addDocument } from "~/lib/storage/document";
 import {
   useContactsOptions,
   usePrefetchContactDetails,
 } from "~/lib/contacts/hooks";
 import { LoadingOverlay } from "~/components/loading-overlay";
+import { useApiMutation } from "~/lib/http/use-api-mutation";
+import {
+  FileData,
+  UploadDocumentPayload,
+} from "~/lib/http/request-type/document";
+import { UploadDocumentResponse } from "~/lib/http/response-type/document";
+import { uploadDocument } from "~/lib/http/endpoints/document";
+
+interface PreviewData {
+  title: string;
+  description: string;
+  category: string;
+  type: string;
+  recipients: string; // JSON stringified array of IDs
+  id: string;
+  reference_number: string;
+  remarks: string;
+  file: FileData;
+}
 
 export default function PreviewDocument() {
-  const {
-    title,
-    description,
-    category,
-    type,
-    fileName,
-    id,
-    reference_number,
-    remarks,
-  } = useLocalSearchParams<{
-    title: string;
-    description: string;
-    category: string;
-    type: string;
-    fileName: string;
-    id: string;
-    reference_number: string;
-    remarks: string;
-  }>();
+  const { previewData } = useLocalSearchParams<{ previewData: string }>();
+  const data: PreviewData = JSON.parse(String(previewData));
 
-  const { recipients } = useLocalSearchParams<{ recipients: string }>();
+  const title = data?.title;
+  const description = data?.description;
+  const category = data?.category;
+  const type = data?.type;
+  const id = data?.id;
+  const recipients = data?.recipients;
+  const reference_number = data?.reference_number;
+  const remarks = data?.remarks;
+  const fileName = data?.file.name;
 
   const ids = useMemo(() => {
     if (!recipients) return [];
@@ -64,31 +70,13 @@ export default function PreviewDocument() {
 
   usePrefetchContactDetails(ids);
 
-  const [isUploading, setIsUploading] = useState(false);
-
-  const sleep = (ms: number) =>
-    new Promise((resolve) => setTimeout(resolve, ms));
-
-  const handleUpload = async () => {
-    setIsUploading(true);
-    try {
-      const fileExt =
-        String(fileName ?? "")
-          .split(".")
-          .pop()
-          ?.toLowerCase() ?? "";
-
-      // const saved = await addDocument({
-      //   documentName: String(title ?? ""),
-      //   description: String(description ?? ""),
-      //   category: String(category ?? ""),
-      //   type: String(type ?? ""),
-      //   fileName: String(fileName ?? ""),
-      //   fileExtension: fileExt,
-      //   recipients: ids,
-      // });
-
-      await sleep(4000);
+  const uploadDocumentMutation = useApiMutation<
+    UploadDocumentResponse,
+    UploadDocumentPayload
+  >({
+    mutationKey: ["document", "upload"],
+    mutationFn: uploadDocument,
+    onSuccess: () => {
       router.replace({
         pathname: "/return-message",
         params: {
@@ -97,21 +85,36 @@ export default function PreviewDocument() {
             "0xd58d35bf1ca98c9d4d1e19cc16b4985e89c09c9cfa90b6ce4b287e7eae545c43",
         },
       });
-    } catch {
+    },
+    onError: () => {
       router.replace({
         pathname: "/return-message",
         params: { mode: "error" },
       });
-    } finally {
-      setIsUploading(false);
-    }
+    },
+  });
+
+  const handleUpload = () => {
+    uploadDocumentMutation.mutate({
+      file: data.file,
+      metadata: {
+        title: data.title,
+        description: data.description,
+        category: data.category,
+        type: data.type,
+        recipients: ids,
+        id: data.id,
+        referenceNo: data.reference_number,
+        remarks: data.remarks,
+      },
+    });
   };
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-      {isUploading && (
+      {uploadDocumentMutation.isPending && (
         <LoadingOverlay
-          visible={isUploading}
+          visible={uploadDocumentMutation.isPending}
           label="Uploading..."
           onDismiss={() => {}}
         />
@@ -139,7 +142,7 @@ export default function PreviewDocument() {
               <Label className="text-black">Category</Label>
               <Input
                 className="text-black bg-gray-300 opacity-100 border-0"
-                value={category as string}
+                value={category}
                 editable={false}
               />
             </View>
@@ -149,7 +152,7 @@ export default function PreviewDocument() {
               <Label className="text-black">Type</Label>
               <Input
                 className="text-black bg-gray-300 opacity-100 border-0"
-                value={type as string}
+                value={type}
                 editable={false}
               />
             </View>
@@ -159,7 +162,7 @@ export default function PreviewDocument() {
               <Label className="text-black">Title</Label>
               <Input
                 className="text-black bg-gray-300 opacity-100 border-0"
-                value={title as string}
+                value={title}
                 editable={false}
               />
             </View>
@@ -169,7 +172,7 @@ export default function PreviewDocument() {
               <Label className="text-black">ID</Label>
               <Input
                 className="text-black bg-gray-300 opacity-100 border-0"
-                value={id as string}
+                value={id}
                 editable={false}
               />
             </View>
@@ -179,7 +182,7 @@ export default function PreviewDocument() {
               <Label className="text-black">Reference Number</Label>
               <Input
                 className="text-black bg-gray-300 opacity-100 border-0"
-                value={reference_number as string}
+                value={reference_number}
                 editable={false}
               />
             </View>
@@ -199,7 +202,7 @@ export default function PreviewDocument() {
               <Label className="text-black">Description</Label>
               <Textarea
                 className="text-black bg-gray-300 opacity-100 border-0"
-                value={description as string}
+                value={description}
                 editable={false}
               />
             </View>
@@ -209,7 +212,7 @@ export default function PreviewDocument() {
               <Label className="text-black">Remarks</Label>
               <Textarea
                 className="text-black bg-gray-300 opacity-100 border-0"
-                value={remarks as string}
+                value={remarks}
                 editable={false}
               />
             </View>
@@ -231,7 +234,7 @@ export default function PreviewDocument() {
           <Button
             className="w-[80%] self-center bg-button"
             onPress={handleUpload}
-            disabled={isUploading}
+            disabled={uploadDocumentMutation.isPending}
           >
             <Text className="font-bold text-white">Confirm & Upload</Text>
           </Button>

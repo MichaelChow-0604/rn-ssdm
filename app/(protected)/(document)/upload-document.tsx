@@ -27,6 +27,13 @@ import { useContactsOptions } from "~/lib/contacts/hooks";
 
 type UploadDocumentFormFields = z.infer<typeof uploadDocumentSchema>;
 
+interface FileInfo {
+  uri: string;
+  name: string;
+  mimeType: string | undefined;
+  size: number | undefined;
+}
+
 export default function UploadDocument() {
   const [selectedCategory, setSelectedCategory] = useState<Option>({
     label: "Legal",
@@ -39,11 +46,20 @@ export default function UploadDocument() {
 
   const { options: contactOptions } = useContactsOptions();
   const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
-  const [selectedFile, setSelectedFile] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<FileInfo | null>(null);
 
   const handleChooseFile = async () => {
     const result = await DocumentPicker.getDocumentAsync({});
-    setSelectedFile(result?.assets?.[0]?.name ?? null);
+
+    if (!result.canceled) {
+      const file = result.assets[0];
+      setSelectedFile({
+        uri: file.uri,
+        name: file.name,
+        mimeType: file.mimeType,
+        size: file.size,
+      });
+    }
   };
 
   const {
@@ -72,18 +88,22 @@ export default function UploadDocument() {
   const isUploadDisabled = !(hasTitle && hasId && hasRecipients && hasFile);
 
   const onSubmit = (data: UploadDocumentFormFields) => {
+    const previewData = {
+      title: data.title,
+      description: data.description,
+      category: selectedCategory?.label,
+      type: selectedType?.label,
+      recipients: JSON.stringify(selectedContacts), // serialize
+      id: data.id,
+      reference_number: data.reference_number,
+      remarks: data.remarks,
+      file: selectedFile,
+    };
+
     router.push({
       pathname: "/preview-document",
       params: {
-        title: data.title,
-        description: data.description,
-        category: selectedCategory?.label,
-        type: selectedType?.label,
-        recipients: JSON.stringify(selectedContacts), // serialize
-        fileName: selectedFile ?? "",
-        id: data.id,
-        reference_number: data.reference_number,
-        remarks: data.remarks,
+        previewData: JSON.stringify(previewData),
       },
     });
   };
@@ -197,6 +217,7 @@ export default function UploadDocument() {
                     onChangeText={onChange}
                     onBlur={onBlur}
                     value={value}
+                    autoCorrect={false}
                     placeholderClassName="text-placeholder"
                     placeholder="Enter Reference Number"
                     className="bg-white text-black border-gray-200"
@@ -292,7 +313,7 @@ export default function UploadDocument() {
               {selectedFile ? (
                 <View className="flex-1 items-center justify-center">
                   <Text className="text-gray-600 font-semibold">
-                    {selectedFile}
+                    {selectedFile.name}
                   </Text>
                 </View>
               ) : (

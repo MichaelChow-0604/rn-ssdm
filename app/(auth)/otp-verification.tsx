@@ -33,20 +33,29 @@ import {
   confirmSignUp,
   resendConfirmation,
 } from "~/lib/http/endpoints/auth";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { LoadingOverlay } from "~/components/loading-overlay";
 import { toast } from "sonner-native";
 import { contactKeys } from "~/lib/http/keys/contact";
 import { getContacts } from "~/lib/http/endpoints/contact";
 import ReLogin from "~/components/pop-up/re-login";
 import { useApiMutation } from "~/lib/http/use-api-mutation";
-import { SignInOTPResponse } from "~/lib/http/response-type/auth";
-import { ConfirmSignInPayload } from "~/lib/http/request-type/auth";
+import {
+  ResendOTPResponse,
+  SignInOTPResponse,
+  SignUpOTPResponse,
+} from "~/lib/http/response-type/auth";
+import {
+  ConfirmSignInPayload,
+  ConfirmSignUpPayload,
+} from "~/lib/http/request-type/auth";
 
 export default function OTPVerificationPage() {
   const { email, session, mode } = useLocalSearchParams();
   const [currentSession, setCurrentSession] = useState(session);
   const [otp, setOtp] = useState("");
+  const [expired, setExpired] = useState(false);
+
   const router = useRouter();
   const queryClient = useQueryClient();
 
@@ -58,25 +67,17 @@ export default function OTPVerificationPage() {
 
   const { setIsAuthenticated } = useAuth();
 
-  const handleTimerExpire = () => {
-    console.log("Timer expired");
-  };
-
-  const handleTimerReset = () => {
-    console.log("Timer reset");
-    // Add your resend code logic here
-  };
-
-  const resendMutation = useMutation({
+  const resendMutation = useApiMutation<ResendOTPResponse, string>({
     mutationKey: ["auth", "resend-confirmation"],
     mutationFn: (email: string) => resendConfirmation(email),
     onSuccess: ({ session: newSession }) => {
-      console.log("Old session", currentSession);
-      console.log("New session", newSession);
       setCurrentSession(newSession);
+
+      timerRef.current?.resetTimer();
+      startCooldown();
       toast.success("New OTP sent to your email.");
     },
-    onError: (err) => toast.error(err.message),
+    onError: () => toast.error("Something went wrong. Please try again later."),
   });
 
   const confirmSignInMutation = useApiMutation<
@@ -118,13 +119,24 @@ export default function OTPVerificationPage() {
     onError: () => {},
   });
 
-  const confirmSignUpMutation = useMutation({
+  const confirmSignUpMutation = useApiMutation<
+    SignUpOTPResponse,
+    ConfirmSignUpPayload
+  >({
     mutationKey: ["auth", "confirm-sign-up"],
     mutationFn: confirmSignUp,
     onSuccess: () => {
       router.replace({ pathname: "/return-message", params: { mode } });
     },
-    onError: () => toast.error("Invalid OTP. Please try again."),
+    onError: ({ status }) => {
+      switch (status) {
+        case 400:
+          toast.error("Invalid OTP. Please try again.");
+          break;
+        default:
+          toast.error("Something went wrong. Please try again later.");
+      }
+    },
   });
 
   const isVerifying =
@@ -134,8 +146,6 @@ export default function OTPVerificationPage() {
 
   const handleResendCode = (): void => {
     if (resendCooldown > 0 || resendMutation.isPending) return;
-    timerRef.current?.resetTimer();
-    startCooldown();
     resendMutation.mutate(String(email));
   };
 
@@ -228,8 +238,8 @@ export default function OTPVerificationPage() {
           <CountdownTimer
             ref={timerRef}
             initialTime={300} // 5 minutes
-            onExpire={handleTimerExpire}
-            onReset={handleTimerReset}
+            onExpire={() => setExpired(true)}
+            onReset={() => setExpired(false)}
             className="mt-1 mb-4"
           />
 
@@ -239,6 +249,7 @@ export default function OTPVerificationPage() {
               className="bg-button text-buttontext"
               disabled={
                 otp.length !== 6 ||
+                expired ||
                 showReLogin ||
                 confirmSignInMutation.isPending ||
                 confirmSignUpMutation.isPending
@@ -268,6 +279,7 @@ export default function OTPVerificationPage() {
               label={RESEND}
               cooldownSeconds={resendCooldown}
               onPress={handleResendCode}
+              isLoading={resendMutation.isPending}
             />
           </View>
         </KeyboardAvoidingView>

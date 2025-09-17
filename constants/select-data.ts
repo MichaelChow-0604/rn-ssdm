@@ -1,13 +1,13 @@
 export const CATEGORIES = [
-  { label: "Legal", value: "legal" },
-  { label: "Insurance", value: "insurance" },
-  { label: "Medical", value: "medical" },
-  { label: "Financials", value: "financials" },
+  { label: "Legal", value: "LEGAL" },
+  { label: "Insurance", value: "INSURANCE" },
+  { label: "Medical", value: "MEDICAL" },
+  { label: "Financials", value: "FINANCIALS" },
 ];
 
 export const TYPES = [
-  { label: "Will", value: "will" },
-  { label: "Insurance Policy", value: "insurance-policy" },
+  { label: "Will", value: "WILL" },
+  { label: "Insurance Policy", value: "INSURANCE_POLICY" },
 ];
 
 export const RELATIONSHIP_OPTIONS = [

@@ -91,8 +91,8 @@ export default function UploadDocument() {
     const previewData = {
       title: data.title,
       description: data.description,
-      category: selectedCategory?.label,
-      type: selectedType?.label,
+      category: selectedCategory?.value,
+      type: selectedType?.value,
       recipients: JSON.stringify(selectedContacts), // serialize
       id: data.id,
       reference_number: data.reference_number,

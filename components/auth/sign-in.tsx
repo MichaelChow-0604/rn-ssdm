@@ -195,7 +195,7 @@ export default function SignIn({ setIsSignIn }: SignInProps) {
       <TouchableOpacity
         activeOpacity={0.6}
         onPress={handleForgetPassword}
-        className="mt-1 items-end"
+        className="mt-1 self-end"
       >
         <Text className="text-redtext">{FORGET_PASSWORD}</Text>
       </TouchableOpacity>

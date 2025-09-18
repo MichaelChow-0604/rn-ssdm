@@ -13,7 +13,7 @@ import {
 type DocumentRow = {
   id: string;
   documentName: string;
-  uploadDate: number; // epoch seconds
+  uploadDate: number;
   fileExtension: string;
 };
 

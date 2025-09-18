@@ -58,7 +58,9 @@ export default function ContactListTab() {
 
       {/* Contact list */}
       {isLoading ? (
-        <ActivityIndicator size="small" color="#438BF7" />
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator size="small" color="#438BF7" className="mb-20" />
+        </View>
       ) : (
         <SectionList
           sections={sections}

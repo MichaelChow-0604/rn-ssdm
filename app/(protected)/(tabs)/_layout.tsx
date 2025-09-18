@@ -8,9 +8,11 @@ export default function TabsLayout() {
   return (
     <Tabs
       initialRouteName="document"
+      detachInactiveScreens={false}
       screenOptions={{
         headerTitle: "SSDM",
         headerTitleAlign: "center",
+        animation: "shift",
         headerShadowVisible: false,
         tabBarStyle:
           Platform.OS === "ios"

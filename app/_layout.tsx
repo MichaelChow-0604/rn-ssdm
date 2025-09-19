@@ -8,6 +8,7 @@ import { AuthProvider } from "~/context/auth-context";
 import { ProfileProvider } from "~/context/profile-context";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner-native";
+import { SettingsProvider } from "~/context/setting-context";
 
 const queryClient = new QueryClient();
 
@@ -18,13 +19,15 @@ export default function RootLayout() {
         <BottomSheetModalProvider>
           <AuthProvider>
             <ProfileProvider>
-              <Stack screenOptions={{ headerShown: false }}>
-                <Stack.Screen name="index" />
-                <Stack.Screen name="(auth)" />
-                <Stack.Screen name="(protected)" />
-                <Stack.Screen name="terms-and-conditions" />
-              </Stack>
-              <PortalHost />
+              <SettingsProvider>
+                <Stack screenOptions={{ headerShown: false }}>
+                  <Stack.Screen name="index" />
+                  <Stack.Screen name="(auth)" />
+                  <Stack.Screen name="(protected)" />
+                  <Stack.Screen name="terms-and-conditions" />
+                </Stack>
+                <PortalHost />
+              </SettingsProvider>
             </ProfileProvider>
           </AuthProvider>
         </BottomSheetModalProvider>

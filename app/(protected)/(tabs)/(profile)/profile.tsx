@@ -24,12 +24,14 @@ import { toast } from "sonner-native";
 import { useTokenStore } from "~/store/use-token-store";
 import { useApiMutation } from "~/lib/http/use-api-mutation";
 import { LogoutResponse } from "~/lib/http/response-type/auth";
+import { useSettings } from "~/context/setting-context";
 
 export default function ProfileTab() {
   const { profile } = useProfile();
   const { setIsAuthenticated } = useAuth();
   const [dialogOpen, setDialogOpen] = useState(false);
   const { clearTokens } = useTokenStore();
+  const { setNotificationEnabled } = useSettings();
 
   const logoutMutation = useApiMutation<LogoutResponse, void>({
     mutationKey: ["logout"],
@@ -37,6 +39,7 @@ export default function ProfileTab() {
     onSuccess: () => {
       clearTokens();
       setIsAuthenticated(false);
+      setNotificationEnabled(true);
     },
     onError: () => toast.error("Failed to logout. Please try again later."),
   });

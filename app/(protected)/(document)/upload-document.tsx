@@ -144,7 +144,7 @@ export default function UploadDocument() {
               setSelectedOption={setSelectedType}
             />
 
-            {/* Document Name */}
+            {/* Title */}
             <View className="flex-col gap-1">
               <View className="flex-row gap-0.5">
                 <Label className="text-black">Title</Label>

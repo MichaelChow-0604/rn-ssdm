@@ -171,13 +171,35 @@ export default function EditDocument() {
               />
             </View>
 
-            {/* Document Name */}
+            {/* Title */}
             <View className="flex-col gap-1">
-              <Label className="text-black">Document Name</Label>
+              <Label className="text-black">Title</Label>
               <Input
                 className="text-black bg-gray-300 opacity-100 border-0"
-                placeholder="Enter Document Name"
-                value={doc?.documentName ?? ""}
+                placeholder="Enter Title"
+                value={""}
+                editable={false}
+              />
+            </View>
+
+            {/* ID */}
+            <View className="flex-col gap-1">
+              <Label className="text-black">ID</Label>
+              <Input
+                className="text-black bg-gray-300 opacity-100 border-0"
+                placeholder="Enter ID"
+                value={doc?.id ?? ""}
+                editable={false}
+              />
+            </View>
+
+            {/* Reference Number */}
+            <View className="flex-col gap-1">
+              <Label className="text-black">Reference Number</Label>
+              <Input
+                className="text-black bg-gray-300 opacity-100 border-0"
+                placeholder="Enter Reference Number"
+                value={""}
                 editable={false}
               />
             </View>
@@ -214,6 +236,20 @@ export default function EditDocument() {
                 editable={isEditing}
               />
             </View>
+
+            {/* Remarks */}
+            <View className="flex-col gap-1">
+              <Label className="text-black">Remarks</Label>
+              <Textarea
+                key={isEditing ? "editing" : "readonly"}
+                className={`text-black opacity-100 border-0 ${
+                  isEditing ? "bg-white border border-gray-200" : "bg-gray-300"
+                }`}
+                // value={remarks}
+                // onChangeText={setRemarks}
+                editable={isEditing}
+              />
+            </View>
           </View>
 
           {/* Selected document */}
@@ -223,7 +259,7 @@ export default function EditDocument() {
             </Text>
 
             <View className="flex-row gap-2 items-center bg-gray-100 p-3 w-full my-2">
-              <AntDesign name="file1" size={20} color="#438BF7" />
+              <AntDesign name="file" size={20} color="#438BF7" />
               <Text className="text-black font-bold text-lg">
                 {doc?.fileName ?? ""}
               </Text>

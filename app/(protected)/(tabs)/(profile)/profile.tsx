@@ -30,6 +30,7 @@ export default function ProfileTab() {
   const { profile } = useProfile();
   const { setIsAuthenticated } = useAuth();
   const [dialogOpen, setDialogOpen] = useState(false);
+
   const { clearTokens } = useTokenStore();
   const { setNotificationEnabled } = useSettings();
 
@@ -76,7 +77,7 @@ export default function ProfileTab() {
           </View>
 
           {/* Form section */}
-          <Card className="w-full bg-white p-4 rounded-xl gap-4 mb-16 border-gray-200">
+          <Card className="w-full bg-white p-4 rounded-xl gap-4 border-gray-200">
             {/* Account section */}
             <SettingsSection title="Account" items={accountItems} />
 

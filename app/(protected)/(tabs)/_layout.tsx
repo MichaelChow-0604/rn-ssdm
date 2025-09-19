@@ -14,17 +14,6 @@ export default function TabsLayout() {
         headerTitleAlign: "center",
         animation: "shift",
         headerShadowVisible: false,
-        tabBarStyle:
-          Platform.OS === "ios"
-            ? {
-                height: "10%",
-                paddingTop: 10,
-                position: "absolute",
-              }
-            : {
-                height: "10%",
-                paddingTop: 10,
-              },
         tabBarBackground: () => {
           if (Platform.OS === "ios") {
             return <BlurBackground />;

@@ -4,5 +4,5 @@ export interface CreateContactPayload {
   phone: string;
   email: string;
   relationship: string;
-  communication_option: string[];
+  communicationOption: string[];
 }

@@ -11,6 +11,9 @@ import { moveToTrash } from "~/lib/storage/trash";
 import { router } from "expo-router";
 import { useState } from "react";
 import { MoveToTrashAlert } from "~/components/pop-up/move-to-trash-alert";
+import { useQueryClient } from "@tanstack/react-query";
+import { documentKeys } from "~/lib/http/keys/document";
+import { getDocumentById } from "~/lib/http/endpoints/document";
 
 interface DotDropdownProps {
   documentId: string;
@@ -21,6 +24,7 @@ export default function DotDropdown({
   documentId,
   onDeleted,
 }: DotDropdownProps) {
+  const queryClient = useQueryClient();
   const [isMoveToTrashAlertOpen, setIsMoveToTrashAlertOpen] = useState(false);
 
   const handleMoveToTrash = async () => {
@@ -42,12 +46,18 @@ export default function DotDropdown({
         >
           <DropdownMenuItem
             className="flex-row items-center gap-2 active:bg-gray-100"
-            onPress={() =>
+            onPress={() => {
+              queryClient.prefetchQuery({
+                queryKey: documentKeys.detail(documentId),
+                queryFn: () => getDocumentById(documentId),
+                staleTime: 5 * 60 * 1000,
+              });
+
               router.push({
                 pathname: "/edit-document",
                 params: { documentId },
-              })
-            }
+              });
+            }}
           >
             <Feather name="edit" size={20} color="black" />
             <Text className="font-medium">View & edit details</Text>

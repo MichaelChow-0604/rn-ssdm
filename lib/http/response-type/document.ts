@@ -1,17 +1,20 @@
 export interface UploadDocumentResponse {
+  id: number;
+  ssdmDocId: string;
   cid: string;
-  transactionId: string;
   mimeType: string;
-  size: string;
+  size: number;
   network: string;
   category: string;
   type: string;
-  id: string;
+  userDocId: string;
   title: string;
+  fileName: string;
   referenceNo: string;
   recipients: string[];
   description: string;
   remarks: string;
+  transactionId: string;
   createdAt: string;
   updatedAt: string;
   message: string;
@@ -20,15 +23,50 @@ export interface UploadDocumentResponse {
 
 export interface DocumentSummary {
   id: number;
+  ssdmDocId: string;
   cid: string;
-  userDocId: string;
-  mimeType: string;
-  updatedAt: string;
   title: string;
+  userDocId: string;
+  size: number;
+  mimeType: string;
+  status: string;
+  updatedAt: string;
 }
 
 export interface GetDocumentsResponse {
   documentSummaries: DocumentSummary[];
+  message: string;
+  timestamp: string;
+}
+
+export interface GetDocumentResponse {
+  id: number;
+  ssdmDocId: string;
+  ownerUserId: string;
+  cid: string;
+  userDocId: string;
+  pinataDocId: string;
+  fileName: string;
+  referenceNo: string;
+  title: string;
+  type: string;
+  category: string;
+  docHash: string;
+  size: number;
+  mimeType: string;
+  network: string;
+  description: string;
+  remarks: string;
+  status: "PROCESSING" | "UPLOADED" | "FAILED";
+  notificationStatus: string;
+  recipients: string[];
+  transactionId: string;
+  pinataCreatedAt: string;
+  pinataUpdatedAt: string;
+  polygonCreatedAt: string;
+  polygonUpdatedAt: string;
+  createdAt: string;
+  updatedAt: string;
   message: string;
   timestamp: string;
 }

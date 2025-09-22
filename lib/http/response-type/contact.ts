@@ -5,7 +5,7 @@ export interface CreateContactResponse {
   email: string;
   relationship: string;
   communicationOptions: string[];
-  created_at: string;
+  createdAt: string;
   message: string;
   timestamp: string;
 }
@@ -30,8 +30,8 @@ interface Contact {
   lastName: string;
   relationship: string;
   contactOptions: string[];
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface GetContactResponse {

@@ -25,7 +25,7 @@ export const contactFormSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
   mobileNumber: z.string().min(1, "Mobile number is required"),
-  email: z.string().email("Invalid email address"),
+  email: z.email("Invalid email address"),
   profilePicUri: z.string().nullable().optional(),
   relationship: z.string().nullable().optional(),
   distributions: z.array(z.enum(["email", "whatsapp", "sms"])).min(1),
@@ -136,6 +136,7 @@ export function ContactForm({
                     onChangeText={onChange}
                     onBlur={onBlur}
                     value={value}
+                    autoCorrect={false}
                     editable={editable}
                     placeholder="First name"
                     className="bg-white text-black"
@@ -158,6 +159,7 @@ export function ContactForm({
                     onChangeText={onChange}
                     onBlur={onBlur}
                     value={value}
+                    autoCorrect={false}
                     editable={editable}
                     placeholder="Last name"
                     className="bg-white text-black"
@@ -212,6 +214,7 @@ export function ContactForm({
                   onChangeText={onChange}
                   onBlur={onBlur}
                   value={value}
+                  autoCorrect={false}
                   editable={editable}
                   placeholder="Email"
                   className="bg-white text-black"

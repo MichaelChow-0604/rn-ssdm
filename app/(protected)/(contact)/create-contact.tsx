@@ -75,7 +75,7 @@ export default function CreateContactPage() {
       phone: phoneNumber.replace(/ /g, ""),
       email: data.email.trim(),
       relationship: selectedRelationship?.value ?? "",
-      communication_option: distributions,
+      communicationOption: distributions,
     });
   };
 

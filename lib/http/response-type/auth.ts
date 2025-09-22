@@ -39,6 +39,8 @@ export interface SignInOTPResponse {
   refreshToken: string;
   tokenType: string;
   session?: string;
+  message: string;
+  timestamp: string;
 }
 
 export interface RefreshResponse {
@@ -47,6 +49,8 @@ export interface RefreshResponse {
   expiresIn: number;
   idToken: string;
   tokenType: string;
+  message: string;
+  timestamp: string;
 }
 
 export interface LogoutResponse {

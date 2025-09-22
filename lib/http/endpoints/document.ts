@@ -1,6 +1,7 @@
 import { api } from "../axios";
 import { UploadDocumentPayload } from "../request-type/document";
 import {
+  GetDocumentResponse,
   GetDocumentsResponse,
   UploadDocumentResponse,
 } from "../response-type/document";
@@ -26,5 +27,14 @@ export async function uploadDocument(
 
 export async function getDocuments(): Promise<GetDocumentsResponse> {
   const { data } = await api.get<GetDocumentsResponse>("/api/v1/documents");
+  return data;
+}
+
+export async function getDocumentById(
+  id: string
+): Promise<GetDocumentResponse> {
+  const { data } = await api.get<GetDocumentResponse>(
+    `/api/v1/documents/${id}`
+  );
   return data;
 }

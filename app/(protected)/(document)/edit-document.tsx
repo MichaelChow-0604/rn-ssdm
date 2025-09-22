@@ -15,111 +15,109 @@ import { Button } from "~/components/ui/button";
 import { useEffect, useMemo, useState } from "react";
 import { useLocalSearchParams } from "expo-router";
 import {
-  getDocumentById,
-  StoredDocument,
-  updateDocument,
-} from "~/lib/storage/document";
-import {
   getContactById,
   getContacts,
   StoredContact,
 } from "~/lib/storage/contact";
 import { EditAlert } from "~/components/pop-up/edit-alert";
-import { formatDateLong } from "~/lib/utils";
+import { beautifyResponse, formatDateLong } from "~/lib/utils";
 import { MultiOption } from "~/lib/types";
 import { RecipientsMultiSelect } from "~/components/documents/recipient-multi-select";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { documentKeys } from "~/lib/http/keys/document";
+import {
+  useContactsOptions,
+  usePrefetchContactDetails,
+} from "~/lib/contacts/hooks";
+import { Controller, useForm } from "react-hook-form";
+import { editDocumentSchema } from "~/schema/edit-document-schema";
+import * as z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { getDocumentById } from "~/lib/http/endpoints/document";
+
+type EditDocumentFormFields = z.infer<typeof editDocumentSchema>;
 
 export default function EditDocument() {
   const { documentId } = useLocalSearchParams<{ documentId: string }>();
   const [isEditing, setIsEditing] = useState(false);
-  const [doc, setDoc] = useState<StoredDocument | null>(null);
-  const [recipientContacts, setRecipientContacts] = useState<StoredContact[]>(
-    []
-  );
-  const [description, setDescription] = useState("");
+  // const [doc, setDoc] = useState<StoredDocument | null>(null);
+  // const [recipientContacts, setRecipientContacts] = useState<StoredContact[]>(
+  //   []
+  // );
+  // const [description, setDescription] = useState("");
 
-  const [contactOptions, setContactOptions] = useState<MultiOption[]>([]);
-  const [selectedRecipients, setSelectedRecipients] = useState<string[]>([]);
+  // const [contactOptions, setContactOptions] = useState<MultiOption[]>([]);
+  // const [selectedRecipients, setSelectedRecipients] = useState<string[]>([]);
 
-  const [editAlertOpen, setEditAlertOpen] = useState(false);
+  // const [editAlertOpen, setEditAlertOpen] = useState(false);
 
-  // Load document
+  const queryClient = useQueryClient();
+  const { data } = useQuery({
+    queryKey: documentKeys.detail(String(documentId)),
+    queryFn: () => getDocumentById(String(documentId)),
+    staleTime: 5 * 60 * 1000,
+  });
+  console.log(beautifyResponse(data));
+
+  const { options: contactOptions, nameIndex } = useContactsOptions();
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    reset,
+    watch,
+    setValue,
+  } = useForm<EditDocumentFormFields>({
+    defaultValues: {
+      id: "",
+      reference_number: "",
+      description: "",
+      remarks: "",
+      recipients: [],
+    },
+    resolver: zodResolver(editDocumentSchema),
+  });
+
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      if (!documentId) return;
-      const found = await getDocumentById(String(documentId));
-      if (cancelled) return;
-      setDoc(found);
-      setDescription(found?.description ?? "");
-      setSelectedRecipients(found?.recipients ?? []);
+    if (!data) return;
+    reset({
+      id: data.userDocId ?? "",
+      reference_number: data.referenceNo ?? "",
+      description: data.description ?? "",
+      remarks: data.remarks ?? "",
+      recipients: data.recipients ?? [],
+    });
+  }, [data, reset]);
 
-      if (found?.recipients?.length) {
-        const contacts = await Promise.all(
-          found.recipients.map((id) => getContactById(id))
-        );
-        if (!cancelled) {
-          setRecipientContacts(contacts.filter(Boolean) as StoredContact[]);
-        }
-      } else {
-        setRecipientContacts([]);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [documentId]);
+  const currentRecipients = watch("recipients") ?? [];
+  usePrefetchContactDetails(currentRecipients);
 
-  // Load all contacts as options
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const all = await getContacts();
-      if (cancelled) return;
-      setContactOptions(all.map((c) => ({ label: c.fullName, value: c.id })));
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const recipientsText = useMemo(
-    () => recipientContacts.map((c) => c.fullName).join(", "),
-    [recipientContacts]
-  );
+  const recipientNames = useMemo(() => {
+    if (!currentRecipients) return "";
+    return currentRecipients
+      .map((id) => nameIndex[id])
+      .filter(Boolean)
+      .join(", ");
+  }, [currentRecipients, nameIndex]);
 
   function handleEdit() {
     setIsEditing(true);
   }
 
   async function handleSave() {
-    if (!documentId || !doc) {
-      setIsEditing(false);
-      return;
-    }
-
-    // Check if no recipients are selected
-    if (selectedRecipients.length === 0) {
-      setEditAlertOpen(true);
-      return;
-    }
-
-    const updated = await updateDocument(String(documentId), {
-      description,
-      recipients: selectedRecipients,
-    });
-
-    if (updated) {
-      setDoc(updated);
-      if (updated.recipients?.length) {
-        const contacts = await Promise.all(
-          updated.recipients.map((id) => getContactById(id))
-        );
-        setRecipientContacts(contacts.filter(Boolean) as StoredContact[]);
-      }
-    }
-    setIsEditing(false);
+    // TODO: Implement Update Document
   }
+
+  const category = data?.category ?? "";
+  const type = data?.type ?? "";
+  const title = data?.title ?? "";
+  const userDocId = data?.userDocId ?? "";
+  const referenceNumber = data?.referenceNo ?? "";
+  const description = data?.description ?? "";
+  const remarks = data?.remarks ?? "";
+  const fileName = data?.fileName ?? "";
+  const transactionId = data?.transactionId ?? "";
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -155,7 +153,7 @@ export default function EditDocument() {
               <Input
                 className="text-black bg-gray-300 opacity-100 border-0"
                 placeholder="Enter Category"
-                value={doc?.category ?? ""}
+                value={category}
                 editable={false}
               />
             </View>
@@ -166,7 +164,7 @@ export default function EditDocument() {
               <Input
                 className="text-black bg-gray-300 opacity-100 border-0"
                 placeholder="Enter Type"
-                value={doc?.type ?? ""}
+                value={type}
                 editable={false}
               />
             </View>
@@ -177,7 +175,7 @@ export default function EditDocument() {
               <Input
                 className="text-black bg-gray-300 opacity-100 border-0"
                 placeholder="Enter Title"
-                value={""}
+                value={title}
                 editable={false}
               />
             </View>
@@ -185,61 +183,157 @@ export default function EditDocument() {
             {/* ID */}
             <View className="flex-col gap-1">
               <Label className="text-black">ID</Label>
-              <Input
-                className="text-black bg-gray-300 opacity-100 border-0"
-                placeholder="Enter ID"
-                value={doc?.id ?? ""}
-                editable={false}
-              />
+              {isEditing ? (
+                <Controller
+                  name="id"
+                  control={control}
+                  render={({ field: { onChange, value, onBlur } }) => (
+                    <Input
+                      onChangeText={onChange}
+                      onBlur={onBlur}
+                      value={value}
+                      autoCorrect={false}
+                      placeholderClassName="text-placeholder"
+                      placeholder="Enter ID"
+                      className="bg-white text-black border-gray-200"
+                    />
+                  )}
+                />
+              ) : (
+                <Input
+                  className="text-black bg-gray-300 opacity-100 border-0"
+                  value={userDocId}
+                  editable={false}
+                />
+              )}
+              {errors.id && (
+                <Text className="text-redtext text-sm">
+                  {errors.id.message}
+                </Text>
+              )}
             </View>
 
             {/* Reference Number */}
             <View className="flex-col gap-1">
               <Label className="text-black">Reference Number</Label>
-              <Input
-                className="text-black bg-gray-300 opacity-100 border-0"
-                placeholder="Enter Reference Number"
-                value={""}
-                editable={false}
-              />
+              {isEditing ? (
+                <Controller
+                  name="reference_number"
+                  control={control}
+                  render={({ field: { onChange, value, onBlur } }) => (
+                    <Input
+                      onChangeText={onChange}
+                      onBlur={onBlur}
+                      value={value}
+                      autoCorrect={false}
+                      placeholderClassName="text-placeholder"
+                      placeholder="Enter Reference Number"
+                      className="bg-white text-black border-gray-200"
+                    />
+                  )}
+                />
+              ) : (
+                <Input
+                  className="text-black bg-gray-300 opacity-100 border-0"
+                  value={referenceNumber}
+                  editable={false}
+                />
+              )}
+              {errors.reference_number && (
+                <Text className="text-redtext text-sm">
+                  {errors.reference_number.message}
+                </Text>
+              )}
             </View>
 
             {/* Recipients */}
             <View className="flex-col gap-1">
               <Label className="text-black">Recipients</Label>
               {isEditing ? (
-                <RecipientsMultiSelect
-                  options={contactOptions}
-                  value={selectedRecipients}
-                  onChange={setSelectedRecipients}
+                <Controller
+                  name="recipients"
+                  control={control}
+                  render={({ field: { onChange, value } }) => (
+                    <RecipientsMultiSelect
+                      options={contactOptions}
+                      value={value ?? []}
+                      onChange={(v) => onChange(v)}
+                    />
+                  )}
                 />
               ) : (
                 <Textarea
                   className="text-black bg-gray-300 opacity-100 border-0"
                   placeholder="Recipients"
-                  value={recipientsText}
+                  value={recipientNames}
                   editable={false}
                 />
+              )}
+              {errors.recipients && (
+                <Text className="text-redtext text-sm">
+                  {errors.recipients.message}
+                </Text>
               )}
             </View>
 
             {/* Description */}
             <View className="flex-col gap-1">
               <Label className="text-black">Description</Label>
-              <Textarea
-                key={isEditing ? "editing" : "readonly"}
-                className={`text-black opacity-100 border-0 ${
-                  isEditing ? "bg-white border border-gray-200" : "bg-gray-300"
-                }`}
-                value={description}
-                onChangeText={setDescription}
-                editable={isEditing}
-              />
+              {isEditing ? (
+                <Controller
+                  name="description"
+                  control={control}
+                  render={({ field: { onChange, value, onBlur } }) => (
+                    <Textarea
+                      onChangeText={onChange}
+                      onBlur={onBlur}
+                      value={value}
+                      autoCorrect={false}
+                      placeholderClassName="text-placeholder"
+                      placeholder="Enter Description"
+                      className="bg-white text-black border-gray-200"
+                    />
+                  )}
+                />
+              ) : (
+                <Textarea
+                  className="text-black bg-gray-300 opacity-100 border-0"
+                  value={description}
+                  editable={false}
+                />
+              )}
             </View>
 
             {/* Remarks */}
             <View className="flex-col gap-1">
               <Label className="text-black">Remarks</Label>
+              {isEditing ? (
+                <Controller
+                  name="remarks"
+                  control={control}
+                  render={({ field: { onChange, value, onBlur } }) => (
+                    <Textarea
+                      onChangeText={onChange}
+                      onBlur={onBlur}
+                      value={value}
+                      autoCorrect={false}
+                      placeholderClassName="text-placeholder"
+                      placeholder="Enter Remarks"
+                      className="bg-white text-black border-gray-200"
+                    />
+                  )}
+                />
+              ) : (
+                <Textarea
+                  className="text-black bg-gray-300 opacity-100 border-0"
+                  value={remarks}
+                  editable={false}
+                />
+              )}
+            </View>
+
+            {/* Transaction ID */}
+            <View className="flex-col gap-1">
               <Textarea
                 key={isEditing ? "editing" : "readonly"}
                 className={`text-black opacity-100 border-0 ${
@@ -260,9 +354,7 @@ export default function EditDocument() {
 
             <View className="flex-row gap-2 items-center bg-gray-100 p-3 w-full my-2">
               <AntDesign name="file" size={20} color="#438BF7" />
-              <Text className="text-black font-bold text-lg">
-                {doc?.fileName ?? ""}
-              </Text>
+              <Text className="text-black font-bold text-lg">{fileName}</Text>
             </View>
           </View>
 
@@ -273,7 +365,7 @@ export default function EditDocument() {
               <Textarea
                 className="text-black bg-gray-300 opacity-100 border-0"
                 placeholder="Enter Transaction ID"
-                value={doc?.transactionId ?? ""}
+                value={transactionId}
                 editable={false}
               />
             </View>
@@ -284,7 +376,7 @@ export default function EditDocument() {
               <Input
                 className="text-black bg-gray-300 opacity-100 border-0"
                 placeholder="Enter Upload Date"
-                value={doc ? formatDateLong(doc.uploadDate) : ""}
+                value={""}
                 editable={false}
               />
             </View>
@@ -295,15 +387,13 @@ export default function EditDocument() {
               <Input
                 className="text-black bg-gray-300 opacity-100 border-0"
                 placeholder="Enter Upload Time"
-                value={doc?.uploadTime ?? ""}
+                value={""}
                 editable={false}
               />
             </View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-
-      <EditAlert visible={editAlertOpen} setOpen={setEditAlertOpen} />
     </SafeAreaView>
   );
 }

@@ -94,7 +94,7 @@ export default function UploadDocument() {
       category: selectedCategory?.value,
       type: selectedType?.value,
       recipients: JSON.stringify(selectedContacts), // serialize
-      id: data.id,
+      userDocId: data.id,
       reference_number: data.reference_number,
       remarks: data.remarks,
       file: selectedFile,
@@ -265,6 +265,7 @@ export default function UploadDocument() {
                     onChangeText={onChange}
                     onBlur={onBlur}
                     value={value}
+                    autoCorrect={false}
                     placeholderClassName="text-placeholder"
                     placeholder="Enter Description"
                     className="bg-white text-black border-gray-200"
@@ -284,6 +285,7 @@ export default function UploadDocument() {
                     onChangeText={onChange}
                     onBlur={onBlur}
                     value={value}
+                    autoCorrect={false}
                     placeholderClassName="text-placeholder"
                     placeholder="Enter Remarks"
                     className="bg-white text-black border-gray-200"

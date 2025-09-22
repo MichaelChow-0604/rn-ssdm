@@ -1,7 +1,7 @@
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { FlatList, Image, Text, View, Platform } from "react-native";
+import { ActivityIndicator, FlatList, Image, Text, View } from "react-native";
 import DotDropdown from "./dot-dropdown";
-import { formateDate, iconForExt } from "~/lib/utils";
+import { extFromMime, formatIsoToDDMMYYYY, iconForExt } from "~/lib/utils";
 
 import {
   ColumnDef,
@@ -9,38 +9,20 @@ import {
   useReactTable,
   flexRender,
 } from "@tanstack/react-table";
+import { useQuery } from "@tanstack/react-query";
+import { getDocuments } from "~/lib/http/endpoints/document";
+import { documentKeys } from "~/lib/http/keys/document";
 
 type DocumentRow = {
   id: string;
-  documentName: string;
-  uploadDate: number;
-  fileExtension: string;
+  title: string;
+  uploadAt: string;
+  mimeType: string;
 };
-
-const TEMP_DATA: DocumentRow[] = [
-  {
-    id: "1",
-    documentName: "Rikki",
-    uploadDate: 1726684800,
-    fileExtension: "pdf",
-  },
-  {
-    id: "2",
-    documentName: "Document 2",
-    uploadDate: 1726684800,
-    fileExtension: "jpeg",
-  },
-  {
-    id: "3",
-    documentName: "Document 3",
-    uploadDate: 1726684800,
-    fileExtension: "docx",
-  },
-];
 
 const COLUMNS: ColumnDef<DocumentRow>[] = [
   {
-    accessorKey: "documentName",
+    accessorKey: "title",
     header: () => <Text className="font-bold">Document Name</Text>,
     cell: ({ row }) => {
       const doc = row.original;
@@ -53,16 +35,19 @@ const COLUMNS: ColumnDef<DocumentRow>[] = [
               color="black"
               className="absolute top-[-6] right-0 z-10"
             />
-            <Image source={iconForExt(doc.fileExtension)} className="w-8 h-8" />
+            <Image
+              source={iconForExt(extFromMime(doc.mimeType))}
+              className="w-8 h-8"
+            />
           </View>
-          <Text className="font-semibold">{doc.documentName}</Text>
+          <Text className="font-semibold">{doc.title}</Text>
         </View>
       );
     },
     meta: { className: "w-[65%] pl-4" },
   },
   {
-    accessorKey: "uploadDate",
+    accessorKey: "uploadAt",
     header: () => (
       <View className="flex flex-col items-center justify-start">
         <Text className="text-center text-xs text-gray-400">(DD/MM/YYYY)</Text>
@@ -70,7 +55,9 @@ const COLUMNS: ColumnDef<DocumentRow>[] = [
       </View>
     ),
     cell: ({ getValue }) => (
-      <Text className="text-center">{formateDate(getValue() as number)}</Text>
+      <Text className="text-center">
+        {formatIsoToDDMMYYYY(getValue() as string)}
+      </Text>
     ),
     meta: { className: "w-[25%] flex items-center justify-center" },
   },
@@ -83,8 +70,23 @@ const COLUMNS: ColumnDef<DocumentRow>[] = [
 ];
 
 export default function DocumentListTable() {
+  const { data, isLoading } = useQuery({
+    queryKey: documentKeys.list(),
+    queryFn: getDocuments,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+  });
+
+  const summaries = data?.documentSummaries ?? [];
+  const tableData: DocumentRow[] = summaries.map((s) => ({
+    id: String(s.id),
+    title: s.title,
+    uploadAt: s.updatedAt,
+    mimeType: s.mimeType,
+  }));
+
   const table = useReactTable({
-    data: TEMP_DATA,
+    data: tableData,
     columns: COLUMNS,
     getCoreRowModel: getCoreRowModel(),
   });
@@ -123,31 +125,37 @@ export default function DocumentListTable() {
 
       {/* Body */}
       <View className="w-full flex-1">
-        <FlatList
-          data={rows}
-          keyExtractor={(row) => row.id}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ flexGrow: 1 }}
-          ListEmptyComponent={<EmptyDocumentList />}
-          renderItem={({ item: row }) => (
-            <View className="flex-row border-gray-200 border-b mx-1">
-              {row.getVisibleCells().map((cell) => (
-                <View
-                  key={cell.id}
-                  className={`py-4 ${
-                    (
-                      cell.column.columnDef.meta as
-                        | { className?: string }
-                        | undefined
-                    )?.className ?? ""
-                  }`}
-                >
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </View>
-              ))}
-            </View>
-          )}
-        />
+        {isLoading ? (
+          <View className="flex-1 items-center justify-center">
+            <ActivityIndicator size="small" color="#438BF7" className="mb-8" />
+          </View>
+        ) : (
+          <FlatList
+            data={rows}
+            keyExtractor={(row) => row.id}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ flexGrow: 1 }}
+            ListEmptyComponent={<EmptyDocumentList />}
+            renderItem={({ item: row }) => (
+              <View className="flex-row border-gray-200 border-b mx-1">
+                {row.getVisibleCells().map((cell) => (
+                  <View
+                    key={cell.id}
+                    className={`py-4 ${
+                      (
+                        cell.column.columnDef.meta as
+                          | { className?: string }
+                          | undefined
+                      )?.className ?? ""
+                    }`}
+                  >
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </View>
+                ))}
+              </View>
+            )}
+          />
+        )}
       </View>
     </View>
   );
@@ -156,11 +164,7 @@ export default function DocumentListTable() {
 function EmptyDocumentList() {
   return (
     <View className="flex-1 items-center justify-center">
-      <Text
-        className={`text-center text-gray-400 text-2xl font-bold ${
-          Platform.OS === "ios" ? "mb-24" : ""
-        }`}
-      >
+      <Text className="text-center text-gray-400 text-2xl font-bold">
         No document yet
       </Text>
     </View>

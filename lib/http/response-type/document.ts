@@ -1,5 +1,6 @@
 export interface UploadDocumentResponse {
   cid: string;
+  transactionId: string;
   mimeType: string;
   size: string;
   network: string;
@@ -13,6 +14,21 @@ export interface UploadDocumentResponse {
   remarks: string;
   createdAt: string;
   updatedAt: string;
+  message: string;
+  timestamp: string;
+}
+
+export interface DocumentSummary {
+  id: number;
+  cid: string;
+  userDocId: string;
+  mimeType: string;
+  updatedAt: string;
+  title: string;
+}
+
+export interface GetDocumentsResponse {
+  documentSummaries: DocumentSummary[];
   message: string;
   timestamp: string;
 }

@@ -49,6 +49,8 @@ import {
   ConfirmSignInPayload,
   ConfirmSignUpPayload,
 } from "~/lib/http/request-type/auth";
+import { documentKeys } from "~/lib/http/keys/document";
+import { getDocuments } from "~/lib/http/endpoints/document";
 
 export default function OTPVerificationPage() {
   const { email, session, mode } = useLocalSearchParams();
@@ -108,6 +110,13 @@ export default function OTPVerificationPage() {
         queryClient.prefetchQuery({
           queryKey: contactKeys.list(),
           queryFn: getContacts,
+          staleTime: 5 * 60 * 1000,
+        });
+
+        // Warm documents in the background (no await needed)
+        queryClient.prefetchQuery({
+          queryKey: documentKeys.list(),
+          queryFn: getDocuments,
           staleTime: 5 * 60 * 1000,
         });
 

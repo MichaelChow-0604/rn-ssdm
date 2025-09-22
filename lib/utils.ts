@@ -14,6 +14,24 @@ export function formateDate(ts: number) {
   return `${dd}/${mm}/${yyyy}`;
 }
 
+export function extFromMime(mime: string | undefined): string {
+  if (!mime) return "unknown";
+  const m = mime.toLowerCase();
+
+  if (m === "application/pdf") return "pdf";
+  if (m === "application/msword") return "doc";
+  if (
+    m ===
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+  )
+    return "docx";
+  if (m === "image/jpeg" || m === "image/jpg") return "jpg";
+  if (m === "image/png") return "png";
+
+  const parts = m.split("/");
+  return parts[1] || "unknown";
+}
+
 export function iconForExt(ext: string) {
   switch (ext?.toLowerCase()) {
     case "pdf":
@@ -28,6 +46,14 @@ export function iconForExt(ext: string) {
     default:
       return require("~/assets/docs_icon/unknown.png");
   }
+}
+
+export function formatIsoToDDMMYYYY(iso: string) {
+  if (!iso) return "";
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso);
+  if (!m) return "";
+  const [, yyyy, mm, dd] = m;
+  return `${dd}/${mm}/${yyyy}`;
 }
 
 export function formatDateLong(ts: number) {

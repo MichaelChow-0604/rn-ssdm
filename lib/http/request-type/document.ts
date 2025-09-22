@@ -4,7 +4,7 @@ export interface Metadata {
   category: string;
   type: string;
   recipients: string[];
-  id: string;
+  userDocId: string;
   referenceNo: string;
   remarks: string;
 }

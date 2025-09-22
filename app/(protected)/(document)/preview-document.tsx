@@ -26,6 +26,8 @@ import {
 } from "~/lib/http/request-type/document";
 import { UploadDocumentResponse } from "~/lib/http/response-type/document";
 import { uploadDocument } from "~/lib/http/endpoints/document";
+import { useQueryClient } from "@tanstack/react-query";
+import { documentKeys } from "~/lib/http/keys/document";
 
 interface PreviewData {
   title: string;
@@ -33,7 +35,7 @@ interface PreviewData {
   category: string;
   type: string;
   recipients: string; // JSON stringified array of IDs
-  id: string;
+  userDocId: string;
   reference_number: string;
   remarks: string;
   file: FileData;
@@ -47,7 +49,7 @@ export default function PreviewDocument() {
   const description = data?.description;
   const category = data?.category;
   const type = data?.type;
-  const id = data?.id;
+  const userDocId = data?.userDocId;
   const recipients = data?.recipients;
   const reference_number = data?.reference_number;
   const remarks = data?.remarks;
@@ -70,23 +72,25 @@ export default function PreviewDocument() {
 
   usePrefetchContactDetails(ids);
 
+  const queryClient = useQueryClient();
+
   const uploadDocumentMutation = useApiMutation<
     UploadDocumentResponse,
     UploadDocumentPayload
   >({
     mutationKey: ["document", "upload"],
     mutationFn: uploadDocument,
-    onSuccess: () => {
+    onSuccess: ({ transactionId }) => {
+      queryClient.invalidateQueries({ queryKey: documentKeys.list() });
       router.replace({
         pathname: "/return-message",
         params: {
           mode: "success",
-          transactionId:
-            "0xd58d35bf1ca98c9d4d1e19cc16b4985e89c09c9cfa90b6ce4b287e7eae545c43",
+          transactionId,
         },
       });
     },
-    onError: () => {
+    onError: (err) => {
       router.replace({
         pathname: "/return-message",
         params: { mode: "error" },
@@ -103,7 +107,7 @@ export default function PreviewDocument() {
         category: data.category,
         type: data.type,
         recipients: ids,
-        id: data.id,
+        userDocId: data.userDocId,
         referenceNo: data.reference_number,
         remarks: data.remarks,
       },
@@ -167,12 +171,12 @@ export default function PreviewDocument() {
               />
             </View>
 
-            {/* ID */}
+            {/* User Doc ID */}
             <View className="flex-col gap-1">
               <Label className="text-black">ID</Label>
               <Input
                 className="text-black bg-gray-300 opacity-100 border-0"
-                value={id}
+                value={userDocId}
                 editable={false}
               />
             </View>

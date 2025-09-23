@@ -76,7 +76,7 @@ export default function TermsAndConditions() {
         </View>
       </ScrollView>
 
-      <View className="w-full px-6 pt-6 border-t border-gray-300">
+      <View className="w-full px-6 py-6 border-t border-gray-300">
         <Button
           className="bg-button"
           disabled={!isAtBottom}

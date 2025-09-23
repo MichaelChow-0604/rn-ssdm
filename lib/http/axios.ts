@@ -47,6 +47,7 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
+    console.log(error.response);
     const response = error.response;
     const originalRequest = error.config as
       | (AxiosRequestConfig & { retried?: boolean })

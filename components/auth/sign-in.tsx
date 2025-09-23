@@ -149,6 +149,7 @@ export default function SignIn({ setIsSignIn }: SignInProps) {
                 onBlur={onBlur}
                 value={value}
                 autoCorrect={false}
+                autoCapitalize="none"
                 placeholder={EMAIL_PLACEHOLDER}
                 placeholderClassName="text-placeholder"
                 className="bg-textfield border-0 text-black"
@@ -175,6 +176,7 @@ export default function SignIn({ setIsSignIn }: SignInProps) {
                 onChangeText={onChange}
                 onBlur={onBlur}
                 value={value}
+                autoCapitalize="none"
                 placeholderClassName="text-placeholder"
                 className="bg-textfield border-0 text-black"
                 placeholder={PASSWORD_PLACEHOLDER}

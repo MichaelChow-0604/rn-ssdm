@@ -8,7 +8,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import SearchBar from "~/components/search-bar";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { router, useFocusEffect } from "expo-router";
+import { router } from "expo-router";
 import { Contact } from "~/lib/types";
 import { buildSections } from "~/lib/contacts/utils";
 import { ContactRow } from "~/components/contact/contact-row";
@@ -18,15 +18,9 @@ import { getContactById, getContacts } from "~/lib/http/endpoints/contact";
 
 export default function ContactListTab() {
   const queryClient = useQueryClient();
-  const { data, isLoading, refetch } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: contactKeys.list(),
     queryFn: getContacts,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
-  });
-
-  useFocusEffect(() => {
-    refetch();
   });
 
   const items: Contact[] = (data?.contactSummaries ?? []).map((s) => ({

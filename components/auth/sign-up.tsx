@@ -184,6 +184,7 @@ export default function SignUp({ setIsSignIn }: SignUpProps) {
                   onBlur={onBlur}
                   value={value}
                   autoCorrect={false}
+                  autoCapitalize="none"
                   className="bg-textfield border-0 text-black"
                   placeholderClassName="text-placeholder"
                   placeholder={EMAIL_PLACEHOLDER}

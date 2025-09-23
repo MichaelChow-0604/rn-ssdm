@@ -90,7 +90,7 @@ export default function PreviewDocument() {
         },
       });
     },
-    onError: (err) => {
+    onError: () => {
       router.replace({
         pathname: "/return-message",
         params: { mode: "error" },
@@ -236,7 +236,7 @@ export default function PreviewDocument() {
 
           {/* Footer */}
           <Button
-            className="w-[80%] self-center bg-button"
+            className="w-[80%] self-center bg-button mb-8"
             onPress={handleUpload}
             disabled={uploadDocumentMutation.isPending}
           >

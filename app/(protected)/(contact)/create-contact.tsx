@@ -34,6 +34,8 @@ import { toast } from "sonner-native";
 import { useApiMutation } from "~/lib/http/use-api-mutation";
 import { CreateContactResponse } from "~/lib/http/response-type/contact";
 import { CreateContactPayload } from "~/lib/http/request-type/contact";
+import { contactKeys } from "~/lib/http/keys/contact";
+import { useQueryClient } from "@tanstack/react-query";
 
 type NewContactFormFields = z.infer<typeof newContactSchema>;
 
@@ -46,13 +48,18 @@ export default function CreateContactPage() {
     value: "FAMILY",
   });
 
+  const queryClient = useQueryClient();
+
   const createContactMutation = useApiMutation<
     CreateContactResponse,
     CreateContactPayload
   >({
     mutationKey: ["contact", "create"],
     mutationFn: createContact,
-    onSuccess: () => router.back(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: contactKeys.list() });
+      router.back();
+    },
     onError: () =>
       toast.error("Failed to create contact. Please try again later."),
   });
@@ -271,6 +278,7 @@ export default function CreateContactPage() {
                       onBlur={onBlur}
                       value={value}
                       autoCorrect={false}
+                      autoCapitalize="none"
                       placeholder="Email"
                       className="bg-white text-black border-gray-200"
                     />

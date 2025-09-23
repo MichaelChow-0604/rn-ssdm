@@ -50,7 +50,6 @@ export default function DotDropdown({
               queryClient.prefetchQuery({
                 queryKey: documentKeys.detail(documentId),
                 queryFn: () => getDocumentById(documentId),
-                staleTime: 5 * 60 * 1000,
               });
 
               router.push({

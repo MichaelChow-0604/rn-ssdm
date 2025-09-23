@@ -49,7 +49,16 @@ export default function UploadDocument() {
   const [selectedFile, setSelectedFile] = useState<FileInfo | null>(null);
 
   const handleChooseFile = async () => {
-    const result = await DocumentPicker.getDocumentAsync({});
+    const result = await DocumentPicker.getDocumentAsync({
+      type: [
+        "application/pdf",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "image/jpeg",
+        "image/jpg",
+        "image/png",
+      ],
+    });
 
     if (!result.canceled) {
       const file = result.assets[0];
@@ -191,6 +200,7 @@ export default function UploadDocument() {
                     onBlur={onBlur}
                     value={value}
                     autoCorrect={false}
+                    autoCapitalize="none"
                     className="bg-white text-black border-gray-200"
                     placeholderClassName="text-placeholder"
                     placeholder="Enter ID"
@@ -218,6 +228,7 @@ export default function UploadDocument() {
                     onBlur={onBlur}
                     value={value}
                     autoCorrect={false}
+                    autoCapitalize="none"
                     placeholderClassName="text-placeholder"
                     placeholder="Enter Reference Number"
                     className="bg-white text-black border-gray-200"
@@ -266,6 +277,7 @@ export default function UploadDocument() {
                     onBlur={onBlur}
                     value={value}
                     autoCorrect={false}
+                    autoCapitalize="none"
                     placeholderClassName="text-placeholder"
                     placeholder="Enter Description"
                     className="bg-white text-black border-gray-200"
@@ -286,6 +298,7 @@ export default function UploadDocument() {
                     onBlur={onBlur}
                     value={value}
                     autoCorrect={false}
+                    autoCapitalize="none"
                     placeholderClassName="text-placeholder"
                     placeholder="Enter Remarks"
                     className="bg-white text-black border-gray-200"

@@ -56,14 +56,45 @@ export function formatIsoToDDMMYYYY(iso: string) {
   return `${dd}/${mm}/${yyyy}`;
 }
 
-export function formatDateLong(ts: number) {
-  const d = new Date(ts);
-  const day = d.getDate();
-  const month = d.toLocaleString("en-US", { month: "short" });
-  const year = d.getFullYear();
-  return `${day} ${month} ${year}`;
+export function formatIsoToHKTTime(iso: string): string {
+  if (!iso) return "";
+  const m =
+    /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?(?:\.\d+)?(Z|[+\-]\d{2}:\d{2})?$/.exec(
+      iso
+    );
+  if (!m) return "";
+  const [, , , , HH, MM, , tz] = m;
+
+  // If timezone is present, convert to HKT (UTC+8); else assume already HKT
+  if (tz) {
+    const dt = new Date(iso); // absolute moment
+    const hktMs = dt.getTime() + 8 * 60 * 60 * 1000;
+    const d = new Date(hktMs);
+    const h24 = d.getUTCHours();
+    const minutes = d.getUTCMinutes();
+    const ampm = h24 >= 12 ? "PM" : "AM";
+    const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
+    return `${String(h12).padStart(2, "0")}:${String(minutes).padStart(
+      2,
+      "0"
+    )} ${ampm} HKT`;
+  }
+
+  // No timezone ⇒ treat as HKT already
+  const h24 = Number(HH);
+  const minutes = Number(MM);
+  const ampm = h24 >= 12 ? "PM" : "AM";
+  const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
+  return `${String(h12).padStart(2, "0")}:${String(minutes).padStart(
+    2,
+    "0"
+  )} ${ampm} HKT`;
 }
 
 export function beautifyResponse(response: any) {
   return JSON.stringify(response, null, 2);
+}
+
+export function delayApi(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }

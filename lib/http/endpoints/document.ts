@@ -10,17 +10,19 @@ export async function uploadDocument(
   payload: UploadDocumentPayload
 ): Promise<UploadDocumentResponse> {
   const formData = new FormData();
-  formData.append("file", payload.file as unknown as Blob);
+
+  // RN FormData file shape
+  formData.append("file", {
+    uri: payload.file.uri,
+    name: payload.file.name,
+    type: payload.file.type ?? "application/octet-stream",
+  } as any);
+
   formData.append("metadata", JSON.stringify(payload.metadata));
 
   const { data } = await api.post<UploadDocumentResponse>(
     "/api/v1/documents",
-    formData,
-    {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    }
+    formData
   );
   return data;
 }

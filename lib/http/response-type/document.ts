@@ -39,6 +39,8 @@ export interface GetDocumentsResponse {
   timestamp: string;
 }
 
+export type DocumentStatus = "PROCESSING" | "UPLOADED" | "FAILED" | "";
+
 export interface GetDocumentResponse {
   id: number;
   ssdmDocId: string;
@@ -57,7 +59,7 @@ export interface GetDocumentResponse {
   network: string;
   description: string;
   remarks: string;
-  status: "PROCESSING" | "UPLOADED" | "FAILED";
+  status: DocumentStatus;
   notificationStatus: string;
   recipients: string[];
   transactionId: string;

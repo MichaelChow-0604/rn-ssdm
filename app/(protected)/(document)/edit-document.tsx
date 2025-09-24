@@ -14,12 +14,7 @@ import { Textarea } from "~/components/ui/textarea";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { Button } from "~/components/ui/button";
 import { useEffect, useState } from "react";
-import { useLocalSearchParams } from "expo-router";
-import {
-  beautifyResponse,
-  formatIsoToDDMMYYYY,
-  formatIsoToHKTTime,
-} from "~/lib/utils";
+import { router, useLocalSearchParams } from "expo-router";
 import { RecipientsMultiSelect } from "~/components/documents/recipient-multi-select";
 import { useQuery } from "@tanstack/react-query";
 import { documentKeys } from "~/lib/http/keys/document";
@@ -29,6 +24,13 @@ import { editDocumentSchema } from "~/schema/edit-document-schema";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { getDocumentById } from "~/lib/http/endpoints/document";
+import { getRecipientNames } from "~/lib/documents/utils";
+import { toast } from "sonner-native";
+import {
+  ReadOnlyInput,
+  ReadOnlyTextarea,
+} from "~/components/documents/view-and-edit/readonly-fields";
+import { toDocumentVM } from "~/lib/documents/mappers";
 
 type EditDocumentFormFields = z.infer<typeof editDocumentSchema>;
 
@@ -36,11 +38,14 @@ export default function EditDocument() {
   const { documentId } = useLocalSearchParams<{ documentId: string }>();
   const [isEditing, setIsEditing] = useState(false);
 
-  const { data, isLoading } = useQuery({
+  // Fetch document details
+  const { data, isLoading, isError } = useQuery({
     queryKey: documentKeys.detail(String(documentId)),
     queryFn: () => getDocumentById(String(documentId)),
+    select: toDocumentVM,
   });
 
+  // Fetch contacts for recipients name display
   const { options: contactOptions, nameIndex } = useContactsOptions();
 
   const {
@@ -61,27 +66,29 @@ export default function EditDocument() {
     resolver: zodResolver(editDocumentSchema),
   });
 
+  // Auto-fill form with document details
   useEffect(() => {
     if (!data) return;
     reset({
       id: data.userDocId ?? "",
-      reference_number: data.referenceNo ?? "",
+      reference_number: data.referenceNumber ?? "",
       description: data.description ?? "",
       remarks: data.remarks ?? "",
       recipients: (data.recipients ?? []).map(String),
     });
   }, [data, reset]);
 
-  const currentRecipients = watch("recipients") ?? [];
+  // Server error
+  useEffect(() => {
+    if (isError) toast.error("Something went wrong. Please try again later.");
+  }, [isError]);
+
+  // Map recipients for display in readonly fields
+  const recipients = watch("recipients") ?? [];
   const contactsReady = Object.keys(nameIndex).length > 0;
-
-  const recipientIds = isEditing ? currentRecipients : data?.recipients ?? [];
-
+  const viewRecipientIds = isEditing ? recipients : data?.recipients ?? [];
   const recipientNames = contactsReady
-    ? recipientIds
-        .map((id) => nameIndex[id])
-        .filter(Boolean)
-        .join(", ")
+    ? getRecipientNames(viewRecipientIds.map(String), nameIndex)
     : "";
 
   function handleEdit() {
@@ -95,40 +102,20 @@ export default function EditDocument() {
     // TODO: Implement Update Document
   }
 
-  const category = data?.category ?? "";
-  const type = data?.type ?? "";
-  const title = data?.title ?? "";
-  const userDocId = data?.userDocId ?? "";
-  const referenceNumber = data?.referenceNo ?? "";
-  const description = data?.description ?? "";
-  const remarks = data?.remarks ?? "";
-  const fileName = data?.fileName ?? "";
-  const transactionId = data?.transactionId ?? "";
-
-  console.log(beautifyResponse(data));
-
-  const status = data?.status ?? "";
-  const uploadDate = (() => {
-    switch (status) {
-      case "UPLOADED":
-        return formatIsoToDDMMYYYY(data?.updatedAt ?? "");
-      case "PROCESSING":
-        return "Pending";
-      default:
-        return "Please reupload";
-    }
-  })();
-
-  const uploadTime = (() => {
-    switch (status) {
-      case "UPLOADED":
-        return formatIsoToHKTTime(data?.updatedAt ?? "");
-      case "PROCESSING":
-        return "Pending";
-      default:
-        return "Please reupload";
-    }
-  })();
+  const EditingRecipients = (
+    <Controller
+      name="recipients"
+      control={control}
+      render={({ field: { onChange, value } }) => (
+        <RecipientsMultiSelect
+          key={`recipients-${contactOptions.length}`}
+          options={contactOptions}
+          value={(value ?? []).map(String)}
+          onChange={(v) => onChange(v)}
+        />
+      )}
+    />
+  );
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -139,6 +126,18 @@ export default function EditDocument() {
         {isLoading ? (
           <View className="flex-1 items-center justify-center">
             <ActivityIndicator size="small" color="#438BF7" />
+          </View>
+        ) : !data ? (
+          <View className="flex-1 items-center justify-center gap-4">
+            <Text className="text-redtext text-center font-medium">
+              Document data not available.
+            </Text>
+            <Button
+              className="bg-button rounded-full"
+              onPress={() => router.back()}
+            >
+              <Text className="text-white font-bold">BACK</Text>
+            </Button>
           </View>
         ) : (
           <ScrollView
@@ -161,36 +160,24 @@ export default function EditDocument() {
               </Button>
             </View>
 
-            {/* Form preview */}
+            {/* Form section */}
             <View className="flex-col gap-4 w-[80%]">
               {/* Category */}
               <View className="flex-col gap-1">
                 <Label className="text-black">Category</Label>
-                <Input
-                  className="text-subtitle font-medium bg-gray-300 opacity-80 border-0"
-                  value={category}
-                  editable={false}
-                />
+                <ReadOnlyInput value={data.category} />
               </View>
 
               {/* Type */}
               <View className="flex-col gap-1">
                 <Label className="text-black">Type</Label>
-                <Input
-                  className="text-subtitle font-medium bg-gray-300 opacity-80 border-0"
-                  value={type}
-                  editable={false}
-                />
+                <ReadOnlyInput value={data.type} />
               </View>
 
               {/* Title */}
               <View className="flex-col gap-1">
                 <Label className="text-black">Title</Label>
-                <Input
-                  className="text-subtitle font-medium bg-gray-300 opacity-80 border-0"
-                  value={title}
-                  editable={false}
-                />
+                <ReadOnlyInput value={data.title} />
               </View>
 
               {/* ID */}
@@ -208,16 +195,12 @@ export default function EditDocument() {
                         autoCorrect={false}
                         placeholderClassName="text-placeholder"
                         placeholder="Enter ID"
-                        className="bg-white text-subtitle border-gray-200"
+                        className="bg-white text-black border-gray-200"
                       />
                     )}
                   />
                 ) : (
-                  <Input
-                    className="text-subtitle bg-gray-300 opacity-80 border-0"
-                    value={userDocId}
-                    editable={false}
-                  />
+                  <ReadOnlyInput value={data.userDocId} />
                 )}
                 {errors.id && (
                   <Text className="text-redtext text-sm">
@@ -241,16 +224,12 @@ export default function EditDocument() {
                         autoCorrect={false}
                         placeholderClassName="text-placeholder"
                         placeholder="Enter Reference Number"
-                        className="bg-white text-subtitle border-gray-200"
+                        className="bg-white text-black border-gray-200"
                       />
                     )}
                   />
                 ) : (
-                  <Input
-                    className="text-subtitle bg-gray-300 opacity-80 border-0"
-                    value={referenceNumber}
-                    editable={false}
-                  />
+                  <ReadOnlyInput value={data.referenceNumber} />
                 )}
                 {errors.reference_number && (
                   <Text className="text-redtext text-sm">
@@ -263,25 +242,9 @@ export default function EditDocument() {
               <View className="flex-col gap-1">
                 <Label className="text-black">Recipients</Label>
                 {isEditing ? (
-                  <Controller
-                    name="recipients"
-                    control={control}
-                    render={({ field: { onChange, value } }) => (
-                      <RecipientsMultiSelect
-                        key={`recipients-${contactOptions.length}`}
-                        options={contactOptions}
-                        value={(value ?? []).map(String)}
-                        onChange={(v) => onChange(v)}
-                      />
-                    )}
-                  />
+                  EditingRecipients
                 ) : (
-                  <Textarea
-                    className="text-subtitle bg-gray-300 opacity-80 border-0"
-                    placeholder="Recipients"
-                    value={recipientNames}
-                    editable={false}
-                  />
+                  <ReadOnlyTextarea value={recipientNames} />
                 )}
                 {errors.recipients && (
                   <Text className="text-redtext text-sm">
@@ -305,16 +268,12 @@ export default function EditDocument() {
                         autoCorrect={false}
                         placeholderClassName="text-placeholder"
                         placeholder="Enter Description"
-                        className="bg-white text-subtitle border-gray-200"
+                        className="bg-white text-black border-gray-200"
                       />
                     )}
                   />
                 ) : (
-                  <Textarea
-                    className="text-subtitle bg-gray-300 opacity-80 border-0"
-                    value={description}
-                    editable={false}
-                  />
+                  <ReadOnlyTextarea value={data.description} />
                 )}
               </View>
 
@@ -333,16 +292,12 @@ export default function EditDocument() {
                         autoCorrect={false}
                         placeholderClassName="text-placeholder"
                         placeholder="Enter Remarks"
-                        className="bg-white text-subtitle border-gray-200"
+                        className="bg-white text-black border-gray-200"
                       />
                     )}
                   />
                 ) : (
-                  <Textarea
-                    className="text-subtitle bg-gray-300 opacity-80 border-0"
-                    value={remarks}
-                    editable={false}
-                  />
+                  <ReadOnlyTextarea value={data.remarks} />
                 )}
               </View>
             </View>
@@ -355,7 +310,9 @@ export default function EditDocument() {
 
               <View className="flex-row gap-2 items-center bg-gray-100 p-3 w-full my-2">
                 <AntDesign name="file" size={20} color="#438BF7" />
-                <Text className="text-black font-bold text-lg">{fileName}</Text>
+                <Text className="text-black font-bold text-lg">
+                  {data.fileName}
+                </Text>
               </View>
             </View>
 
@@ -363,34 +320,19 @@ export default function EditDocument() {
               {/* Transaction ID */}
               <View className="flex-col gap-1">
                 <Label className="text-black">Transaction ID</Label>
-                <Textarea
-                  className="text-subtitle font-medium bg-gray-300 opacity-80 border-0"
-                  placeholder="Enter Transaction ID"
-                  value={transactionId}
-                  editable={false}
-                />
+                <ReadOnlyTextarea value={data.transactionId} />
               </View>
 
               {/* Upload Date */}
               <View className="flex-col gap-1">
                 <Label className="text-black">Upload Date</Label>
-                <Input
-                  className="text-subtitle font-medium bg-gray-300 opacity-80 border-0"
-                  placeholder="Enter Upload Date"
-                  value={uploadDate}
-                  editable={false}
-                />
+                <ReadOnlyInput value={data.uploadDate} />
               </View>
 
               {/* Upload Time */}
               <View className="flex-col gap-1">
                 <Label className="text-black">Upload Time</Label>
-                <Input
-                  className="text-subtitle font-medium bg-gray-300 opacity-80 border-0"
-                  placeholder="Enter Upload Time"
-                  value={uploadTime}
-                  editable={false}
-                />
+                <ReadOnlyInput value={data.uploadTime} />
               </View>
             </View>
           </ScrollView>

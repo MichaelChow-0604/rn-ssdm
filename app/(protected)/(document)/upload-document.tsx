@@ -24,15 +24,9 @@ import { RecipientsMultiSelect } from "~/components/documents/recipient-multi-se
 import { SelectDropdown } from "~/components/select-dropdown";
 import { CATEGORIES, TYPES } from "~/constants/select-data";
 import { useContactsOptions } from "~/lib/contacts/hooks";
+import { FileData } from "~/lib/http/request-type/document";
 
 type UploadDocumentFormFields = z.infer<typeof uploadDocumentSchema>;
-
-interface FileInfo {
-  uri: string;
-  name: string;
-  mimeType: string | undefined;
-  size: number | undefined;
-}
 
 export default function UploadDocument() {
   const [selectedCategory, setSelectedCategory] = useState<Option>({
@@ -46,7 +40,7 @@ export default function UploadDocument() {
 
   const { options: contactOptions } = useContactsOptions();
   const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
-  const [selectedFile, setSelectedFile] = useState<FileInfo | null>(null);
+  const [selectedFile, setSelectedFile] = useState<FileData | null>(null);
 
   const handleChooseFile = async () => {
     const result = await DocumentPicker.getDocumentAsync({
@@ -57,6 +51,7 @@ export default function UploadDocument() {
         "image/jpeg",
         "image/jpg",
         "image/png",
+        "image/heic",
       ],
     });
 
@@ -65,8 +60,8 @@ export default function UploadDocument() {
       setSelectedFile({
         uri: file.uri,
         name: file.name,
-        mimeType: file.mimeType,
-        size: file.size,
+        mimeType: file.mimeType ?? "",
+        size: file.size ?? 0,
       });
     }
   };

@@ -15,14 +15,19 @@ export async function uploadDocument(
   formData.append("file", {
     uri: payload.file.uri,
     name: payload.file.name,
-    type: payload.file.type ?? "application/octet-stream",
+    type: payload.file.mimeType ?? "application/octet-stream",
   } as any);
 
   formData.append("metadata", JSON.stringify(payload.metadata));
 
   const { data } = await api.post<UploadDocumentResponse>(
     "/api/v1/documents",
-    formData
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
   );
   return data;
 }

@@ -9,6 +9,8 @@ import { useCallback } from "react";
 import { useFocusEffect } from "expo-router";
 import { AccessProgressDialog } from "~/components/pop-up/access-progress";
 import { useShareUnlock } from "~/hooks/use-share-unlock";
+import { downloadDocument } from "~/lib/http/endpoints/document";
+import { beautifyResponse } from "~/lib/utils";
 
 type ShareFormFields = z.infer<typeof shareSchema>;
 
@@ -34,8 +36,11 @@ export default function ShareTab() {
     Keyboard.dismiss();
 
     // pick any bundled asset
-    const fileName = "ssdm.pdf";
-    await begin(require(`~/assets/docs/${fileName}`), fileName);
+    // const fileName = "ssdm.pdf";
+    // await begin(require(`~/assets/docs/${fileName}`), fileName);
+
+    const blob = await downloadDocument(72);
+    console.log(blob);
   };
 
   useFocusEffect(

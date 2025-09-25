@@ -45,3 +45,11 @@ export async function getDocumentById(
   );
   return data;
 }
+
+export async function downloadDocument(id: number): Promise<Blob> {
+  const { data } = await api.get<Blob>(`/api/v1/documents/72/download`, {
+    responseType: "blob",
+  });
+
+  return data;
+}

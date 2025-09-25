@@ -2,6 +2,7 @@ import { View } from "react-native";
 import SearchBar from "~/components/search-bar";
 import FilterOptions from "~/components/documents/filter-options";
 import DocumentListTable from "~/components/documents/document-list-table";
+import { useTokenStore } from "~/store/use-token-store";
 
 export default function DocumentTab() {
   return (

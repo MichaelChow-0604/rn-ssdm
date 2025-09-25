@@ -106,6 +106,9 @@ export default function OTPVerificationPage() {
           idToken: data.idToken,
         });
 
+        console.log("ACCESS TOKEN", data.accessToken);
+        console.log("ID TOKEN", data.idToken);
+
         // Warm contacts in the background (no await needed)
         queryClient.prefetchQuery({
           queryKey: contactKeys.list(),

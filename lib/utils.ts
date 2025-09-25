@@ -27,6 +27,7 @@ export function extFromMime(mime: string | undefined): string {
     return "docx";
   if (m === "image/jpeg" || m === "image/jpg") return "jpg";
   if (m === "image/png") return "png";
+  if (m === "image/heic") return "heic";
 
   const parts = m.split("/");
   return parts[1] || "unknown";
@@ -42,6 +43,7 @@ export function iconForExt(ext: string) {
     case "jpg":
     case "jpeg":
     case "png":
+    case "heic":
       return require("~/assets/docs_icon/image.png");
     default:
       return require("~/assets/docs_icon/unknown.png");

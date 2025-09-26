@@ -9,7 +9,12 @@ import { isPublicPath, isRenewalPath } from "./paths";
 import { renewAccessToken } from "./refresh";
 import { useTokenStore } from "../../store/use-token-store";
 
-type Subscriber = (token: string | null) => void;
+interface Tokens {
+  idToken: string;
+  accessToken: string;
+}
+
+type Subscriber = (token: Tokens | null) => void;
 
 let isRefreshing = false;
 let subscribers: Subscriber[] = [];
@@ -18,8 +23,8 @@ function subscribeTokenRefresh(cb: Subscriber) {
   subscribers.push(cb);
 }
 
-function onTokenRefreshed(token: string | null) {
-  subscribers.forEach((cb) => cb(token));
+function onTokenRefreshed(tokens: Tokens | null) {
+  subscribers.forEach((cb) => cb(tokens));
   subscribers = [];
 }
 
@@ -57,18 +62,23 @@ api.interceptors.response.use(
     const status = response.status;
     const url = originalRequest.url ?? "";
 
+    // If the request is public or user does not have access permission (403), don't refresh
     if (isPublicPath(url) || isRenewalPath(url)) return Promise.reject(error);
     if (status === 403) return Promise.reject(error);
 
+    // If the request is unauthorized (401) and not retried, refresh the token once
     if (status === 401 && !originalRequest.retried) {
       originalRequest.retried = true;
 
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
-          subscribeTokenRefresh((newToken) => {
-            if (!newToken) return reject(error);
+          subscribeTokenRefresh((newTokens) => {
+            if (!newTokens) return reject(error);
             const headers = ensureHeaders(originalRequest.headers);
-            headers.set("Authorization", `Bearer ${newToken}`);
+
+            // Attach fresh tokens
+            headers.set("Authorization", `Bearer ${newTokens.idToken}`);
+            headers.set("X-Access-Token", newTokens.accessToken);
             originalRequest.headers = headers;
             resolve(api(originalRequest));
           });
@@ -77,14 +87,21 @@ api.interceptors.response.use(
 
       isRefreshing = true;
       try {
-        const newToken = await renewAccessToken();
-        onTokenRefreshed(newToken);
+        // Get the new tokens
+        const { idToken, accessToken } = await renewAccessToken();
+        // Notify the subscribers that the token has been refreshed
+        onTokenRefreshed({ idToken, accessToken });
 
         const headers = ensureHeaders(originalRequest.headers);
-        headers.set("Authorization", `Bearer ${newToken}`);
+
+        // Attach the new tokens to the original request
+        headers.set("Authorization", `Bearer ${idToken}`);
+        headers.set("X-Access-Token", accessToken);
+
         originalRequest.headers = headers;
         return api(originalRequest);
       } catch (refreshErr) {
+        // Refresh failed, meaning the user is not authenticated anymore, log the user out
         onTokenRefreshed(null);
         useTokenStore.getState().clearTokens();
         console.log("NOW LOG THE FK OUT");

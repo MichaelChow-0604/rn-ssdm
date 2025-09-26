@@ -173,7 +173,7 @@ function NoSearchResults() {
 const COLUMNS: ColumnDef<DocumentRow>[] = [
   {
     accessorKey: "title",
-    header: () => <Text className="font-bold">Document Name</Text>,
+    header: () => <Text className="font-bold">Title</Text>,
     cell: ({ row }) => {
       const doc = row.original;
       return (

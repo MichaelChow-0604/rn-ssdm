@@ -58,6 +58,7 @@ export default function CreateContactPage() {
     mutationFn: createContact,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: contactKeys.list() });
+      toast.success("Contact created successfully.");
       router.back();
     },
     onError: () =>

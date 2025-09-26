@@ -25,6 +25,7 @@ import { SelectDropdown } from "~/components/select-dropdown";
 import { CATEGORIES, TYPES } from "~/constants/select-data";
 import { useContactsOptions } from "~/lib/contacts/hooks";
 import { FileData } from "~/lib/http/request-type/document";
+import { AlertDialog } from "~/components/alert-dialog";
 
 type UploadDocumentFormFields = z.infer<typeof uploadDocumentSchema>;
 
@@ -41,6 +42,7 @@ export default function UploadDocument() {
   const { options: contactOptions } = useContactsOptions();
   const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
   const [selectedFile, setSelectedFile] = useState<FileData | null>(null);
+  const [fileReachedMaxSize, setFileReachedMaxSize] = useState(false);
 
   const handleChooseFile = async () => {
     const result = await DocumentPicker.getDocumentAsync({
@@ -63,6 +65,10 @@ export default function UploadDocument() {
         mimeType: file.mimeType ?? "",
         size: file.size ?? 0,
       });
+
+      if (file.size && file.size > 25 * 1024 * 1024) {
+        setFileReachedMaxSize(true);
+      }
     }
   };
 
@@ -122,6 +128,16 @@ export default function UploadDocument() {
           className="bg-white"
           contentContainerClassName="items-center"
         >
+          <AlertDialog
+            visible={fileReachedMaxSize}
+            title="Reached maximum upload size limit"
+            label={`Please select a file with a size less than 25MB.`}
+            onDismiss={() => {
+              setSelectedFile(null);
+              setFileReachedMaxSize(false);
+            }}
+          />
+
           {/* Header */}
           <View className="flex-row items-center justify-start gap-2 w-full px-4 ">
             <BackButton />
@@ -334,8 +350,8 @@ export default function UploadDocument() {
             </View>
 
             <Text className="text-subtitle text-sm my-2 font-semibold">
-              Support JPG, PDF, WORD, EXCEL, PNG formats. Maximum file size:
-              25MB.
+              Support JPG, JPEG, PNG, HEIC, PDF, DOC, DOCX formats. Maximum file
+              size: 25MB.
             </Text>
           </View>
 

@@ -1,6 +1,7 @@
 import { api } from "../axios";
 import { CreateContactPayload } from "../request-type/contact";
 import {
+  CheckRelatedDocsResponse,
   CreateContactResponse,
   DeleteContactResponse,
   GetContactResponse,
@@ -24,6 +25,15 @@ export async function getContacts(): Promise<GetContactsResponse> {
 
 export async function getContactById(id: string): Promise<GetContactResponse> {
   const { data } = await api.get<GetContactResponse>(`/api/v1/contacts/${id}`);
+  return data;
+}
+
+export async function checkRelatedDocs(
+  id: string
+): Promise<CheckRelatedDocsResponse> {
+  const { data } = await api.get<CheckRelatedDocsResponse>(
+    `/api/v1/contacts/${id}/accessible-documents`
+  );
   return data;
 }
 

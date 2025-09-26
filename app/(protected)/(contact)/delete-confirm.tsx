@@ -1,20 +1,53 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { View, Text, Image } from "react-native";
+import { toast } from "sonner-native";
 import { Button } from "~/components/ui/button";
-import { useDeleteContact } from "~/hooks/use-delete-contact";
+import { deleteContact } from "~/lib/http/endpoints/contact";
+import { contactKeys } from "~/lib/http/keys/contact";
+import { DeleteContactResponse } from "~/lib/http/response-type/contact";
+import { useApiMutation } from "~/lib/http/use-api-mutation";
 
 export default function DeleteConfirm() {
-  const { id } = useLocalSearchParams();
-  const contactId = String(id ?? "");
+  const params = useLocalSearchParams();
 
-  const { blockedDocNames, affectedNames, canDelete, deleteContactAndCleanup } =
-    useDeleteContact(contactId);
+  const queryClient = useQueryClient();
+
+  const id = String(params.id ?? "");
+  const canDelete = String(params.canDelete ?? "false");
+
+  const blockedDocs = Array.isArray(params.blockedDocs)
+    ? (params.blockedDocs as string[])
+    : typeof params.blockedDocs === "string"
+    ? params.blockedDocs.length
+      ? [params.blockedDocs]
+      : []
+    : [];
+
+  const RelatedDocs = Array.isArray(params.RelatedDocs)
+    ? (params.RelatedDocs as string[])
+    : typeof params.RelatedDocs === "string"
+    ? params.RelatedDocs.length
+      ? [params.RelatedDocs]
+      : []
+    : [];
+
+  const deleteContactMutation = useApiMutation<DeleteContactResponse, string>({
+    mutationKey: ["contact", "delete"],
+    mutationFn: deleteContact,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: contactKeys.list() });
+      queryClient.removeQueries({ queryKey: contactKeys.detail(String(id)) });
+      router.replace("/contact-list");
+      toast.success("Contact deleted successfully.");
+    },
+    onError: () =>
+      toast.error("Failed to delete contact. Please try again later."),
+  });
 
   async function handleDelete() {
-    if (!canDelete) return;
-    await deleteContactAndCleanup();
-
-    router.replace("/contact-list");
+    if (canDelete !== "true") return;
+    deleteContactMutation.mutate(String(id));
   }
 
   return (
@@ -27,7 +60,8 @@ export default function DeleteConfirm() {
         Are you sure you want to delete this contact person?
       </Text>
 
-      {blockedDocNames.length > 0 ? (
+      {/* This contact is the ONLY recipient of the following document(s) */}
+      {blockedDocs.length > 0 ? (
         <View className="flex-col gap-1 w-[90%] mt-4">
           <Text className="text-center text-sm text-redtext">
             You cannot delete this contact.
@@ -38,7 +72,7 @@ export default function DeleteConfirm() {
           </Text>
 
           <Text className="text-center text-sm text-redtext font-bold">
-            {blockedDocNames.join(", ")}
+            {blockedDocs}
           </Text>
 
           <Text className="text-center text-sm text-redtext">
@@ -46,13 +80,14 @@ export default function DeleteConfirm() {
             this contact.
           </Text>
         </View>
-      ) : affectedNames.length > 0 ? (
+      ) : RelatedDocs.length > 0 ? (
+        // This contact is the recipient of the following document(s)
         <View className="flex-col gap-1 w-[90%] mt-4">
           <Text className="text-center text-sm text-redtext">
             This contact is the recipient of the following documents:
           </Text>
           <Text className="text-center text-sm text-redtext font-bold">
-            {affectedNames.join(", ")}
+            {RelatedDocs}
           </Text>
           <Text className="text-center text-sm text-redtext">
             Proceeding will automatically remove this contact from those
@@ -64,8 +99,8 @@ export default function DeleteConfirm() {
       <View className="flex-col gap-4 pt-8 w-[60%]">
         <Button
           onPress={handleDelete}
-          className={canDelete ? "bg-button" : "bg-gray-300"}
-          disabled={!canDelete}
+          className={canDelete === "true" ? "bg-button" : "bg-gray-300"}
+          disabled={canDelete !== "true"}
         >
           <Text className="text-white font-bold">YES, DELETE</Text>
         </Button>

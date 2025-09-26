@@ -40,6 +40,18 @@ export interface GetContactResponse {
   timestamp: string;
 }
 
+export interface RelatedDoc {
+  id: number;
+  title: string;
+}
+
+export interface CheckRelatedDocsResponse {
+  accessedOnlyByContact: RelatedDoc[];
+  accessedByContact: RelatedDoc[];
+  message: string;
+  timestamp: string;
+}
+
 export interface DeleteContactResponse {
   message: string;
   timestamp: string;

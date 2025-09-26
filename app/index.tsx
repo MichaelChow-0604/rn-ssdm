@@ -1,12 +1,22 @@
 import { Redirect } from "expo-router";
-import { View, ActivityIndicator } from "react-native";
+import { View, ActivityIndicator, Platform } from "react-native";
 import { useLocalStorage } from "../hooks/use-local-storage";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useEffect } from "react";
+import * as NavigationBar from "expo-navigation-bar";
 
 export default function Index() {
   // AsyncStorage.clear();
   // See whether the user has accepted the terms and conditions
   const { value: accepted, isLoading } = useLocalStorage<boolean>("accepted");
+
+  useEffect(() => {
+    if (Platform.OS === "android") {
+      // Set the navigation bar style
+      NavigationBar.setStyle("light");
+      NavigationBar.setBackgroundColorAsync("#ffffff");
+    }
+  }, []);
 
   if (isLoading) {
     return (

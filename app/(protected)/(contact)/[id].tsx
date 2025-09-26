@@ -32,12 +32,8 @@ import PhoneInput, {
 } from "react-native-international-phone-number";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { contactKeys } from "~/lib/http/keys/contact";
-import { deleteContact, getContactById } from "~/lib/http/endpoints/contact";
-import {
-  DeleteContactResponse,
-  GetContactResponse,
-} from "~/lib/http/response-type/contact";
-import { useApiMutation } from "~/lib/http/use-api-mutation";
+import { checkRelatedDocs, getContactById } from "~/lib/http/endpoints/contact";
+import { GetContactResponse } from "~/lib/http/response-type/contact";
 import { toast } from "sonner-native";
 
 const detailSchema = newContactSchema.extend({
@@ -51,6 +47,7 @@ type FormValues = z.infer<typeof detailSchema>;
 export default function ContactDetailPage() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const queryClient = useQueryClient();
+
   const [isEditing, setIsEditing] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState<ICountry | undefined>(
     undefined
@@ -153,21 +150,44 @@ export default function ContactDetailPage() {
     setIsEditing(false);
   });
 
-  const deleteContactMutation = useApiMutation<DeleteContactResponse, string>({
-    mutationKey: ["contact", "delete"],
-    mutationFn: deleteContact,
-    onSuccess: () => router.back(),
-    onError: () =>
-      toast.error("Failed to delete contact. Please try again later."),
-  });
-
-  async function onDelete() {
+  const onDelete = async () => {
     if (!apiContact) return;
 
-    // TODO: Add confirmation dialog (integrate with doc-check)
+    try {
+      // Check if the contact is associated with any documents
+      const res = await checkRelatedDocs(String(apiContact.id));
 
-    deleteContactMutation.mutate(String(apiContact.id));
-  }
+      const accessedOnlyByContact = Array.isArray(res.accessedOnlyByContact)
+        ? res.accessedOnlyByContact
+        : [];
+
+      const accessedByContact = Array.isArray(res.accessedByContact)
+        ? res.accessedByContact
+        : [];
+
+      const hasBlocked = accessedOnlyByContact.length > 0;
+      const hasRelated = accessedByContact.length > 0;
+
+      const params = {
+        id: String(apiContact.id),
+        canDelete: (!hasBlocked).toString(),
+        blockedDocs: hasBlocked
+          ? accessedOnlyByContact.map((d) => d.title)
+          : [],
+        relatedDocs:
+          !hasBlocked && hasRelated
+            ? accessedByContact.map((d) => d.title)
+            : [],
+      };
+
+      router.push({
+        pathname: "/delete-confirm",
+        params,
+      });
+    } catch (error) {
+      toast.error("Failed to check related documents. Please try again later.");
+    }
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-white">

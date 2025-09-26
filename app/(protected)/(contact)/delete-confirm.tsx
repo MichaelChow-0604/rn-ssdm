@@ -16,21 +16,32 @@ export default function DeleteConfirm() {
   const id = String(params.id ?? "");
   const canDelete = String(params.canDelete ?? "false");
 
-  const blockedDocs = Array.isArray(params.blockedDocs)
-    ? (params.blockedDocs as string[])
-    : typeof params.blockedDocs === "string"
-    ? params.blockedDocs.length
-      ? [params.blockedDocs]
-      : []
-    : [];
+  function toStringArray(value: unknown): string[] {
+    if (Array.isArray(value)) return value.map((v) => String(v));
+    if (typeof value === "string") {
+      if (!value) return [];
+      try {
+        const parsed = JSON.parse(value);
+        if (Array.isArray(parsed)) return parsed.map((v) => String(v));
+      } catch {}
+      return value
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+    }
+    return [];
+  }
 
-  const RelatedDocs = Array.isArray(params.RelatedDocs)
-    ? (params.RelatedDocs as string[])
-    : typeof params.RelatedDocs === "string"
-    ? params.RelatedDocs.length
-      ? [params.RelatedDocs]
-      : []
-    : [];
+  const blockedDocs = toStringArray(params.blockedDocs);
+  const relatedDocs = toStringArray(params.relatedDocs);
+
+  function formatDocsList(docs: string[]): string {
+    const parts = docs
+      .flatMap((d) => String(d).split(","))
+      .map((s) => s.trim().replace(/,+$/g, ""))
+      .filter(Boolean);
+    return parts.join(", ");
+  }
 
   const deleteContactMutation = useApiMutation<DeleteContactResponse, string>({
     mutationKey: ["contact", "delete"],
@@ -72,7 +83,7 @@ export default function DeleteConfirm() {
           </Text>
 
           <Text className="text-center text-sm text-redtext font-bold">
-            {blockedDocs}
+            {formatDocsList(blockedDocs)}
           </Text>
 
           <Text className="text-center text-sm text-redtext">
@@ -80,14 +91,14 @@ export default function DeleteConfirm() {
             this contact.
           </Text>
         </View>
-      ) : RelatedDocs.length > 0 ? (
+      ) : relatedDocs.length > 0 ? (
         // This contact is the recipient of the following document(s)
         <View className="flex-col gap-1 w-[90%] mt-4">
           <Text className="text-center text-sm text-redtext">
             This contact is the recipient of the following documents:
           </Text>
           <Text className="text-center text-sm text-redtext font-bold">
-            {RelatedDocs}
+            {formatDocsList(relatedDocs)}
           </Text>
           <Text className="text-center text-sm text-redtext">
             Proceeding will automatically remove this contact from those

@@ -58,8 +58,8 @@ export default function CreateContactPage() {
     mutationFn: createContact,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: contactKeys.list() });
-      toast.success("Contact created successfully.");
       router.back();
+      toast.success("Contact created successfully.");
     },
     onError: () =>
       toast.error("Failed to create contact. Please try again later."),
@@ -180,7 +180,6 @@ export default function CreateContactPage() {
                     rules={{ required: true }}
                     render={({ field: { onChange, onBlur, value } }) => (
                       <Input
-                        onScroll={() => console.log("gg")}
                         scrollEnabled={false}
                         onChangeText={onChange}
                         onBlur={onBlur}

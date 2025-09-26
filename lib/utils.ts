@@ -46,7 +46,7 @@ export function iconForExt(ext: string) {
     case "heic":
       return require("~/assets/docs_icon/image.png");
     default:
-      return require("~/assets/docs_icon/unknown.png");
+      return require("~/assets/docs_icon/doc.png");
   }
 }
 

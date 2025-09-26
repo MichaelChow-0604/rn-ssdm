@@ -154,7 +154,7 @@ function EmptyDocumentList() {
   return (
     <View className="flex-1 items-center justify-center">
       <Text className="text-center text-gray-400 text-2xl font-bold">
-        No document yet
+        No document
       </Text>
     </View>
   );

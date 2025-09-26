@@ -48,6 +48,14 @@
         {
           "icon": "./assets/images/app_icon.png"
         }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
       ]
     ],
     "experiments": {

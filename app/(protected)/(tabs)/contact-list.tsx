@@ -10,11 +10,12 @@ import SearchBar from "~/components/search-bar";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { router } from "expo-router";
 import { Contact } from "~/lib/types";
-import { buildSections } from "~/lib/contacts/utils";
+import { buildSections, normalizeName } from "~/lib/contacts/utils";
 import { ContactRow } from "~/components/contact/contact-row";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { contactKeys } from "~/lib/http/keys/contact";
 import { getContactById, getContacts } from "~/lib/http/endpoints/contact";
+import { useMemo, useState } from "react";
 
 export default function ContactListTab() {
   const queryClient = useQueryClient();
@@ -23,18 +24,41 @@ export default function ContactListTab() {
     queryFn: getContacts,
   });
 
+  const [searchQuery, setSearchQuery] = useState("");
+
   const items: Contact[] = (data?.contactSummaries ?? []).map((s) => ({
     id: String(s.id),
     name: `${s.firstName} ${s.lastName}`.trim(),
   }));
 
-  const sections = buildSections(items);
+  const query = searchQuery.trim();
+  const queryNorm = normalizeName(query).toLowerCase();
+  const filteredItems = query.length
+    ? items.filter((c) =>
+        normalizeName(c.name).toLowerCase().includes(queryNorm)
+      )
+    : items;
+
+  const sections = buildSections(filteredItems);
+
+  const RenderEmptyComponent = useMemo(() => {
+    return filteredItems.length === 0 && searchQuery.length > 0 ? (
+      <NoSearchResults />
+    ) : (
+      <EmptyState />
+    );
+  }, [filteredItems, searchQuery]);
 
   return (
     <SafeAreaView className="flex-1 bg-white">
       {/* Header */}
       <View className="flex-row items-center justify-between px-4 gap-4 py-6">
-        <SearchBar className="flex-1" placeholder="Search contacts" />
+        <SearchBar
+          className="flex-1"
+          placeholder="Search contacts"
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
 
         <TouchableOpacity
           activeOpacity={0.8}
@@ -63,7 +87,7 @@ export default function ContactListTab() {
           contentContainerStyle={{
             flexGrow: 1,
           }}
-          ListEmptyComponent={<EmptyState />}
+          ListEmptyComponent={RenderEmptyComponent}
           renderSectionHeader={({ section }) => (
             <SectionHeader title={section.title} />
           )}
@@ -103,6 +127,16 @@ function EmptyState({ text = "No contact yet" }: { text?: string }) {
     <View className="flex-1 items-center justify-center">
       <Text className="text-center text-gray-400 text-2xl font-bold">
         {text}
+      </Text>
+    </View>
+  );
+}
+
+function NoSearchResults() {
+  return (
+    <View className="flex-1 items-center justify-center">
+      <Text className="text-center text-gray-400 text-2xl font-bold">
+        No results found
       </Text>
     </View>
   );

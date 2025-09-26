@@ -76,6 +76,14 @@ export default function DocumentListTable({
     `Row count: Original=${coreRowCount}, Filtered=${filteredRowCount}`
   );
 
+  const RenderEmptyComponent = useMemo(() => {
+    return filteredRowCount === 0 && searchQuery.length > 0 ? (
+      <NoSearchResults />
+    ) : (
+      <EmptyDocumentList />
+    );
+  }, [filteredRowCount, searchQuery]);
+
   return (
     <View className="min-w-full flex-1">
       {/* Header */}
@@ -118,13 +126,7 @@ export default function DocumentListTable({
             keyExtractor={(row) => row.id}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ flexGrow: 1 }}
-            ListEmptyComponent={
-              filteredRowCount === 0 && searchQuery.length > 0 ? (
-                <NoSearchResults /> // Show a different empty state for search
-              ) : (
-                <EmptyDocumentList />
-              )
-            }
+            ListEmptyComponent={RenderEmptyComponent}
             renderItem={({ item: row }) => (
               <View className="flex-row border-gray-200 border-b mx-1">
                 {row.getVisibleCells().map((cell) => (
@@ -154,7 +156,7 @@ function EmptyDocumentList() {
   return (
     <View className="flex-1 items-center justify-center">
       <Text className="text-center text-gray-400 text-2xl font-bold">
-        No document
+        No document yet
       </Text>
     </View>
   );

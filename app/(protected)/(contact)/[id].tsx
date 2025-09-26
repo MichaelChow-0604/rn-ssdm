@@ -83,6 +83,14 @@ export default function ContactDetailPage() {
     }
   );
 
+  const checkKey = ["contact", "check-related-docs", String(id)];
+
+  const { isFetching: isCheckingDelete } = useQuery({
+    queryKey: checkKey,
+    queryFn: () => checkRelatedDocs(String(apiContact?.id ?? id)),
+    enabled: false, // do not auto-run
+  });
+
   useEffect(() => {
     if (!apiContact) return;
 
@@ -155,7 +163,10 @@ export default function ContactDetailPage() {
 
     try {
       // Check if the contact is associated with any documents
-      const res = await checkRelatedDocs(String(apiContact.id));
+      const res = await queryClient.fetchQuery({
+        queryKey: checkKey,
+        queryFn: () => checkRelatedDocs(String(apiContact.id)),
+      });
 
       const accessedOnlyByContact = Array.isArray(res.accessedOnlyByContact)
         ? res.accessedOnlyByContact
@@ -184,8 +195,8 @@ export default function ContactDetailPage() {
         pathname: "/delete-confirm",
         params,
       });
-    } catch (error) {
-      toast.error("Failed to check related documents. Please try again later.");
+    } catch {
+      toast.error("Failed to delete contact. Please try again later.");
     }
   };
 
@@ -434,9 +445,13 @@ export default function ContactDetailPage() {
             <Button
               className="w-[80%] self-center bg-red-500"
               onPress={onDelete}
-              disabled={!isEditing}
+              disabled={!isEditing || isCheckingDelete}
             >
-              <Text className="font-bold text-white">DELETE</Text>
+              {isCheckingDelete ? (
+                <ActivityIndicator size="small" color="white" />
+              ) : (
+                <Text className="font-bold text-white">DELETE</Text>
+              )}
             </Button>
           </ScrollView>
         </KeyboardAvoidingView>

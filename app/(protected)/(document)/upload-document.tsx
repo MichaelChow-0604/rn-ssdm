@@ -66,6 +66,8 @@ export default function UploadDocument() {
         size: file.size ?? 0,
       });
 
+      console.log(file);
+
       if (file.size && file.size > 25 * 1024 * 1024) {
         setFileReachedMaxSize(true);
       }

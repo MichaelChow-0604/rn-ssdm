@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
-import { View, Text, Image } from "react-native";
+import { View, Text, Image, ActivityIndicator } from "react-native";
 import { toast } from "sonner-native";
 import { Button } from "~/components/ui/button";
 import { deleteContact } from "~/lib/http/endpoints/contact";
@@ -55,6 +55,9 @@ export default function DeleteConfirm() {
     onError: () =>
       toast.error("Failed to delete contact. Please try again later."),
   });
+
+  const isDeletingContact =
+    deleteContactMutation.isPending || deleteContactMutation.isSuccess;
 
   async function handleDelete() {
     if (canDelete !== "true") return;
@@ -111,9 +114,13 @@ export default function DeleteConfirm() {
         <Button
           onPress={handleDelete}
           className={canDelete === "true" ? "bg-button" : "bg-gray-300"}
-          disabled={canDelete !== "true"}
+          disabled={canDelete !== "true" || isDeletingContact}
         >
-          <Text className="text-white font-bold">YES, DELETE</Text>
+          {isDeletingContact ? (
+            <ActivityIndicator size="small" color="white" />
+          ) : (
+            <Text className="text-white font-bold">YES, DELETE</Text>
+          )}
         </Button>
 
         <Button

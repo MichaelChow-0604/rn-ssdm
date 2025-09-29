@@ -31,6 +31,7 @@ export default function ContactListTab() {
   const items: Contact[] = (data?.contactSummaries ?? []).map((s) => ({
     id: String(s.id),
     name: `${s.firstName} ${s.lastName}`.trim(),
+    avatarUri: s.profilePicture,
   }));
 
   const query = searchQuery.trim();

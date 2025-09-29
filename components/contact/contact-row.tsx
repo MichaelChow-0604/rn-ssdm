@@ -8,6 +8,10 @@ interface ContactRowProps {
 }
 
 export function ContactRow({ id, name, avatarUri, onPress }: ContactRowProps) {
+  const iconDataUri = avatarUri
+    ? `data:image/jpeg;base64,${avatarUri}`
+    : require("~/assets/images/default_icon.png");
+
   return (
     <TouchableOpacity
       activeOpacity={0.7}
@@ -15,12 +19,12 @@ export function ContactRow({ id, name, avatarUri, onPress }: ContactRowProps) {
       onPress={() => onPress(id)}
     >
       {avatarUri ? (
-        <Image source={{ uri: avatarUri }} className="w-10 h-10 rounded-full" />
-      ) : (
         <Image
-          source={require("~/assets/images/default_icon.png")}
+          source={{ uri: iconDataUri }}
           className="w-10 h-10 rounded-full"
         />
+      ) : (
+        <Image source={iconDataUri} className="w-10 h-10 rounded-full" />
       )}
       <Text className="text-black font-semibold">{name}</Text>
     </TouchableOpacity>

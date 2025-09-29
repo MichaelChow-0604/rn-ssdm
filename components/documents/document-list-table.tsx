@@ -1,7 +1,12 @@
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { ActivityIndicator, FlatList, Image, Text, View } from "react-native";
 import DotDropdown from "./dot-dropdown";
-import { extFromMime, formatIsoToDDMMYYYY, iconForExt } from "~/lib/utils";
+import {
+  beautifyResponse,
+  extFromMime,
+  formatIsoToDDMMYYYY,
+  iconForExt,
+} from "~/lib/utils";
 
 import {
   ColumnDef,
@@ -15,13 +20,26 @@ import { useQuery } from "@tanstack/react-query";
 import { getDocuments } from "~/lib/http/endpoints/document";
 import { documentKeys } from "~/lib/http/keys/document";
 import { useMemo } from "react";
+import { FilterOption } from "~/lib/types";
 
 type DocumentRow = {
   id: string;
   title: string;
   uploadAt: string;
   mimeType: string;
+  type: string;
+  category: string;
 };
+
+interface AppliedFilter {
+  type: FilterOption | null;
+  value: string | null;
+}
+
+interface DocumentListTableProps {
+  searchQuery: string;
+  filter?: AppliedFilter | null;
+}
 
 const globalFilterFn: FilterFn<DocumentRow> = (row, columnId, filterValue) => {
   const title = row.original.title.toLowerCase();
@@ -36,25 +54,53 @@ interface DocumentListTableProps {
 
 export default function DocumentListTable({
   searchQuery = "",
+  filter = null,
 }: DocumentListTableProps) {
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: documentKeys.list(),
     queryFn: getDocuments,
-    staleTime: 60_000,
-    gcTime: 30 * 60_000,
   });
 
+  console.log(beautifyResponse(data));
+
   const summaries = data?.documentSummaries ?? [];
-  const tableData = useMemo<DocumentRow[]>(
+  const baseData = useMemo<DocumentRow[]>(
     () =>
       summaries.map((s) => ({
         id: String(s.id),
         title: s.title,
-        uploadAt: s.updatedAt,
+        uploadAt: s.polygonUpdatedAt,
         mimeType: s.mimeType,
+        type: String(s.type ?? ""),
+        category: String(s.category ?? ""),
       })),
     [summaries]
   );
+
+  function norm(s: string) {
+    return String(s).trim().toLowerCase();
+  }
+
+  const tableData = useMemo<DocumentRow[]>(() => {
+    let rows = baseData;
+
+    if (filter?.type === "documentType" && filter.value) {
+      rows = rows.filter((r) => norm(r.type) === norm(filter.value!));
+    } else if (filter?.type === "category" && filter.value) {
+      rows = rows.filter((r) => norm(r.category) === norm(filter.value!));
+    }
+
+    if (filter?.type === "uploadDate" && filter.value) {
+      const desc = norm(filter.value) === "latest";
+      rows = [...rows].sort((a, b) => {
+        const da = new Date(a.uploadAt).getTime();
+        const db = new Date(b.uploadAt).getTime();
+        return desc ? db - da : da - db;
+      });
+    }
+
+    return rows;
+  }, [baseData, filter]);
 
   const columns = useMemo<ColumnDef<DocumentRow>[]>(() => COLUMNS, []);
 
@@ -108,7 +154,7 @@ export default function DocumentListTable({
 
       {/* Body */}
       <View className="w-full flex-1">
-        {isLoading ? (
+        {isLoading || isRefetching ? (
           <View className="flex-1 items-center justify-center">
             <ActivityIndicator size="small" color="#438BF7" className="mb-8" />
           </View>
@@ -118,6 +164,8 @@ export default function DocumentListTable({
             keyExtractor={(row) => row.id}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ flexGrow: 1 }}
+            onRefresh={() => refetch()}
+            refreshing={isRefetching}
             ListEmptyComponent={() =>
               coreRowCount === 0 ? (
                 <EmptyDocumentList />

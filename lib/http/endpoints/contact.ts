@@ -11,9 +11,27 @@ import {
 export async function createContact(
   payload: CreateContactPayload
 ): Promise<CreateContactResponse> {
+  const formData = new FormData();
+
+  // RN FormData file shape, only append if profilePicture is provided
+  if (payload.profilePicture?.uri) {
+    formData.append("profilePicture", {
+      uri: payload.profilePicture.uri,
+      name: payload.profilePicture.name,
+      type: payload.profilePicture.mimeType,
+    } as any);
+  }
+
+  formData.append("contactInfo", JSON.stringify(payload.contactInfo));
+
   const { data } = await api.post<CreateContactResponse>(
     "/api/v1/contacts",
-    payload
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
   );
   return data;
 }

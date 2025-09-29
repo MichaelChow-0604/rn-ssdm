@@ -101,12 +101,16 @@ export default function ContactDetailPage() {
       ? apiContact.phone.replace(country.idd.root, "")
       : apiContact.phone;
 
+    const iconDataUri = apiContact.profilePicture
+      ? `data:image/png;base64,${apiContact.profilePicture}`
+      : require("~/assets/images/default_icon.png");
+
     reset({
       firstName: apiContact.firstName,
       lastName: apiContact.lastName,
       phone: national,
       email: apiContact.email,
-      profilePicUri: null,
+      profilePicUri: apiContact.profilePicture ? iconDataUri : null,
       relationship: apiContact.relationship ?? null,
       distributions: apiContact.contactOptions?.length
         ? (Array.from(
@@ -131,8 +135,8 @@ export default function ContactDetailPage() {
     : undefined;
 
   const handlePickImage = async () => {
-    const uri = await pickImage();
-    if (uri) setValue("profilePicUri", uri);
+    const res = await pickImage();
+    if (res) setValue("profilePicUri", res.uri);
   };
 
   const onSave = handleSubmit(async (data) => {

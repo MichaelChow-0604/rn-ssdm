@@ -47,8 +47,8 @@ export default function DeleteConfirm() {
     mutationKey: ["contact", "delete"],
     mutationFn: deleteContact,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: contactKeys.list() });
       queryClient.removeQueries({ queryKey: contactKeys.detail(String(id)) });
+      queryClient.invalidateQueries({ queryKey: contactKeys.list() });
       router.replace("/contact-list");
       toast.success("Contact deleted successfully.");
     },

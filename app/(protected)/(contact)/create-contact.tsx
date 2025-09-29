@@ -33,14 +33,18 @@ import { createContact } from "~/lib/http/endpoints/contact";
 import { toast } from "sonner-native";
 import { useApiMutation } from "~/lib/http/use-api-mutation";
 import { CreateContactResponse } from "~/lib/http/response-type/contact";
-import { CreateContactPayload } from "~/lib/http/request-type/contact";
+import {
+  ContactInfo,
+  CreateContactPayload,
+  IconData,
+} from "~/lib/http/request-type/contact";
 import { contactKeys } from "~/lib/http/keys/contact";
 import { useQueryClient } from "@tanstack/react-query";
 
 type NewContactFormFields = z.infer<typeof newContactSchema>;
 
 export default function CreateContactPage() {
-  const [profilePic, setProfilePic] = useState<string | null>(null);
+  const [profilePic, setProfilePic] = useState<IconData | undefined>(undefined);
   const [isWhatsappChecked, setIsWhatsappChecked] = useState(false);
   const [isSMSChecked, setIsSMSChecked] = useState(false);
   const [selectedRelationship, setSelectedRelationship] = useState<Option>({
@@ -77,19 +81,30 @@ export default function CreateContactPage() {
     if (isWhatsappChecked) distributions.push("WHATSAPP");
     if (isSMSChecked) distributions.push("SMS");
 
-    createContactMutation.mutate({
+    const contactInfo: ContactInfo = {
       firstName: data.firstName.trim(),
       lastName: data.lastName.trim(),
       phone: phoneNumber.replace(/ /g, ""),
       email: data.email.trim(),
       relationship: selectedRelationship?.value ?? "",
       communicationOption: distributions,
+    };
+
+    createContactMutation.mutate({
+      profilePicture: profilePic,
+      contactInfo,
     });
   };
 
   const handlePickImage = async () => {
-    const uri = await pickImage();
-    if (uri) setProfilePic(uri);
+    const res = await pickImage();
+
+    if (res)
+      setProfilePic({
+        uri: res.uri,
+        name: res.fileName ?? "",
+        mimeType: res.mimeType ?? "",
+      });
   };
 
   const {
@@ -148,7 +163,7 @@ export default function CreateContactPage() {
                 <Image
                   source={
                     profilePic
-                      ? { uri: profilePic }
+                      ? { uri: profilePic.uri }
                       : require("~/assets/images/default_icon.png")
                   }
                   className="w-24 h-24 rounded-full text-black"

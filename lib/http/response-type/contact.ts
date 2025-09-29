@@ -1,3 +1,4 @@
+// Create Contact API Response
 export interface CreateContactResponse {
   firstName: string;
   lastName: string;
@@ -10,10 +11,12 @@ export interface CreateContactResponse {
   timestamp: string;
 }
 
+// Get all Contacts API Response
 interface ContactSummary {
   id: number;
   firstName: string;
   lastName: string;
+  profilePicture: string;
 }
 
 export interface GetContactsResponse {
@@ -22,7 +25,8 @@ export interface GetContactsResponse {
   timestamp: string;
 }
 
-interface Contact {
+// Get Contact by ID API Response
+export interface GetContactResponse {
   id: number;
   email: string;
   phone: string;
@@ -30,16 +34,14 @@ interface Contact {
   lastName: string;
   relationship: string;
   contactOptions: string[];
+  profilePicture: string;
   createdAt: string;
   updatedAt: string;
-}
-
-export interface GetContactResponse {
-  contact: Contact;
   message: string;
   timestamp: string;
 }
 
+// Check Related Documents API Response
 export interface RelatedDoc {
   id: number;
   title: string;
@@ -52,6 +54,7 @@ export interface CheckRelatedDocsResponse {
   timestamp: string;
 }
 
+// Delete Contact API Response
 export interface DeleteContactResponse {
   message: string;
   timestamp: string;

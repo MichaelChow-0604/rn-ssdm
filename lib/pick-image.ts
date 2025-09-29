@@ -1,6 +1,7 @@
 import * as ImagePicker from "expo-image-picker";
+import { ImagePickerAsset } from "expo-image-picker";
 
-export async function pickImage(): Promise<string | null> {
+export async function pickImage(): Promise<ImagePickerAsset | null> {
   const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
   if (status !== "granted") return null;
 
@@ -12,5 +13,5 @@ export async function pickImage(): Promise<string | null> {
   });
 
   if (result.canceled) return null;
-  return result.assets?.[0]?.uri ?? null;
+  return result.assets?.[0] ?? null;
 }

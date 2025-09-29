@@ -10,12 +10,22 @@ interface FilterButtonProps {
   label: string;
 }
 
-export default function FilterOptions() {
+interface AppliedFilter {
+  type: FilterOption | null;
+  value: string | null;
+}
+
+export default function FilterOptions({
+  value,
+  onChange,
+}: {
+  value: AppliedFilter | null;
+  onChange: (next: AppliedFilter | null) => void;
+}) {
   const bottomSheetRef = useRef<BottomSheetModal>(null);
   const [selectedFilter, setSelectedFilter] = useState<FilterOption | null>(
     null
   );
-  const [appliedFilter, setAppliedFilter] = useState<FilterOption | null>(null);
 
   const handlePresentModalPress = useCallback((filter: FilterOption) => {
     setSelectedFilter(filter);
@@ -23,16 +33,12 @@ export default function FilterOptions() {
   }, []);
 
   const handleClearFilter = useCallback(() => {
-    setAppliedFilter(null);
-  }, []);
-
-  const markApplied = useCallback((filter: FilterOption) => {
-    setAppliedFilter(filter);
-  }, []);
+    onChange(null);
+  }, [onChange]);
 
   const isApplied = useCallback(
-    (filter: FilterOption) => appliedFilter === filter,
-    [appliedFilter]
+    (filter: FilterOption) => value?.type === filter,
+    [value?.type]
   );
 
   const handleDismiss = useCallback(() => {
@@ -63,8 +69,8 @@ export default function FilterOptions() {
         ref={bottomSheetRef}
         selectedFilter={selectedFilter}
         onDismiss={handleDismiss}
-        onApply={(filter) => {
-          markApplied(filter);
+        onApply={(filter, subId) => {
+          onChange({ type: filter, value: subId });
         }}
       />
 
@@ -72,9 +78,9 @@ export default function FilterOptions() {
       <TouchableOpacity
         activeOpacity={0.7}
         // If filter is applied, clear it
-        onPress={() => appliedFilter !== null && handleClearFilter()}
+        onPress={handleClearFilter}
       >
-        {appliedFilter === null ? (
+        {value === null ? (
           // No filter applied
           <MaterialCommunityIcons
             name="filter-outline"

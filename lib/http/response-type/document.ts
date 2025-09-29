@@ -27,8 +27,12 @@ export interface DocumentSummary {
   cid: string;
   title: string;
   userDocId: string;
+  type: string;
+  category: string;
   size: number;
   mimeType: string;
+  polygonCreatedAt: string;
+  polygonUpdatedAt: string;
   status: string;
   updatedAt: string;
 }

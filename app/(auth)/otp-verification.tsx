@@ -113,14 +113,12 @@ export default function OTPVerificationPage() {
         queryClient.prefetchQuery({
           queryKey: contactKeys.list(),
           queryFn: getContacts,
-          staleTime: 5 * 60 * 1000,
         });
 
         // Warm documents in the background (no await needed)
         queryClient.prefetchQuery({
           queryKey: documentKeys.list(),
           queryFn: getDocuments,
-          staleTime: 5 * 60 * 1000,
         });
 
         setIsAuthenticated(true);

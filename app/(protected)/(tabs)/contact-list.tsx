@@ -22,6 +22,8 @@ export default function ContactListTab() {
   const { data, isLoading } = useQuery({
     queryKey: contactKeys.list(),
     queryFn: getContacts,
+    staleTime: 60_000,
+    gcTime: 30 * 60_000,
   });
 
   const [searchQuery, setSearchQuery] = useState("");

@@ -25,11 +25,13 @@ import { useTokenStore } from "~/store/use-token-store";
 import { useApiMutation } from "~/lib/http/use-api-mutation";
 import { LogoutResponse } from "~/lib/http/response-type/auth";
 import { useSettings } from "~/context/setting-context";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function ProfileTab() {
   const { profile } = useProfile();
   const { setIsAuthenticated } = useAuth();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const queryClient = useQueryClient();
 
   const { clearTokens } = useTokenStore();
   const { setNotificationEnabled } = useSettings();
@@ -38,6 +40,7 @@ export default function ProfileTab() {
     mutationKey: ["logout"],
     mutationFn: logout,
     onSuccess: () => {
+      queryClient.clear();
       clearTokens();
       setIsAuthenticated(false);
       setNotificationEnabled(true);

@@ -40,8 +40,8 @@ export default function DocumentListTable({
   const { data, isLoading } = useQuery({
     queryKey: documentKeys.list(),
     queryFn: getDocuments,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
+    staleTime: 60_000,
+    gcTime: 30 * 60_000,
   });
 
   const summaries = data?.documentSummaries ?? [];
@@ -75,14 +75,6 @@ export default function DocumentListTable({
   console.log(
     `Row count: Original=${coreRowCount}, Filtered=${filteredRowCount}`
   );
-
-  const RenderEmptyComponent = useMemo(() => {
-    return filteredRowCount === 0 && searchQuery.length > 0 ? (
-      <NoSearchResults />
-    ) : (
-      <EmptyDocumentList />
-    );
-  }, [filteredRowCount, searchQuery]);
 
   return (
     <View className="min-w-full flex-1">
@@ -126,7 +118,13 @@ export default function DocumentListTable({
             keyExtractor={(row) => row.id}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ flexGrow: 1 }}
-            ListEmptyComponent={RenderEmptyComponent}
+            ListEmptyComponent={() =>
+              coreRowCount === 0 ? (
+                <EmptyDocumentList />
+              ) : searchQuery.length > 0 ? (
+                <NoSearchResults />
+              ) : null
+            }
             renderItem={({ item: row }) => (
               <View className="flex-row border-gray-200 border-b mx-1">
                 {row.getVisibleCells().map((cell) => (

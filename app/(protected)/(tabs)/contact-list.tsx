@@ -19,6 +19,7 @@ import { useMemo, useState } from "react";
 
 export default function ContactListTab() {
   const queryClient = useQueryClient();
+
   const { data, isLoading, isFetching } = useQuery({
     queryKey: contactKeys.list(),
     queryFn: getContacts,

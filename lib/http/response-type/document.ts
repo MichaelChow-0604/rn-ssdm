@@ -43,7 +43,12 @@ export interface GetDocumentsResponse {
   timestamp: string;
 }
 
-export type DocumentStatus = "PROCESSING" | "UPLOADED" | "FAILED" | "";
+export type DocumentStatus =
+  | "PROCESSING"
+  | "UPLOADED"
+  | "FAILED"
+  | "TRASH"
+  | "DELETED";
 
 export interface GetDocumentResponse {
   id: number;
@@ -72,6 +77,21 @@ export interface GetDocumentResponse {
   polygonCreatedAt: string;
   polygonUpdatedAt: string;
   createdAt: string;
+  updatedAt: string;
+  message: string;
+  timestamp: string;
+}
+
+export interface UpdateDocumentResponse {
+  userDocId: string;
+  referenceNo: string;
+  recipients: string[];
+  description: string;
+  updatedAt: string;
+}
+
+export interface UpdateDocumentStatusResponse {
+  status: DocumentStatus;
   updatedAt: string;
   message: string;
   timestamp: string;

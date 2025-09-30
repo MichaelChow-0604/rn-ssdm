@@ -20,3 +20,16 @@ export interface UploadDocumentPayload {
   file: FileData;
   metadata: Metadata;
 }
+
+export interface UpdateDocumentPayload {
+  id: string;
+  userDocId: string;
+  referenceNo: string;
+  recipients: string[];
+  description: string;
+}
+
+export interface UpdateDocumentStatusPayload {
+  id: string;
+  status: string;
+}

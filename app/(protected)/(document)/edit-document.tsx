@@ -13,75 +13,39 @@ import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { Button } from "~/components/ui/button";
-import { useEffect, useState } from "react";
 import { router, useLocalSearchParams } from "expo-router";
 import { RecipientsMultiSelect } from "~/components/documents/recipient-multi-select";
-import { useQuery } from "@tanstack/react-query";
-import { documentKeys } from "~/lib/http/keys/document";
 import { useContactsOptions } from "~/lib/contacts/hooks";
-import { Controller, useForm } from "react-hook-form";
-import { editDocumentSchema } from "~/schema/edit-document-schema";
-import * as z from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { getDocumentById } from "~/lib/http/endpoints/document";
+import { Controller } from "react-hook-form";
 import { getRecipientNames } from "~/lib/documents/utils";
-import { toast } from "sonner-native";
 import {
   ReadOnlyInput,
   ReadOnlyTextarea,
 } from "~/components/documents/view-and-edit/readonly-fields";
-import { toDocumentVM } from "~/lib/documents/mappers";
-
-type EditDocumentFormFields = z.infer<typeof editDocumentSchema>;
+import { LoadingOverlay } from "~/components/loading-overlay";
+import { useEditDocumentForm } from "~/hooks/use-edit-document-form";
 
 export default function EditDocument() {
   const { documentId } = useLocalSearchParams<{ documentId: string }>();
-  const [isEditing, setIsEditing] = useState(false);
 
-  // Fetch document details
-  const { data, isLoading, isError } = useQuery({
-    queryKey: documentKeys.detail(String(documentId)),
-    queryFn: () => getDocumentById(String(documentId)),
-    select: toDocumentVM,
-  });
+  const {
+    data,
+    isLoading,
+    isEditing,
+    handleEdit,
+    handleSave,
+    isUpdatingDocument,
+    form,
+  } = useEditDocumentForm({ documentId: String(documentId) });
 
   // Fetch contacts for recipients name display
   const { options: contactOptions, nameIndex } = useContactsOptions();
 
   const {
     control,
-    handleSubmit,
-    formState: { errors },
-    reset,
     watch,
-    setValue,
-  } = useForm<EditDocumentFormFields>({
-    defaultValues: {
-      id: "",
-      reference_number: "",
-      description: "",
-      remarks: "",
-      recipients: [],
-    },
-    resolver: zodResolver(editDocumentSchema),
-  });
-
-  // Auto-fill form with document details
-  useEffect(() => {
-    if (!data) return;
-    reset({
-      id: data.userDocId ?? "",
-      reference_number: data.referenceNumber ?? "",
-      description: data.description ?? "",
-      remarks: data.remarks ?? "",
-      recipients: (data.recipients ?? []).map(String),
-    });
-  }, [data, reset]);
-
-  // Server error
-  useEffect(() => {
-    if (isError) toast.error("Something went wrong. Please try again later.");
-  }, [isError]);
+    formState: { errors },
+  } = form;
 
   // Map recipients for display in readonly fields
   const recipients = watch("recipients") ?? [];
@@ -90,17 +54,6 @@ export default function EditDocument() {
   const recipientNames = contactsReady
     ? getRecipientNames(viewRecipientIds.map(String), nameIndex)
     : "";
-
-  function handleEdit() {
-    setIsEditing(true);
-    setValue("recipients", (data?.recipients ?? []).map(String), {
-      shouldDirty: false,
-    });
-  }
-
-  async function handleSave() {
-    // TODO: Implement Update Document
-  }
 
   const EditingRecipients = (
     <Controller
@@ -123,6 +76,12 @@ export default function EditDocument() {
         style={{ flexGrow: 1 }}
         behavior={Platform.select({ ios: "padding", android: "height" })}
       >
+        <LoadingOverlay
+          visible={isUpdatingDocument}
+          label="Updating document..."
+          onDismiss={() => {}}
+        />
+
         {isLoading ? (
           <View className="flex-1 items-center justify-center">
             <ActivityIndicator size="small" color="#438BF7" />

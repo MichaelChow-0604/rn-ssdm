@@ -7,30 +7,47 @@ import {
 import Feather from "@expo/vector-icons/Feather";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Text } from "react-native";
-import { moveToTrash } from "~/lib/storage/trash";
 import { router } from "expo-router";
 import { useState } from "react";
 import { MoveToTrashAlert } from "~/components/pop-up/move-to-trash-alert";
 import { useQueryClient } from "@tanstack/react-query";
 import { documentKeys } from "~/lib/http/keys/document";
-import { getDocumentById } from "~/lib/http/endpoints/document";
+import {
+  getDocumentById,
+  updateDocumentStatus,
+} from "~/lib/http/endpoints/document";
+import { useApiMutation } from "~/lib/http/use-api-mutation";
+import { UpdateDocumentStatusResponse } from "~/lib/http/response-type/document";
+import { UpdateDocumentStatusPayload } from "~/lib/http/request-type/document";
+import { toast } from "sonner-native";
 
 interface DotDropdownProps {
   documentId: string;
-  onDeleted?: () => void;
 }
 
-export default function DotDropdown({
-  documentId,
-  onDeleted,
-}: DotDropdownProps) {
+export default function DotDropdown({ documentId }: DotDropdownProps) {
   const queryClient = useQueryClient();
   const [isMoveToTrashAlertOpen, setIsMoveToTrashAlertOpen] = useState(false);
 
-  const handleMoveToTrash = async () => {
-    await moveToTrash(documentId);
-    onDeleted?.();
-    setIsMoveToTrashAlertOpen(false);
+  const moveToTrashMutation = useApiMutation<
+    UpdateDocumentStatusResponse,
+    UpdateDocumentStatusPayload
+  >({
+    mutationKey: ["document", "updateStatus"],
+    mutationFn: updateDocumentStatus,
+    onSuccess: () => {
+      setIsMoveToTrashAlertOpen(false);
+      toast.success("Document moved to trash successfully.");
+      queryClient.invalidateQueries({ queryKey: documentKeys.list() });
+    },
+    onError: (err) => {
+      console.log(err.response);
+      toast.error("Failed to move document to trash. Please try again later.");
+    },
+  });
+
+  const onConfirmMoveToTrash = () => {
+    moveToTrashMutation.mutate({ id: documentId, status: "TRASH" });
   };
 
   return (
@@ -75,7 +92,7 @@ export default function DotDropdown({
       {/* Pop up alert */}
       <MoveToTrashAlert
         visible={isMoveToTrashAlertOpen}
-        onConfirm={handleMoveToTrash}
+        onConfirm={onConfirmMoveToTrash}
         onCancel={() => setIsMoveToTrashAlertOpen(false)}
       />
     </>

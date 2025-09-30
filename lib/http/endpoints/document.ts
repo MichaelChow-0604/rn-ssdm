@@ -1,8 +1,14 @@
 import { api } from "../axios";
-import { UploadDocumentPayload } from "../request-type/document";
+import {
+  UpdateDocumentPayload,
+  UpdateDocumentStatusPayload,
+  UploadDocumentPayload,
+} from "../request-type/document";
 import {
   GetDocumentResponse,
   GetDocumentsResponse,
+  UpdateDocumentResponse,
+  UpdateDocumentStatusResponse,
   UploadDocumentResponse,
 } from "../response-type/document";
 
@@ -28,6 +34,28 @@ export async function uploadDocument(
         "Content-Type": "multipart/form-data",
       },
     }
+  );
+  return data;
+}
+
+export async function updateDocument(
+  payload: UpdateDocumentPayload
+): Promise<UpdateDocumentResponse> {
+  const { data } = await api.put<UpdateDocumentResponse>(
+    `/api/v1/documents/${payload.id}`,
+    payload
+  );
+  return data;
+}
+
+export async function updateDocumentStatus(
+  payload: UpdateDocumentStatusPayload
+): Promise<UpdateDocumentStatusResponse> {
+  const { id, status } = payload;
+  const { data } = await api.put<UpdateDocumentStatusResponse>(
+    `/api/v1/documents/${id}/status`,
+    undefined,
+    { params: { status } }
   );
   return data;
 }

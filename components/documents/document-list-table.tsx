@@ -1,13 +1,4 @@
-import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { ActivityIndicator, FlatList, Image, Text, View } from "react-native";
-import DotDropdown from "./dot-dropdown";
-import {
-  beautifyResponse,
-  extFromMime,
-  formatIsoToDDMMYYYY,
-  iconForExt,
-} from "~/lib/utils";
-
+import { ActivityIndicator, FlatList, Text, View } from "react-native";
 import {
   ColumnDef,
   getCoreRowModel,
@@ -21,6 +12,8 @@ import { getDocuments } from "~/lib/http/endpoints/document";
 import { documentKeys } from "~/lib/http/keys/document";
 import { useMemo } from "react";
 import { FilterOption } from "~/lib/types";
+import { applyFilterAndSort, mapSummariesToRows } from "./document-filters";
+import { DOCUMENT_COLUMNS } from "./document-columns";
 
 type DocumentRow = {
   id: string;
@@ -61,48 +54,17 @@ export default function DocumentListTable({
     queryFn: getDocuments,
   });
 
-  console.log(beautifyResponse(data));
-
   const summaries = data?.documentSummaries ?? [];
   const baseData = useMemo<DocumentRow[]>(
-    () =>
-      summaries.map((s) => ({
-        id: String(s.id),
-        title: s.title,
-        uploadAt: s.polygonUpdatedAt,
-        mimeType: s.mimeType,
-        type: String(s.type ?? ""),
-        category: String(s.category ?? ""),
-      })),
+    () => mapSummariesToRows(summaries),
     [summaries]
   );
 
-  function norm(s: string) {
-    return String(s).trim().toLowerCase();
-  }
-
   const tableData = useMemo<DocumentRow[]>(() => {
-    let rows = baseData;
-
-    if (filter?.type === "documentType" && filter.value) {
-      rows = rows.filter((r) => norm(r.type) === norm(filter.value!));
-    } else if (filter?.type === "category" && filter.value) {
-      rows = rows.filter((r) => norm(r.category) === norm(filter.value!));
-    }
-
-    if (filter?.type === "uploadDate" && filter.value) {
-      const desc = norm(filter.value) === "latest";
-      rows = [...rows].sort((a, b) => {
-        const da = new Date(a.uploadAt).getTime();
-        const db = new Date(b.uploadAt).getTime();
-        return desc ? db - da : da - db;
-      });
-    }
-
-    return rows;
+    return applyFilterAndSort(baseData, filter);
   }, [baseData, filter]);
 
-  const columns = useMemo<ColumnDef<DocumentRow>[]>(() => COLUMNS, []);
+  const columns = useMemo<ColumnDef<DocumentRow>[]>(() => DOCUMENT_COLUMNS, []);
 
   const table = useReactTable({
     data: tableData,
@@ -217,52 +179,3 @@ function NoSearchResults() {
     </View>
   );
 }
-
-const COLUMNS: ColumnDef<DocumentRow>[] = [
-  {
-    accessorKey: "title",
-    header: () => <Text className="font-bold">Title</Text>,
-    cell: ({ row }) => {
-      const doc = row.original;
-      return (
-        <View className="flex-row items-center gap-2">
-          <View className="relative w-8 h-8">
-            <FontAwesome
-              name="lock"
-              size={16}
-              color="black"
-              className="absolute top-[-6] right-0 z-10"
-            />
-            <Image
-              source={iconForExt(extFromMime(doc.mimeType))}
-              className="w-8 h-8"
-            />
-          </View>
-          <Text className="font-semibold">{doc.title}</Text>
-        </View>
-      );
-    },
-    meta: { className: "w-[65%] pl-4" },
-  },
-  {
-    accessorKey: "uploadAt",
-    header: () => (
-      <View className="flex flex-col items-center justify-start">
-        <Text className="text-center text-xs text-gray-400">(DD/MM/YYYY)</Text>
-        <Text className="text-center font-bold">Upload Date</Text>
-      </View>
-    ),
-    cell: ({ getValue }) => (
-      <Text className="text-center">
-        {formatIsoToDDMMYYYY(getValue() as string)}
-      </Text>
-    ),
-    meta: { className: "w-[25%] flex items-center justify-center" },
-  },
-  {
-    id: "actions",
-    header: () => null,
-    cell: ({ row }) => <DotDropdown documentId={row.original.id} />,
-    meta: { className: "w-[10%] flex items-center justify-center" },
-  },
-];

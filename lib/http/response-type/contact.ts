@@ -16,7 +16,7 @@ interface ContactSummary {
   id: number;
   firstName: string;
   lastName: string;
-  profilePicture: string;
+  profilePicture?: string;
 }
 
 export interface GetContactsResponse {
@@ -34,7 +34,7 @@ export interface GetContactResponse {
   lastName: string;
   relationship: string;
   contactOptions: string[];
-  profilePicture: string;
+  profilePicture?: string;
   createdAt: string;
   updatedAt: string;
   message: string;
@@ -56,6 +56,18 @@ export interface CheckRelatedDocsResponse {
 
 // Delete Contact API Response
 export interface DeleteContactResponse {
+  message: string;
+  timestamp: string;
+}
+
+export interface UpdateContactResponse {
+  firstName: string;
+  lastName: string;
+  phone: string;
+  email: string;
+  relationship: string;
+  communicationOptions: string[];
+  updatedAt: string;
   message: string;
   timestamp: string;
 }

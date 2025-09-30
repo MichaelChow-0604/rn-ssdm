@@ -1,0 +1,156 @@
+import { useEffect, useMemo, useState } from "react";
+import * as z from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
+import { router } from "expo-router";
+import { newContactSchema } from "~/schema/new-contact-schema";
+import {
+  getCountryByPhoneNumber,
+  ICountry,
+} from "react-native-international-phone-number";
+import { useApiMutation } from "~/lib/http/use-api-mutation";
+import { updateContact } from "~/lib/http/endpoints/contact";
+import { contactKeys } from "~/lib/http/keys/contact";
+import { IconData } from "~/lib/http/request-type/contact";
+import { GetContactResponse } from "~/lib/http/response-type/contact";
+import { toast } from "sonner-native";
+import { pickImage } from "~/lib/pick-image";
+
+const detailSchema = newContactSchema.extend({
+  profilePicUri: z.string().nullable().optional(),
+  relationship: z.string().nullable().optional(),
+  distributions: z.array(z.enum(["EMAIL", "WHATSAPP", "SMS"])).min(1),
+});
+export interface ContactDetailFormValues extends z.infer<typeof detailSchema> {}
+
+interface Params {
+  id: string;
+  apiContact?: GetContactResponse | null;
+}
+
+export function useContactDetailForm({ id, apiContact }: Params) {
+  const qc = useQueryClient();
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [profilePic, setProfilePic] = useState<IconData | undefined>(undefined);
+  const [selectedCountry, setSelectedCountry] = useState<ICountry | undefined>(
+    undefined
+  );
+
+  const form = useForm<ContactDetailFormValues>({
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      phone: "",
+      email: "",
+      profilePicUri: null,
+      relationship: null,
+      distributions: ["EMAIL"],
+    },
+    resolver: zodResolver(detailSchema),
+  });
+
+  // Populate when apiContact arrives
+  useEffect(() => {
+    if (!apiContact) return;
+
+    const country = getCountryByPhoneNumber(apiContact.phone);
+    setSelectedCountry(country);
+
+    const national = country?.idd?.root
+      ? apiContact.phone.replace(country.idd.root, "")
+      : apiContact.phone;
+
+    const hasPicture = !!apiContact.profilePicture;
+    if (hasPicture) {
+      const dataUri = `data:image/png;base64,${apiContact.profilePicture}`;
+      setProfilePic({
+        uri: dataUri,
+        name: "profilePicture",
+        mimeType: "image/png",
+      });
+    } else {
+      setProfilePic(undefined);
+    }
+
+    form.reset({
+      firstName: apiContact.firstName,
+      lastName: apiContact.lastName,
+      phone: national,
+      email: apiContact.email,
+      profilePicUri: hasPicture
+        ? `data:image/png;base64,${apiContact.profilePicture}`
+        : null,
+      relationship: apiContact.relationship ?? null,
+      distributions: apiContact.contactOptions?.length
+        ? (Array.from(
+            new Set(apiContact.contactOptions.map((o) => o.toUpperCase()))
+          ).filter((o) =>
+            ["EMAIL", "WHATSAPP", "SMS"].includes(o as string)
+          ) as ContactDetailFormValues["distributions"])
+        : ["EMAIL"],
+    });
+    setIsEditing(false);
+  }, [apiContact, form]);
+
+  const isUpdatingContact = useApiMutation({
+    mutationKey: ["contact", "update"],
+    mutationFn: updateContact,
+    onSuccess: () => {
+      router.back();
+      qc.invalidateQueries({ queryKey: contactKeys.list() });
+      toast.success("Contact updated successfully.");
+    },
+    onError: () =>
+      toast.error("Failed to update contact. Please try again later."),
+  });
+
+  async function handlePickImage() {
+    const res = await pickImage();
+    if (res)
+      setProfilePic({
+        uri: res.uri,
+        name: res.fileName ?? "",
+        mimeType: res.mimeType ?? "",
+      });
+  }
+
+  const onSave = form.handleSubmit(async (data) => {
+    if (!apiContact) return;
+    const phoneNumber = `${selectedCountry?.idd?.root ?? ""} ${
+      data.phone
+    }`.replace(/ /g, "");
+    const unique = Array.from(
+      new Set(["EMAIL", ...data.distributions])
+    ) as ContactDetailFormValues["distributions"];
+
+    isUpdatingContact.mutate({
+      id: String(apiContact.id),
+      profilePicture: profilePic,
+      contactInfo: {
+        firstName: data.firstName.trim(),
+        lastName: data.lastName.trim(),
+        phone: phoneNumber,
+        email: data.email.trim(),
+        relationship: data.relationship ?? "",
+        communicationOption: unique,
+      },
+    });
+    setIsEditing(false);
+  });
+
+  return {
+    form,
+    isEditing,
+    setIsEditing,
+    isUpdatingContact:
+      isUpdatingContact.isPending || isUpdatingContact.isSuccess,
+    profilePic,
+    setProfilePic,
+    selectedCountry,
+    setSelectedCountry,
+    handlePickImage,
+    onSave,
+  };
+}

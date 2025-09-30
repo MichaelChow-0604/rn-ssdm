@@ -19,7 +19,7 @@ import { useMemo, useState } from "react";
 
 export default function ContactListTab() {
   const queryClient = useQueryClient();
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isFetching } = useQuery({
     queryKey: contactKeys.list(),
     queryFn: getContacts,
     staleTime: 60_000,
@@ -78,7 +78,7 @@ export default function ContactListTab() {
       </View>
 
       {/* Contact list */}
-      {isLoading ? (
+      {isLoading || isFetching ? (
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="small" color="#438BF7" className="mb-20" />
         </View>

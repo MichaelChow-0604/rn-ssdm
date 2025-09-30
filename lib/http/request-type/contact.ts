@@ -17,3 +17,9 @@ export interface CreateContactPayload {
   profilePicture?: IconData;
   contactInfo: ContactInfo;
 }
+
+export interface UpdateContactPayload {
+  id: string;
+  profilePicture?: IconData;
+  contactInfo: ContactInfo;
+}

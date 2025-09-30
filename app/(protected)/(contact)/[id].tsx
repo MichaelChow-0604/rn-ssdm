@@ -10,31 +10,27 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { BackButton } from "~/components/back-button";
-import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { Card, CardHeader } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { Option } from "~/components/ui/select";
-import { useEffect, useState } from "react";
 import * as z from "zod";
-import { Controller, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { Controller } from "react-hook-form";
 import { Button } from "~/components/ui/button";
-import { router, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { newContactSchema } from "~/schema/new-contact-schema";
-import { pickImage } from "~/lib/pick-image";
 import { RelationshipSelect } from "~/components/contact/relationship-select";
 import { DistributionCheckbox } from "~/components/contact/distribution-checkbox";
 import { RELATIONSHIP_OPTIONS } from "~/constants/select-data";
-import PhoneInput, {
-  ICountry,
-  getCountryByPhoneNumber,
-} from "react-native-international-phone-number";
+import PhoneInput from "react-native-international-phone-number";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { contactKeys } from "~/lib/http/keys/contact";
-import { checkRelatedDocs, getContactById } from "~/lib/http/endpoints/contact";
+import { getContactById } from "~/lib/http/endpoints/contact";
 import { GetContactResponse } from "~/lib/http/response-type/contact";
-import { toast } from "sonner-native";
+import { LoadingOverlay } from "~/components/loading-overlay";
+import { ProfileAvatar } from "~/components/contact/profile-avatar";
+import { useContactDeleteCheck } from "~/hooks/use-contact-delete-check";
+import { useContactDetailForm } from "~/hooks/use-contact-detail-form";
 
 const detailSchema = newContactSchema.extend({
   profilePicUri: z.string().nullable().optional(),
@@ -46,33 +42,8 @@ type FormValues = z.infer<typeof detailSchema>;
 
 export default function ContactDetailPage() {
   const { id } = useLocalSearchParams<{ id: string }>();
+
   const queryClient = useQueryClient();
-
-  const [isEditing, setIsEditing] = useState(false);
-  const [selectedCountry, setSelectedCountry] = useState<ICountry | undefined>(
-    undefined
-  );
-
-  const {
-    control,
-    handleSubmit,
-    reset,
-    watch,
-    setValue,
-    formState: { errors },
-  } = useForm<FormValues>({
-    defaultValues: {
-      firstName: "",
-      lastName: "",
-      phone: "",
-      email: "",
-      profilePicUri: null,
-      relationship: null,
-      distributions: ["EMAIL"],
-    },
-    resolver: zodResolver(detailSchema), // use the matching schema
-  });
-
   const { data: apiContact, status } = useQuery<GetContactResponse, Error, any>(
     {
       queryKey: contactKeys.detail(String(id) ?? ""),
@@ -83,126 +54,33 @@ export default function ContactDetailPage() {
     }
   );
 
-  const checkKey = ["contact", "check-related-docs", String(id)];
+  const { isCheckingDelete, onDelete } = useContactDeleteCheck(
+    String(apiContact?.id ?? id)
+  );
 
-  const { isFetching: isCheckingDelete } = useQuery({
-    queryKey: checkKey,
-    queryFn: () => checkRelatedDocs(String(apiContact?.id ?? id)),
-    enabled: false, // do not auto-run
-  });
+  const {
+    form,
+    isEditing,
+    setIsEditing,
+    isUpdatingContact,
+    profilePic,
+    selectedCountry,
+    setSelectedCountry,
+    handlePickImage,
+    onSave,
+  } = useContactDetailForm({ id: String(id), apiContact });
 
-  useEffect(() => {
-    if (!apiContact) return;
-
-    const country = getCountryByPhoneNumber(apiContact.phone);
-    setSelectedCountry(country);
-
-    const national = country?.idd?.root
-      ? apiContact.phone.replace(country.idd.root, "")
-      : apiContact.phone;
-
-    const iconDataUri = apiContact.profilePicture
-      ? `data:image/png;base64,${apiContact.profilePicture}`
-      : require("~/assets/images/default_icon.png");
-
-    reset({
-      firstName: apiContact.firstName,
-      lastName: apiContact.lastName,
-      phone: national,
-      email: apiContact.email,
-      profilePicUri: apiContact.profilePicture ? iconDataUri : null,
-      relationship: apiContact.relationship ?? null,
-      distributions: apiContact.contactOptions?.length
-        ? (Array.from(
-            new Set(
-              apiContact.contactOptions.map((o: string) => o.toUpperCase())
-            )
-          ).filter((o) =>
-            ["EMAIL", "WHATSAPP", "SMS"].includes(o as string)
-          ) as FormValues["distributions"])
-        : ["EMAIL"],
-    });
-    setIsEditing(false);
-  }, [apiContact, reset]);
-
+  const {
+    control,
+    watch,
+    setValue,
+    formState: { errors },
+  } = form;
   const values = watch();
-  const title = apiContact
-    ? `${apiContact.firstName} ${apiContact.lastName}`.trim()
-    : "Contact";
 
   const relationshipLabel = values.relationship
     ? RELATIONSHIP_OPTIONS.find((o) => o.value === values.relationship)?.label
     : undefined;
-
-  const handlePickImage = async () => {
-    const res = await pickImage();
-    if (res) setValue("profilePicUri", res.uri);
-  };
-
-  const onSave = handleSubmit(async (data) => {
-    if (!apiContact) return;
-
-    const phoneNumber = `${selectedCountry?.idd?.root ?? ""} ${
-      data.phone
-    }`.replace(/ /g, "");
-
-    const unique = Array.from(
-      new Set(["email", ...data.distributions])
-    ) as FormValues["distributions"];
-
-    // await updateContact(apiContact.id, {
-    //   firstName: data.firstName.trim(),
-    //   lastName: data.lastName.trim(),
-    //   phone: phoneNumber,
-    //   email: data.email.trim(),
-    //   profilePicUri: data.profilePicUri ?? null,
-    //   relationship: data.relationship ?? null,
-    //   distributions: unique,
-    // });
-    setIsEditing(false);
-  });
-
-  const onDelete = async () => {
-    if (!apiContact) return;
-
-    try {
-      // Check if the contact is associated with any documents
-      const res = await queryClient.fetchQuery({
-        queryKey: checkKey,
-        queryFn: () => checkRelatedDocs(String(apiContact.id)),
-      });
-
-      const accessedOnlyByContact = Array.isArray(res.accessedOnlyByContact)
-        ? res.accessedOnlyByContact
-        : [];
-
-      const accessedByContact = Array.isArray(res.accessedByContact)
-        ? res.accessedByContact
-        : [];
-
-      const hasBlocked = accessedOnlyByContact.length > 0;
-      const hasRelated = accessedByContact.length > 0;
-
-      const params = {
-        id: String(apiContact.id),
-        canDelete: (!hasBlocked).toString(),
-        blockedDocs: hasBlocked
-          ? accessedOnlyByContact.map((d) => d.title)
-          : [],
-        relatedDocs:
-          !hasBlocked && hasRelated
-            ? accessedByContact.map((d) => d.title)
-            : [],
-      };
-
-      router.push({
-        pathname: "/delete-confirm",
-        params,
-      });
-    } catch {
-      toast.error("Failed to delete contact. Please try again later.");
-    }
-  };
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -218,10 +96,18 @@ export default function ContactDetailPage() {
           className="flex-1 px-4"
           behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
+          <LoadingOverlay
+            visible={isUpdatingContact}
+            label="Updating contact..."
+            onDismiss={() => {}}
+          />
+
           {/* Header */}
           <View className="flex-row gap-2 items-center my-8 justify-start w-full">
             <BackButton />
-            <Text className="text-2xl font-semibold text-white">{title}</Text>
+            <Text className="text-2xl font-semibold text-white">
+              {apiContact?.firstName} {apiContact?.lastName}
+            </Text>
 
             <TouchableOpacity
               activeOpacity={0.8}
@@ -237,27 +123,11 @@ export default function ContactDetailPage() {
           <ScrollView className="bg-transparent w-full">
             {/* Profile pic */}
             <View className="h-[15%] flex items-center justify-center w-full gap-1 flex-col">
-              <View className="w-24 h-24 relative">
-                <TouchableOpacity
-                  className="rounded-full"
-                  activeOpacity={isEditing ? 0.8 : 1}
-                  onPress={handlePickImage}
-                >
-                  <Image
-                    source={
-                      values.profilePicUri
-                        ? { uri: values.profilePicUri }
-                        : require("~/assets/images/default_icon.png")
-                    }
-                    className="w-24 h-24 rounded-full text-black"
-                  />
-                  {isEditing && (
-                    <View className="bg-white rounded-full absolute p-1 bottom-0 right-[-2]">
-                      <FontAwesome6 name="pen" size={12} color="black" />
-                    </View>
-                  )}
-                </TouchableOpacity>
-              </View>
+              <ProfileAvatar
+                imageUri={profilePic?.uri ?? null}
+                editable={isEditing}
+                onPress={handlePickImage}
+              />
             </View>
 
             {/* Form section */}

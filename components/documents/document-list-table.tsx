@@ -1,4 +1,5 @@
 import { ActivityIndicator, FlatList, Text, View } from "react-native";
+import { beautifyResponse } from "~/lib/utils";
 import {
   ColumnDef,
   getCoreRowModel,
@@ -12,8 +13,8 @@ import { getDocuments } from "~/lib/http/endpoints/document";
 import { documentKeys } from "~/lib/http/keys/document";
 import { useMemo } from "react";
 import { FilterOption } from "~/lib/types";
-import { applyFilterAndSort, mapSummariesToRows } from "./document-filters";
 import { DOCUMENT_COLUMNS } from "./document-columns";
+import { applyFilterAndSort, mapSummariesToRows } from "./document-filters";
 
 type DocumentRow = {
   id: string;
@@ -53,6 +54,8 @@ export default function DocumentListTable({
     queryKey: documentKeys.list(),
     queryFn: getDocuments,
   });
+
+  console.log(beautifyResponse(data));
 
   const summaries = data?.documentSummaries ?? [];
   const baseData = useMemo<DocumentRow[]>(

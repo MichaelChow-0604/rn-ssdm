@@ -3,19 +3,19 @@ import { Card, CardContent } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
-interface MoveToTrashAlertProps {
+interface DirectDeleteAlertProps {
   visible: boolean;
   isLoading: boolean;
   onConfirm: () => void;
   onCancel?: () => void;
 }
 
-export function MoveToTrashAlert({
+export function DirectDeleteAlert({
   visible,
   isLoading,
   onConfirm,
   onCancel,
-}: MoveToTrashAlertProps) {
+}: DirectDeleteAlertProps) {
   return (
     <Modal
       visible={visible}
@@ -32,7 +32,8 @@ export function MoveToTrashAlert({
             <View className="gap-2 flex-col items-center">
               <MaterialIcons name="delete" size={32} color="#E42D2D" />
               <Text className="text-[#555] text-center">
-                Are you sure you want to move this document to trash?
+                This document will be deleted directly, due to the failure of
+                the upload process.
               </Text>
             </View>
 

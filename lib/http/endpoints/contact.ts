@@ -88,7 +88,7 @@ export async function checkRelatedDocs(
 }
 
 export async function deleteContact(
-  id: string
+  id: number
 ): Promise<DeleteContactResponse> {
   const { data } = await api.delete<DeleteContactResponse>(
     `/api/v1/contacts/${id}`

@@ -33,7 +33,7 @@ export interface DocumentSummary {
   mimeType: string;
   polygonCreatedAt: string;
   polygonUpdatedAt: string;
-  status: string;
+  status: DocumentStatus;
   updatedAt: string;
 }
 
@@ -93,6 +93,19 @@ export interface UpdateDocumentResponse {
 export interface UpdateDocumentStatusResponse {
   status: DocumentStatus;
   updatedAt: string;
+  message: string;
+  timestamp: string;
+}
+
+export interface DeleteDocumentResponse {
+  id: number;
+  ssdmDocId: string;
+  userDocId: string;
+  status: DocumentStatus;
+  transactionId: string;
+  pinataDeleteAt: string;
+  polygonDeleteAt: string;
+  fileName: string;
   message: string;
   timestamp: string;
 }

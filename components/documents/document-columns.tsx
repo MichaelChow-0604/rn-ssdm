@@ -3,6 +3,7 @@ import { Image, Text, View } from "react-native";
 import { ColumnDef } from "@tanstack/react-table";
 import DotDropdown from "./dot-dropdown";
 import { extFromMime, formatIsoToDDMMYYYY, iconForExt } from "~/lib/utils";
+import { DocumentStatus } from "~/lib/http/response-type/document";
 
 export interface DocumentRow {
   id: string;
@@ -11,6 +12,7 @@ export interface DocumentRow {
   mimeType: string;
   type: string;
   category: string;
+  status: DocumentStatus;
 }
 
 export const DOCUMENT_COLUMNS: ColumnDef<DocumentRow>[] = [
@@ -47,17 +49,20 @@ export const DOCUMENT_COLUMNS: ColumnDef<DocumentRow>[] = [
         <Text className="text-center font-bold">Upload Date</Text>
       </View>
     ),
-    cell: ({ getValue }) => (
-      <Text className="text-center">
-        {formatIsoToDDMMYYYY(getValue() as string)}
-      </Text>
-    ),
+    // Pending if the uploadAt (polygonUpdatedAt) is not yet available
+    cell: ({ getValue }) => {
+      const iso = getValue() as string | undefined;
+      const text = iso ? formatIsoToDDMMYYYY(iso) : "Pending";
+      return <Text className="text-center">{text}</Text>;
+    },
     meta: { className: "w-[25%] flex items-center justify-center" },
   },
   {
     id: "actions",
     header: () => null,
-    cell: ({ row }) => <DotDropdown documentId={row.original.id} />,
+    cell: ({ row }) => (
+      <DotDropdown documentId={row.original.id} status={row.original.status} />
+    ),
     meta: { className: "w-[10%] flex items-center justify-center" },
   },
 ];

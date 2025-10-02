@@ -1,5 +1,6 @@
 import { FilterOption } from "~/lib/types";
 import type { DocumentRow } from "./document-columns";
+import { DocumentStatus } from "~/lib/http/response-type/document";
 
 export interface AppliedFilter {
   type: FilterOption | null;
@@ -13,6 +14,7 @@ interface DocumentSummaryLike {
   mimeType: string;
   type?: string;
   category?: string;
+  status: DocumentStatus;
 }
 
 export function mapSummariesToRows(
@@ -25,6 +27,7 @@ export function mapSummariesToRows(
     mimeType: s.mimeType,
     type: String(s.type ?? ""),
     category: String(s.category ?? ""),
+    status: s.status,
   }));
 }
 

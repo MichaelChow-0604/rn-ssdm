@@ -13,21 +13,32 @@ import { MoveToTrashAlert } from "~/components/pop-up/move-to-trash-alert";
 import { useQueryClient } from "@tanstack/react-query";
 import { documentKeys } from "~/lib/http/keys/document";
 import {
+  deleteDocument,
   getDocumentById,
   updateDocumentStatus,
 } from "~/lib/http/endpoints/document";
 import { useApiMutation } from "~/lib/http/use-api-mutation";
-import { UpdateDocumentStatusResponse } from "~/lib/http/response-type/document";
-import { UpdateDocumentStatusPayload } from "~/lib/http/request-type/document";
+import {
+  DeleteDocumentResponse,
+  DocumentStatus,
+  UpdateDocumentStatusResponse,
+} from "~/lib/http/response-type/document";
+import {
+  DeleteDocumentPayload,
+  UpdateDocumentStatusPayload,
+} from "~/lib/http/request-type/document";
 import { toast } from "sonner-native";
+import { DirectDeleteAlert } from "../pop-up/direct-delete-alert";
 
 interface DotDropdownProps {
   documentId: string;
+  status: DocumentStatus;
 }
 
-export default function DotDropdown({ documentId }: DotDropdownProps) {
+export default function DotDropdown({ documentId, status }: DotDropdownProps) {
   const queryClient = useQueryClient();
   const [isMoveToTrashAlertOpen, setIsMoveToTrashAlertOpen] = useState(false);
+  const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
 
   const moveToTrashMutation = useApiMutation<
     UpdateDocumentStatusResponse,
@@ -37,18 +48,58 @@ export default function DotDropdown({ documentId }: DotDropdownProps) {
     mutationFn: updateDocumentStatus,
     onSuccess: () => {
       setIsMoveToTrashAlertOpen(false);
-      toast.success("Document moved to trash successfully.");
+      toast.success("Document moved to trash successfully.", {
+        position: "bottom-center",
+      });
       queryClient.invalidateQueries({ queryKey: documentKeys.list() });
     },
-    onError: (err) => {
-      console.log(err.response);
-      toast.error("Failed to move document to trash. Please try again later.");
-    },
+    onError: (err) =>
+      toast.error("Failed to move document to trash. Please try again later."),
   });
 
   const onConfirmMoveToTrash = () => {
     moveToTrashMutation.mutate({ id: documentId, status: "TRASH" });
   };
+
+  const isMoveToTrashLoading =
+    moveToTrashMutation.isPending || moveToTrashMutation.isSuccess;
+
+  // Direct delete for FAILED documents
+  const deleteMutation = useApiMutation<
+    DeleteDocumentResponse,
+    DeleteDocumentPayload
+  >({
+    mutationKey: ["document", "delete"],
+    mutationFn: deleteDocument,
+    onSuccess: () => {
+      setIsDeleteAlertOpen(false);
+      toast.success("Document deleted successfully.", {
+        position: "bottom-center",
+      });
+      queryClient.invalidateQueries({ queryKey: documentKeys.list() });
+    },
+    onError: (err) => {
+      toast.error("Failed to delete document. Please try again later.");
+    },
+  });
+
+  const onConfirmDelete = () => {
+    deleteMutation.mutate({ id: documentId as string, password: "" });
+  };
+
+  const isDeleteLoading =
+    moveToTrashMutation.isPending || moveToTrashMutation.isSuccess;
+
+  // If the document's status is UPLOADED or PROCESSING, show the move to trash alert
+  // If the document's status is FAILED, show the direct delete alert
+  function handleMoveToTrashOrDelete() {
+    if (status === "FAILED") {
+      setIsDeleteAlertOpen(true);
+      return;
+    }
+
+    setIsMoveToTrashAlertOpen(true);
+  }
 
   return (
     <>
@@ -81,7 +132,7 @@ export default function DotDropdown({ documentId }: DotDropdownProps) {
 
           <DropdownMenuItem
             className="flex-row items-center gap-2 active:bg-gray-100"
-            onPress={() => setIsMoveToTrashAlertOpen(true)}
+            onPress={handleMoveToTrashOrDelete}
           >
             <Feather name="trash-2" size={20} color="#E42D2D" />
             <Text className="font-medium text-[#E42D2D]">Move to trash</Text>
@@ -92,8 +143,16 @@ export default function DotDropdown({ documentId }: DotDropdownProps) {
       {/* Pop up alert */}
       <MoveToTrashAlert
         visible={isMoveToTrashAlertOpen}
+        isLoading={isMoveToTrashLoading}
         onConfirm={onConfirmMoveToTrash}
         onCancel={() => setIsMoveToTrashAlertOpen(false)}
+      />
+
+      <DirectDeleteAlert
+        visible={isDeleteAlertOpen}
+        isLoading={isDeleteLoading}
+        onConfirm={onConfirmDelete}
+        onCancel={() => setIsDeleteAlertOpen(false)}
       />
     </>
   );

@@ -43,7 +43,7 @@ export default function DeleteConfirm() {
     return parts.join(", ");
   }
 
-  const deleteContactMutation = useApiMutation<DeleteContactResponse, string>({
+  const deleteContactMutation = useApiMutation<DeleteContactResponse, number>({
     mutationKey: ["contact", "delete"],
     mutationFn: deleteContact,
     onSuccess: () => {
@@ -61,7 +61,7 @@ export default function DeleteConfirm() {
 
   async function handleDelete() {
     if (canDelete !== "true") return;
-    deleteContactMutation.mutate(String(id));
+    deleteContactMutation.mutate(Number(id));
   }
 
   return (

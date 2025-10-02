@@ -33,3 +33,8 @@ export interface UpdateDocumentStatusPayload {
   id: string;
   status: string;
 }
+
+export interface DeleteDocumentPayload {
+  id: string;
+  password?: string;
+}

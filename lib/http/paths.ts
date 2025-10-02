@@ -1,5 +1,3 @@
-import { API_URL } from "../constants";
-
 export const PUBLIC_PATHS = [
   "/api/v1/users",
   "/api/v1/users/confirmation",
@@ -14,7 +12,9 @@ function getPathname(url?: string) {
   if (!url) return "";
   try {
     // axios config.url is usually relative; handle both
-    const u = url.startsWith("http") ? new URL(url) : new URL(url, API_URL);
+    const u = url.startsWith("http")
+      ? new URL(url)
+      : new URL(url, process.env.EXPO_PUBLIC_API_URL);
     return u.pathname;
   } catch {
     return url; // fallback

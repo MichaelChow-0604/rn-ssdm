@@ -68,10 +68,8 @@ export function useEditDocumentForm({ documentId }: Params) {
       });
       router.back();
     },
-    onError: (err) => {
-      console.log(err.response);
-      toast.error("Failed to update document. Please try again later.");
-    },
+    onError: (err) =>
+      toast.error("Failed to update document. Please try again later."),
   });
 
   function handleEdit() {

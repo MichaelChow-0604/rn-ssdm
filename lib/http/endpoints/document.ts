@@ -1,10 +1,12 @@
 import { api } from "../axios";
 import {
+  DeleteDocumentPayload,
   UpdateDocumentPayload,
   UpdateDocumentStatusPayload,
   UploadDocumentPayload,
 } from "../request-type/document";
 import {
+  DeleteDocumentResponse,
   GetDocumentResponse,
   GetDocumentsResponse,
   UpdateDocumentResponse,
@@ -12,6 +14,7 @@ import {
   UploadDocumentResponse,
 } from "../response-type/document";
 
+// Upload document API
 export async function uploadDocument(
   payload: UploadDocumentPayload
 ): Promise<UploadDocumentResponse> {
@@ -38,6 +41,7 @@ export async function uploadDocument(
   return data;
 }
 
+// Edit document API
 export async function updateDocument(
   payload: UpdateDocumentPayload
 ): Promise<UpdateDocumentResponse> {
@@ -48,6 +52,7 @@ export async function updateDocument(
   return data;
 }
 
+// Move to trash / Recover document API
 export async function updateDocumentStatus(
   payload: UpdateDocumentStatusPayload
 ): Promise<UpdateDocumentStatusResponse> {
@@ -60,11 +65,13 @@ export async function updateDocumentStatus(
   return data;
 }
 
+// Get all documents API
 export async function getDocuments(): Promise<GetDocumentsResponse> {
   const { data } = await api.get<GetDocumentsResponse>("/api/v1/documents");
   return data;
 }
 
+// Get document by ID API
 export async function getDocumentById(
   id: string
 ): Promise<GetDocumentResponse> {
@@ -74,10 +81,24 @@ export async function getDocumentById(
   return data;
 }
 
+export async function deleteDocument(
+  payload: DeleteDocumentPayload
+): Promise<DeleteDocumentResponse> {
+  const config = payload.password
+    ? { data: { password: payload.password } }
+    : { data: {} };
+
+  const { data } = await api.delete<DeleteDocumentResponse>(
+    `/api/v1/documents/${payload.id}`,
+    config
+  );
+  return data;
+}
+
+// Download document API
 export async function downloadDocument(id: number): Promise<Blob> {
   const { data } = await api.get<Blob>(`/api/v1/documents/72/download`, {
     responseType: "blob",
   });
-
   return data;
 }

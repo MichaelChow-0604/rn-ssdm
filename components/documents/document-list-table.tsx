@@ -15,6 +15,7 @@ import { useMemo } from "react";
 import { FilterOption } from "~/lib/types";
 import { DOCUMENT_COLUMNS } from "./document-columns";
 import { applyFilterAndSort, mapSummariesToRows } from "./document-filters";
+import { DocumentStatus } from "~/lib/http/response-type/document";
 
 type DocumentRow = {
   id: string;
@@ -23,6 +24,7 @@ type DocumentRow = {
   mimeType: string;
   type: string;
   category: string;
+  status: DocumentStatus;
 };
 
 interface AppliedFilter {
@@ -57,10 +59,22 @@ export default function DocumentListTable({
 
   console.log(beautifyResponse(data));
 
+  // Pre-filter out documents that are not in the normal status (PROCESSING, UPLOADED, FAILED)
   const summaries = data?.documentSummaries ?? [];
-  const baseData = useMemo<DocumentRow[]>(
-    () => mapSummariesToRows(summaries),
+  const normalSummaries = useMemo(
+    () =>
+      summaries.filter(
+        (s) =>
+          s.status === "PROCESSING" ||
+          s.status === "UPLOADED" ||
+          s.status === "FAILED"
+      ),
     [summaries]
+  );
+
+  const baseData = useMemo<DocumentRow[]>(
+    () => mapSummariesToRows(normalSummaries),
+    [normalSummaries]
   );
 
   const tableData = useMemo<DocumentRow[]>(() => {

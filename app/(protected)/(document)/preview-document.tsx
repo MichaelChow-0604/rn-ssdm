@@ -91,7 +91,6 @@ export default function PreviewDocument() {
       });
     },
     onError: (err) => {
-      console.log(err);
       router.replace({
         pathname: "/return-message",
         params: { mode: "error" },

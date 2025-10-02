@@ -7,41 +7,79 @@ import {
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button } from "~/components/ui/button";
 import { CANCEL, VERIFY } from "~/constants/auth-placeholders";
-import { removeDocument } from "~/lib/storage/trash";
 import { Input } from "~/components/ui/input";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
-import { TrashDeleteSuccess } from "~/components/pop-up/trash-delete-success";
 import { IncorrectPassword } from "~/components/pop-up/incorrect-password";
+import { useQueryClient } from "@tanstack/react-query";
+import { useApiMutation } from "~/lib/http/use-api-mutation";
+import { DeleteDocumentResponse } from "~/lib/http/response-type/document";
+import { deleteDocument } from "~/lib/http/endpoints/document";
+import { toast } from "sonner-native";
+import { DeleteDocumentPayload } from "~/lib/http/request-type/document";
+import { documentKeys } from "~/lib/http/keys/document";
+import { z } from "zod";
+import { Controller, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+const schema = z.object({
+  password: z.string().min(1, { message: "Password is required" }),
+});
+type FormFields = z.infer<typeof schema>;
 
 export default function DeleteDocConfirm() {
   const { documentId } = useLocalSearchParams();
+  const queryClient = useQueryClient();
   const router = useRouter();
 
-  const [password, setPassword] = useState("");
-  const [openSuccessDialog, setOpenSuccessDialog] = useState(false);
   const [openIncorrectPasswordDialog, setOpenIncorrectPasswordDialog] =
     useState(false);
 
-  const tempCheck = () => {
-    if (password === "12345678") {
-      return true;
-    }
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormFields>({
+    defaultValues: { password: "" },
+    resolver: zodResolver(schema),
+    mode: "onChange",
+  });
 
-    return false;
-  };
+  const deleteMutation = useApiMutation<
+    DeleteDocumentResponse,
+    DeleteDocumentPayload
+  >({
+    mutationKey: ["document", "delete"],
+    mutationFn: deleteDocument,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: documentKeys.list() });
+      router.replace("/trash");
+      toast.success("Document deleted successfully.", {
+        position: "bottom-center",
+      });
+    },
+    onError: ({ status }) => {
+      switch (status) {
+        // Wrong password
+        case 403:
+          setOpenIncorrectPasswordDialog(true);
+          break;
+        // Server error
+        default:
+          toast.error("Failed to delete document. Please try again later.");
+      }
+    },
+  });
 
-  const handleVerify = async () => {
-    if (tempCheck()) {
-      Keyboard.dismiss();
-      await removeDocument(documentId as string);
-      setOpenSuccessDialog(true);
-    } else {
-      setOpenIncorrectPasswordDialog(true);
-    }
+  const isDeletingDocument = deleteMutation.isPending;
+
+  const onSubmit = ({ password }: FormFields) => {
+    Keyboard.dismiss();
+    deleteMutation.mutate({ id: documentId as string, password });
   };
 
   return (
@@ -61,20 +99,42 @@ export default function DeleteDocConfirm() {
           </Text>
 
           {/* OTP Input */}
-          <Input
-            placeholder="Enter your password"
-            value={password}
-            onChangeText={setPassword}
-            className="w-full my-8 bg-white border-gray-200 text-black"
-          />
+          <View className="w-full my-8">
+            <Controller
+              name="password"
+              control={control}
+              render={({ field: { onChange, onBlur, value } }) => (
+                <Input
+                  placeholder="Enter your password"
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  secureTextEntry
+                  autoCorrect={false}
+                  autoCapitalize="none"
+                  className="w-full bg-white border-gray-200 text-black"
+                />
+              )}
+            />
+            {errors.password && (
+              <Text className="text-redtext text-sm mt-2">
+                {errors.password.message}
+              </Text>
+            )}
+          </View>
 
           {/* Verify Button */}
           <View className="flex flex-col gap-4 w-full">
             <Button
               className="bg-button text-buttontext"
-              onPress={handleVerify}
+              onPress={handleSubmit(onSubmit)}
+              disabled={isDeletingDocument}
             >
-              <Text className="text-white font-bold">{VERIFY}</Text>
+              {isDeletingDocument ? (
+                <ActivityIndicator size="small" color="white" />
+              ) : (
+                <Text className="text-white font-bold">{VERIFY}</Text>
+              )}
             </Button>
 
             {/* Cancel Button */}
@@ -89,7 +149,6 @@ export default function DeleteDocConfirm() {
         </KeyboardAvoidingView>
       </TouchableWithoutFeedback>
 
-      <TrashDeleteSuccess visible={openSuccessDialog} />
       <IncorrectPassword
         visible={openIncorrectPasswordDialog}
         setOpen={setOpenIncorrectPasswordDialog}

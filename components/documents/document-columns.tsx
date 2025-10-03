@@ -23,6 +23,9 @@ export const DOCUMENT_COLUMNS: ColumnDef<DocumentRow>[] = [
       const doc = row.original;
       return (
         <View className="flex-row items-center gap-2">
+          {doc.status === "FAILED" && (
+            <FontAwesome name="exclamation-circle" size={16} color="red" />
+          )}
           <View className="relative w-8 h-8">
             <FontAwesome
               name="lock"
@@ -35,7 +38,10 @@ export const DOCUMENT_COLUMNS: ColumnDef<DocumentRow>[] = [
               className="w-8 h-8"
             />
           </View>
-          <Text className="font-semibold">{doc.title}</Text>
+
+          <View className="flex-1">
+            <Text className="font-semibold">{doc.title}</Text>
+          </View>
         </View>
       );
     },

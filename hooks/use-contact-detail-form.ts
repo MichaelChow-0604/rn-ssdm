@@ -144,8 +144,7 @@ export function useContactDetailForm({ id, apiContact }: Params) {
     form,
     isEditing,
     setIsEditing,
-    isUpdatingContact:
-      isUpdatingContact.isPending || isUpdatingContact.isSuccess,
+    isUpdatingContact: isUpdatingContact.isPending,
     profilePic,
     setProfilePic,
     selectedCountry,

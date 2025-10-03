@@ -20,7 +20,7 @@ import { useMemo, useState } from "react";
 export default function ContactListTab() {
   const queryClient = useQueryClient();
 
-  const { data, isLoading, isFetching } = useQuery({
+  const { data, isLoading, isFetching, refetch, isRefetching } = useQuery({
     queryKey: contactKeys.list(),
     queryFn: getContacts,
     staleTime: 60_000,
@@ -79,7 +79,7 @@ export default function ContactListTab() {
       </View>
 
       {/* Contact list */}
-      {isLoading || isFetching ? (
+      {isLoading || isFetching || isRefetching ? (
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="small" color="#438BF7" className="mb-20" />
         </View>
@@ -112,6 +112,8 @@ export default function ContactListTab() {
           )}
           initialNumToRender={20}
           windowSize={10}
+          onRefresh={() => refetch()}
+          refreshing={isRefetching}
         />
       )}
     </SafeAreaView>

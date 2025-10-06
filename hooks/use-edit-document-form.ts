@@ -86,7 +86,7 @@ export function useEditDocumentForm({ documentId }: Params) {
       referenceNo: form.getValues("reference_number") ?? "",
       recipients: form.getValues("recipients"),
       description: form.getValues("description") ?? "",
-      // remarks intentionally not sent (API not supported yet)
+      remarks: form.getValues("remarks") ?? "",
     });
   }
 

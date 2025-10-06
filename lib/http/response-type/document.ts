@@ -83,11 +83,14 @@ export interface GetDocumentResponse {
 }
 
 export interface UpdateDocumentResponse {
+  id: number;
   userDocId: string;
   referenceNo: string;
   recipients: string[];
   description: string;
-  updatedAt: string;
+  remarks: string;
+  message: string;
+  timestamp: string;
 }
 
 export interface UpdateDocumentStatusResponse {

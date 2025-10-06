@@ -27,6 +27,7 @@ export interface UpdateDocumentPayload {
   referenceNo: string;
   recipients: string[];
   description: string;
+  remarks: string;
 }
 
 export interface UpdateDocumentStatusPayload {

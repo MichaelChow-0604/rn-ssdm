@@ -5,11 +5,11 @@ import {
   Platform,
   ScrollView,
   Image,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Card } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
-import { useProfile } from "~/context/profile-context";
 import { useAuth } from "~/context/auth-context";
 import { useState } from "react";
 import { LogoutConfirm } from "~/components/pop-up/logout-confirm";
@@ -27,7 +27,6 @@ import { LogoutResponse } from "~/lib/http/response-type/auth";
 import { useSettings } from "~/context/setting-context";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getProfile } from "~/lib/http/endpoints/profile";
-import { LoadingOverlay } from "~/components/loading-overlay";
 
 export default function ProfileTab() {
   const { setIsAuthenticated } = useAuth();
@@ -40,17 +39,11 @@ export default function ProfileTab() {
   const {
     data: profile,
     isLoading,
-    isError,
-    refetch,
     isRefetching,
   } = useQuery({
-    queryKey: ["profile"],
+    queryKey: ["profile", "get"],
     queryFn: getProfile,
   });
-
-  const profilePic = profile?.profilePicture;
-  const firstName = profile?.firstName;
-  const lastName = profile?.lastName;
 
   const logoutMutation = useApiMutation<LogoutResponse, void>({
     mutationKey: ["logout"],
@@ -73,54 +66,53 @@ export default function ProfileTab() {
         className="flex-1 items-start px-4"
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        <LoadingOverlay
-          visible={isLoading}
-          label="Loading profile..."
-          onDismiss={() => {}}
-        />
-
-        <ScrollView className="w-full" showsVerticalScrollIndicator={false}>
-          {/* Profile pic */}
-          <View className="flex items-center justify-center w-full gap-1 flex-col pt-20 pb-10">
-            {/* Profile pic box */}
-            <View className="w-24 h-24 relative">
-              <View className="rounded-full">
+        {isLoading || isRefetching ? (
+          <View className="flex-1 w-full items-center justify-center mt-32">
+            <ActivityIndicator size="small" color="gray" />
+          </View>
+        ) : (
+          <ScrollView className="w-full" showsVerticalScrollIndicator={false}>
+            {/* Profile pic */}
+            <View className="flex items-center justify-center w-full gap-1 flex-col pt-20 pb-10">
+              {/* Profile pic box */}
+              <View className="w-24 h-24 relative">
                 <Image
                   source={
-                    profilePic
-                      ? { uri: profilePic }
+                    profile?.profilePicture
+                      ? {
+                          uri: profile.profilePicture.startsWith("data:")
+                            ? profile.profilePicture
+                            : `data:image/png;base64,${profile.profilePicture}`,
+                        }
                       : require("~/assets/images/default_icon.png")
                   }
                   className="w-24 h-24 rounded-full text-black"
                 />
               </View>
+
+              <Text className="text-xl font-bold text-white">
+                {profile?.firstName} {profile?.lastName}
+              </Text>
             </View>
 
-            <Text className="text-xl font-bold text-white">
-              {firstName} {lastName}
-            </Text>
-          </View>
-
-          {/* Form section */}
-          <Card className="w-full bg-white p-4 rounded-xl gap-4 border-gray-200">
-            {/* Account section */}
-            <SettingsSection title="Account" items={accountItems} />
-
-            {/* Support & About section */}
-            <SettingsSection title="Support & About" items={supportItems} />
-
-            {/* More */}
-            <SettingsSection title="More" items={moreItems} />
-
-            {/* Logout */}
-            <Button
-              className="bg-button w-[40%] mx-auto mt-12 mb-4"
-              onPress={() => setDialogOpen(true)}
-            >
-              <Text className="text-white font-bold">LOGOUT</Text>
-            </Button>
-          </Card>
-        </ScrollView>
+            {/* Form section */}
+            <Card className="w-full bg-white p-4 rounded-xl gap-4 border-gray-200">
+              {/* Account section */}
+              <SettingsSection title="Account" items={accountItems} />
+              {/* Support & About section */}
+              <SettingsSection title="Support & About" items={supportItems} />
+              {/* More */}
+              <SettingsSection title="More" items={moreItems} />
+              {/* Logout */}
+              <Button
+                className="bg-button w-[40%] mx-auto mt-12 mb-4"
+                onPress={() => setDialogOpen(true)}
+              >
+                <Text className="text-white font-bold">LOGOUT</Text>
+              </Button>
+            </Card>
+          </ScrollView>
+        )}
       </KeyboardAvoidingView>
 
       <LogoutConfirm

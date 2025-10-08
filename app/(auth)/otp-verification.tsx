@@ -124,7 +124,7 @@ export default function OTPVerificationPage() {
 
         // Warm profile in the background (no await needed)
         queryClient.prefetchQuery({
-          queryKey: ["profile"],
+          queryKey: ["profile", "get"],
           queryFn: getProfile,
         });
 

@@ -6,6 +6,6 @@ interface ProfileInfoJson {
 }
 
 export interface UpdateProfilePayload {
-  profilePicture?: IconData;
+  profilePicture?: IconData | null;
   profileInfoJson: ProfileInfoJson;
 }

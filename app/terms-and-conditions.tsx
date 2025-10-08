@@ -15,15 +15,28 @@ import { TEMP_LONG_TEXT } from "~/lib/constants";
 
 export default function TermsAndConditions() {
   const [isAtBottom, setIsAtBottom] = useState(false);
+  const [contentHeight, setContentHeight] = useState(0);
+  const [containerHeight, setContainerHeight] = useState(0);
+
   const { set: setAccepted } = useLocalStorage<boolean>("accepted");
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    // contentSize.height: the total height of the scrollable content, including padding/margin
+    // layoutMeasurement.height: the height of the visible part of the scrollable content, not including the header and button area
+    // contentOffset.y: how far you've scrolled from the very top of the content
     const { contentOffset, layoutMeasurement, contentSize } = event.nativeEvent;
+    const epsilon = 12; // dp tolerance for bounce/rounding
 
-    if (contentOffset.y + layoutMeasurement.height >= contentSize.height) {
+    // If the user has scrolled to the bottom of the scrollable content, set isAtBottom to true
+    if (
+      contentOffset.y + layoutMeasurement.height >=
+      contentSize.height - epsilon
+    ) {
       setIsAtBottom(true);
     }
   };
+
+  const canAccept = isAtBottom || contentHeight <= containerHeight;
 
   const handleAccept = async () => {
     await setAccepted(true);
@@ -38,8 +51,11 @@ export default function TermsAndConditions() {
       <ScrollView
         className="flex-1 px-6"
         contentContainerClassName="gap-8 py-6"
+        scrollEventThrottle={16}
         onScroll={handleScroll}
         showsVerticalScrollIndicator
+        onLayout={(e) => setContainerHeight(e.nativeEvent.layout.height)}
+        onContentSizeChange={(_, h) => setContentHeight(h)}
       >
         <Text className="text-center text-red-500 text-xl font-semibold">
           Please scroll to read through the content before accepting
@@ -79,7 +95,7 @@ export default function TermsAndConditions() {
       <View className="w-full px-6 py-6 border-t border-gray-300">
         <Button
           className="bg-button"
-          disabled={!isAtBottom}
+          disabled={!canAccept}
           onPress={handleAccept}
         >
           <Text className="text-white font-bold">Accept</Text>

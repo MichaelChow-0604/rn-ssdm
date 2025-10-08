@@ -12,10 +12,10 @@ import {
 import { useApiMutation } from "~/lib/http/use-api-mutation";
 import { updateContact } from "~/lib/http/endpoints/contact";
 import { contactKeys } from "~/lib/http/keys/contact";
-import { IconData } from "~/lib/http/request-type/contact";
 import { GetContactResponse } from "~/lib/http/response-type/contact";
 import { toast } from "sonner-native";
 import { pickImage } from "~/lib/pick-image";
+import { IconData } from "~/lib/types";
 
 const detailSchema = newContactSchema.extend({
   profilePicUri: z.string().nullable().optional(),

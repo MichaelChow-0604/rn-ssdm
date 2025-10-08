@@ -6,7 +6,7 @@ import { useEffect } from "react";
 import * as NavigationBar from "expo-navigation-bar";
 
 export default function Index() {
-  AsyncStorage.clear();
+  // AsyncStorage.clear();
   // See whether the user has accepted the terms and conditions
   const { value: accepted, isLoading } = useLocalStorage<boolean>("accepted");
 

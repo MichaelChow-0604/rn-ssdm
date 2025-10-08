@@ -1,3 +1,5 @@
+import { IconData } from "~/lib/types";
+
 export interface ContactInfo {
   firstName: string;
   lastName: string;
@@ -5,12 +7,6 @@ export interface ContactInfo {
   email: string;
   relationship: string;
   communicationOption: string[];
-}
-
-export interface IconData {
-  uri: string;
-  name: string;
-  mimeType: string;
 }
 
 export interface CreateContactPayload {

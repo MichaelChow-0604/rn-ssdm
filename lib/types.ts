@@ -10,3 +10,9 @@ export interface MultiOption {
   label: string;
   value: string; // contact id
 }
+
+export interface IconData {
+  uri: string;
+  name: string;
+  mimeType: string;
+}

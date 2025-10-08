@@ -25,16 +25,32 @@ import { useTokenStore } from "~/store/use-token-store";
 import { useApiMutation } from "~/lib/http/use-api-mutation";
 import { LogoutResponse } from "~/lib/http/response-type/auth";
 import { useSettings } from "~/context/setting-context";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { getProfile } from "~/lib/http/endpoints/profile";
+import { LoadingOverlay } from "~/components/loading-overlay";
 
 export default function ProfileTab() {
-  const { profile } = useProfile();
   const { setIsAuthenticated } = useAuth();
   const [dialogOpen, setDialogOpen] = useState(false);
   const queryClient = useQueryClient();
 
   const { clearTokens } = useTokenStore();
   const { setNotificationEnabled } = useSettings();
+
+  const {
+    data: profile,
+    isLoading,
+    isError,
+    refetch,
+    isRefetching,
+  } = useQuery({
+    queryKey: ["profile"],
+    queryFn: getProfile,
+  });
+
+  const profilePic = profile?.profilePicture;
+  const firstName = profile?.firstName;
+  const lastName = profile?.lastName;
 
   const logoutMutation = useApiMutation<LogoutResponse, void>({
     mutationKey: ["logout"],
@@ -57,6 +73,12 @@ export default function ProfileTab() {
         className="flex-1 items-start px-4"
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
+        <LoadingOverlay
+          visible={isLoading}
+          label="Loading profile..."
+          onDismiss={() => {}}
+        />
+
         <ScrollView className="w-full" showsVerticalScrollIndicator={false}>
           {/* Profile pic */}
           <View className="flex items-center justify-center w-full gap-1 flex-col pt-20 pb-10">
@@ -65,8 +87,8 @@ export default function ProfileTab() {
               <View className="rounded-full">
                 <Image
                   source={
-                    profile.profilePic
-                      ? { uri: profile.profilePic }
+                    profilePic
+                      ? { uri: profilePic }
                       : require("~/assets/images/default_icon.png")
                   }
                   className="w-24 h-24 rounded-full text-black"
@@ -75,7 +97,7 @@ export default function ProfileTab() {
             </View>
 
             <Text className="text-xl font-bold text-white">
-              {profile.firstName} {profile.lastName}
+              {firstName} {lastName}
             </Text>
           </View>
 

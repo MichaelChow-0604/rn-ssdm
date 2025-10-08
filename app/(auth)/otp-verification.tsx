@@ -51,6 +51,7 @@ import {
 } from "~/lib/http/request-type/auth";
 import { documentKeys } from "~/lib/http/keys/document";
 import { getDocuments } from "~/lib/http/endpoints/document";
+import { getProfile } from "~/lib/http/endpoints/profile";
 
 export default function OTPVerificationPage() {
   const { email, session, mode } = useLocalSearchParams();
@@ -119,6 +120,12 @@ export default function OTPVerificationPage() {
         queryClient.prefetchQuery({
           queryKey: documentKeys.list(),
           queryFn: getDocuments,
+        });
+
+        // Warm profile in the background (no await needed)
+        queryClient.prefetchQuery({
+          queryKey: ["profile"],
+          queryFn: getProfile,
         });
 
         setIsAuthenticated(true);

@@ -1,5 +1,4 @@
 import { ActivityIndicator, FlatList, Text, View } from "react-native";
-import { beautifyResponse } from "~/lib/utils";
 import {
   ColumnDef,
   getCoreRowModel,
@@ -57,8 +56,6 @@ export default function DocumentListTable({
     queryFn: getDocuments,
   });
 
-  console.log(beautifyResponse(data));
-
   // Pre-filter out documents that are not in the normal status (PROCESSING, UPLOADED, FAILED)
   const summaries = data?.documentSummaries ?? [];
   const normalSummaries = useMemo(
@@ -97,9 +94,9 @@ export default function DocumentListTable({
   const coreRowCount = table.getCoreRowModel().rows.length;
   const filteredRowCount = table.getFilteredRowModel().rows.length;
 
-  console.log(
-    `Row count: Original=${coreRowCount}, Filtered=${filteredRowCount}`
-  );
+  // console.log(
+  //   `Row count: Original=${coreRowCount}, Filtered=${filteredRowCount}`
+  // );
 
   return (
     <View className="min-w-full flex-1">

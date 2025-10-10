@@ -1,4 +1,5 @@
-import { ActivityIndicator, Modal, Text, View } from "react-native";
+import { ActivityIndicator, Modal, Text, View, Platform } from "react-native";
+import { useEffect, useRef } from "react";
 import { Card, CardContent } from "~/components/ui/card";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 
@@ -15,13 +16,23 @@ export function AccessProgressDialog({
   status = "pending",
   onDismiss,
 }: AccessProgressDialogProps) {
+  const wasVisible = useRef(false);
+
+  // Android: Modal.onDismiss may not fire when programmatically hidden.
+  useEffect(() => {
+    if (Platform.OS === "android" && wasVisible.current && !visible) {
+      onDismiss?.();
+    }
+    wasVisible.current = visible;
+  }, [visible, onDismiss]);
+
   return (
     <Modal
       visible={visible}
       transparent
       animationType="fade"
       statusBarTranslucent
-      onDismiss={onDismiss}
+      onDismiss={onDismiss} // iOS will use this
     >
       <View
         className="flex-1 items-center justify-center bg-black/50"

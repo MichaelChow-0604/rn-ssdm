@@ -1,5 +1,6 @@
 import * as FileSystem from "expo-file-system/legacy";
 import * as Sharing from "expo-sharing";
+import * as IntentLauncher from "expo-intent-launcher";
 import { Alert, Platform } from "react-native";
 
 interface OpenFileOptions {
@@ -15,9 +16,7 @@ export async function openFile({
 }: OpenFileOptions) {
   try {
     const info = await FileSystem.getInfoAsync(localUri);
-    if (!info.exists) {
-      throw new Error(`File does not exist at ${localUri}`);
-    }
+    if (!info.exists) throw new Error(`File does not exist at ${localUri}`);
 
     const available = await Sharing.isAvailableAsync();
     if (!available) {
@@ -28,12 +27,44 @@ export async function openFile({
       return;
     }
 
-    const options =
-      Platform.OS === "ios"
-        ? { UTI: iosUTI } // iOS only uses UTI
-        : { mimeType };
+    if (Platform.OS === "ios") {
+      await Sharing.shareAsync(
+        localUri,
+        iosUTI ? ({ UTI: iosUTI } as any) : undefined
+      );
+      return;
+    }
 
-    await Sharing.shareAsync(localUri, options as any);
+    // ANDROID: Prefer a specific MIME; avoid application/octet-stream
+    const androidMime =
+      mimeType && mimeType !== "application/octet-stream"
+        ? mimeType
+        : undefined;
+
+    try {
+      // Try share sheet first
+      await Sharing.shareAsync(
+        localUri,
+        androidMime ? ({ mimeType: androidMime } as any) : undefined
+      );
+
+      return;
+    } catch (shareErr) {
+      // Fallback: open via VIEW intent using content:// URI
+      try {
+        const contentUri = await FileSystem.getContentUriAsync(localUri);
+        await IntentLauncher.startActivityAsync("android.intent.action.VIEW", {
+          data: contentUri,
+          flags: 1, // FLAG_GRANT_READ_URI_PERMISSION
+          type: androidMime ?? "*/*",
+        } as any);
+
+        return;
+      } catch (intentErr) {
+        console.error("Android intent open error:", intentErr);
+        throw shareErr;
+      }
+    }
   } catch (err) {
     console.error("openFile error:", err);
     Alert.alert("Unable to open file", "Please try again.");
@@ -64,18 +95,11 @@ export function resolveFileMeta(fileName: string): {
       return { mimeType: "image/jpeg", iosUTI: "public.jpeg" };
     case "png":
       return { mimeType: "image/png", iosUTI: "public.png" };
+    case "heic":
+      return { mimeType: "image/heic", iosUTI: "public.heic" };
     default:
       return { mimeType: "application/octet-stream" };
   }
-}
-
-export async function ensureLocalFromRemote(
-  url: string,
-  fileName: string
-): Promise<string> {
-  const target = FileSystem.cacheDirectory + fileName;
-  const { uri } = await FileSystem.downloadAsync(url, target);
-  return uri;
 }
 
 export async function ensureLocalFromBlob(

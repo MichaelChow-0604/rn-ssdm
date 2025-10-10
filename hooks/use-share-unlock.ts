@@ -47,11 +47,15 @@ export function useShareUnlock() {
     await nextFrame();
     await wait(120);
 
+    console.log("Starting to open file...");
+
     await openFile({
       localUri: payload.localUri,
       mimeType: payload.mimeType,
       iosUTI: payload.iosUTI,
     });
+
+    console.log("File opened successfully");
 
     pendingOpenRef.current = null;
   }
@@ -69,7 +73,9 @@ export function useShareUnlock() {
     clearTimers();
 
     const localUri = await ensureLocalFromBlob(blob, fileName);
+    console.log("completeWithBlob", localUri, fileName);
     const { mimeType, iosUTI } = resolveFileMeta(fileName);
+    console.log("completeWithBlob", mimeType, iosUTI);
     pendingOpenRef.current = { localUri, mimeType, iosUTI, armed: false };
 
     setDialogText("Unlock successful!");

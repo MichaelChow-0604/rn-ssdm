@@ -39,3 +39,8 @@ export interface DeleteDocumentPayload {
   id: string;
   password?: string;
 }
+
+export interface DownloadDocumentPayload {
+  cid: string;
+  passcode: string;
+}

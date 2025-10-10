@@ -9,8 +9,13 @@ import { useCallback } from "react";
 import { useFocusEffect } from "expo-router";
 import { AccessProgressDialog } from "~/components/pop-up/access-progress";
 import { useShareUnlock } from "~/hooks/use-share-unlock";
-import { downloadDocument } from "~/lib/http/endpoints/document";
-import { beautifyResponse } from "~/lib/utils";
+import {
+  downloadDocument,
+  DownloadedBlob,
+} from "~/lib/http/endpoints/document";
+import { useApiMutation } from "~/lib/http/use-api-mutation";
+import { DownloadDocumentPayload } from "~/lib/http/request-type/document";
+import { toast } from "sonner-native";
 
 type ShareFormFields = z.infer<typeof shareSchema>;
 
@@ -28,19 +33,50 @@ export default function ShareTab() {
     },
   });
 
-  const { dialogOpen, dialogText, dialogStatus, begin, onDialogDismiss } =
-    useShareUnlock();
+  const downloadMutation = useApiMutation<
+    DownloadedBlob,
+    DownloadDocumentPayload
+  >({
+    mutationKey: ["document", "download"],
+    mutationFn: downloadDocument,
+    onSuccess: ({ fileName, blob }) => {
+      completeWithBlob(blob, fileName);
+    },
+    onError: ({ status }) => {
+      switch (status) {
+        case 400:
+          toast.error("Invalid passcode.");
+          break;
+        case 404:
+          toast.error("Document not found.");
+          break;
+        default:
+          toast.error("Something went wrong. Please try again later.");
+      }
+      cancel();
+    },
+  });
+
+  const {
+    dialogOpen,
+    dialogText,
+    dialogStatus,
+    onDialogDismiss,
+    beginPending,
+    completeWithBlob,
+    cancel,
+  } = useShareUnlock();
 
   // For temporary testing & demo
-  const onSubmit = async (data: ShareFormFields) => {
+  const onSubmit = (_data: ShareFormFields) => {
     Keyboard.dismiss();
 
-    // pick any bundled asset
-    // const fileName = "ssdm.pdf";
-    // await begin(require(`~/assets/docs/${fileName}`), fileName);
+    beginPending();
 
-    const blob = await downloadDocument(72);
-    console.log(blob);
+    downloadMutation.mutate({
+      cid: _data.cidPin,
+      passcode: _data.passcode,
+    });
   };
 
   useFocusEffect(
@@ -68,7 +104,7 @@ export default function ShareTab() {
         {/* CID Pin */}
         <View className="flex-col gap-1">
           <View className="flex-row items-center">
-            <Text className="w-[80px] text-center font-bold">CID Pin</Text>
+            <Text className="w-[80px] text-center font-bold">CID</Text>
             <Controller
               name="cidPin"
               control={control}
@@ -78,6 +114,7 @@ export default function ShareTab() {
                   onChangeText={onChange}
                   onBlur={onBlur}
                   value={value}
+                  lineBreakModeIOS="tail"
                 />
               )}
             />

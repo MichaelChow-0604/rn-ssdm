@@ -28,11 +28,19 @@ export function useLocalStorage<T>(
       try {
         const raw = await AsyncStorage.getItem(key);
         if (!mounted) return;
+
         if (raw != null) {
           try {
             setValue(JSON.parse(raw) as T);
           } catch {
-            setValue(initialValue);
+            // Corrupt/non-JSON value: repair it
+            if (initialValue !== undefined) {
+              await AsyncStorage.setItem(key, JSON.stringify(initialValue));
+              if (mounted) setValue(initialValue);
+            } else {
+              await AsyncStorage.removeItem(key);
+              if (mounted) setValue(undefined);
+            }
           }
         } else if (initialValue !== undefined) {
           await AsyncStorage.setItem(key, JSON.stringify(initialValue));
@@ -47,7 +55,7 @@ export function useLocalStorage<T>(
     return () => {
       mounted = false;
     };
-  }, [key]);
+  }, [key, initialValue]);
 
   const set = useCallback<UseLocalStorageResult<T>["set"]>(
     async (next) => {

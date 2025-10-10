@@ -1,6 +1,7 @@
 import { api } from "../axios";
 import {
   DeleteDocumentPayload,
+  DownloadDocumentPayload,
   UpdateDocumentPayload,
   UpdateDocumentStatusPayload,
   UploadDocumentPayload,
@@ -81,6 +82,7 @@ export async function getDocumentById(
   return data;
 }
 
+// Delete document API
 export async function deleteDocument(
   payload: DeleteDocumentPayload
 ): Promise<DeleteDocumentResponse> {
@@ -95,10 +97,40 @@ export async function deleteDocument(
   return data;
 }
 
+// Interface for downloaded blob
+export interface DownloadedBlob {
+  fileName: string;
+  blob: Blob;
+  contentType?: string;
+}
+
+// Helper function to get filename from content disposition
+function filenameFromContentDisposition(
+  value: string | undefined
+): string | null {
+  if (!value) return null;
+  // Handles: filename="name.ext" and RFC5987: filename*=UTF-8''name.ext
+  const rfc5987 = /filename\*=(?:UTF-8'')?([^;]+)/i.exec(value);
+  if (rfc5987?.[1])
+    return decodeURIComponent(rfc5987[1].replace(/(^")|("$)/g, ""));
+  const simple = /filename="?([^";]+)"?/i.exec(value);
+  if (simple?.[1]) return simple[1];
+  return null;
+}
+
 // Download document API
-export async function downloadDocument(id: number): Promise<Blob> {
-  const { data } = await api.get<Blob>(`/api/v1/documents/72/download`, {
+export async function downloadDocument(
+  payload: DownloadDocumentPayload
+): Promise<DownloadedBlob> {
+  const res = await api.post<Blob>(`/api/v1/documents/download`, payload, {
     responseType: "blob",
   });
-  return data;
+
+  const headers = res.headers as Record<string, string | undefined>;
+  const disposition =
+    headers["content-disposition"] ?? headers["Content-Disposition"];
+  const contentType = headers["content-type"] ?? headers["Content-Type"];
+
+  let fileName = filenameFromContentDisposition(disposition) ?? "document";
+  return { fileName, blob: res.data, contentType };
 }

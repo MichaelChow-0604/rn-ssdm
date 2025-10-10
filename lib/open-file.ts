@@ -1,6 +1,5 @@
 import * as FileSystem from "expo-file-system/legacy";
 import * as Sharing from "expo-sharing";
-import { Asset } from "expo-asset";
 import { Alert, Platform } from "react-native";
 
 interface OpenFileOptions {
@@ -70,18 +69,6 @@ export function resolveFileMeta(fileName: string): {
   }
 }
 
-export async function ensureLocalFromAsset(
-  moduleId: number,
-  fileName: string
-): Promise<string> {
-  const asset = Asset.fromModule(moduleId);
-  await asset.downloadAsync();
-  const sourceUri = asset.localUri ?? asset.uri;
-  const target = FileSystem.cacheDirectory + fileName;
-  await FileSystem.copyAsync({ from: sourceUri, to: target });
-  return target;
-}
-
 export async function ensureLocalFromRemote(
   url: string,
   fileName: string
@@ -89,4 +76,28 @@ export async function ensureLocalFromRemote(
   const target = FileSystem.cacheDirectory + fileName;
   const { uri } = await FileSystem.downloadAsync(url, target);
   return uri;
+}
+
+export async function ensureLocalFromBlob(
+  blob: Blob,
+  fileName: string
+): Promise<string> {
+  const base64 = await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () =>
+      reject(reader.error ?? new Error("Failed to read blob"));
+    reader.onloadend = () => {
+      const result = reader.result as string;
+      const commaIdx = result.indexOf(",");
+      if (commaIdx === -1) return reject(new Error("Invalid data URL"));
+      resolve(result.slice(commaIdx + 1)); // strip "data:*/*;base64,"
+    };
+    reader.readAsDataURL(blob);
+  });
+
+  const target = FileSystem.cacheDirectory + fileName;
+  await FileSystem.writeAsStringAsync(target, base64, {
+    encoding: FileSystem.EncodingType.Base64,
+  });
+  return target;
 }

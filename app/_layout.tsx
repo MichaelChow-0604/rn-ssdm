@@ -9,6 +9,7 @@ import { ProfileProvider } from "~/context/profile-context";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner-native";
 import { SettingsProvider } from "~/context/setting-context";
+import { BuoyDebugger } from "~/lib/buoy-debugger";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -29,12 +30,15 @@ export default function RootLayout() {
           <AuthProvider>
             <ProfileProvider>
               <SettingsProvider>
+                {/* <BuoyDebugger /> */}
+
                 <Stack screenOptions={{ headerShown: false }}>
                   <Stack.Screen name="index" />
                   <Stack.Screen name="(auth)" />
                   <Stack.Screen name="(protected)" />
                   <Stack.Screen name="terms-and-conditions" />
                 </Stack>
+
                 <PortalHost />
               </SettingsProvider>
             </ProfileProvider>

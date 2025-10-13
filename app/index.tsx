@@ -4,11 +4,15 @@ import { useLocalStorage } from "../hooks/use-local-storage";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect } from "react";
 import * as NavigationBar from "expo-navigation-bar";
+import { usePushNotification } from "~/hooks/use-push-notification";
 
 export default function Index() {
   // AsyncStorage.clear();
   // See whether the user has accepted the terms and conditions
   const { value: accepted, isLoading } = useLocalStorage<boolean>("accepted");
+
+  // Set up the push notification
+  usePushNotification();
 
   useEffect(() => {
     if (Platform.OS === "android") {

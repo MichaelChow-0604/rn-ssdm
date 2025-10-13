@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "366664529917",
+    "project_id": "ssdm-keyslink",
+    "storage_bucket": "ssdm-keyslink.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:366664529917:android:be9906e8a9e3e3f8a0cb94",
+        "android_client_info": {
+          "package_name": "com.mehchow.rnssdm"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCwt8hMj5j55_RzER08I4gNlbMYfmCMwnI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -23,7 +23,8 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.mehchow.rnssdm",
-      "softwareKeyboardLayoutMode": "pan"
+      "softwareKeyboardLayoutMode": "pan",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "bundler": "metro",

@@ -77,7 +77,7 @@ export default function ProfileTab() {
           <ScrollView
             className="w-full"
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ bottom: 40 }}
+            contentContainerStyle={{ paddingBottom: 40 }}
           >
             {/* Profile pic */}
             <View className="flex items-center justify-center w-full gap-1 flex-col pt-20 pb-10">

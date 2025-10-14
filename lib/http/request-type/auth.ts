@@ -34,3 +34,9 @@ export interface ResetPasswordPayload {
   password: string;
   confirm_password: string;
 }
+
+export interface ChangePasswordPayload {
+  old_password: string;
+  password: string;
+  confirm_password: string;
+}

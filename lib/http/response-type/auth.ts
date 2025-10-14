@@ -66,12 +66,17 @@ export interface ForgotPasswordResponse {
 }
 
 export interface ForgotPasswordOTPResponse {
-  email: string;
+  session: string;
   message: string;
   timestamp: string;
 }
 
 export interface ResetPasswordResponse {
+  message: string;
+  timestamp: string;
+}
+
+export interface ChangePasswordResponse {
   message: string;
   timestamp: string;
 }

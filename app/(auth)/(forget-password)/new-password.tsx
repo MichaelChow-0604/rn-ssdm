@@ -1,5 +1,6 @@
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import {
+  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -12,7 +13,6 @@ import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { newPasswordSchema } from "~/schema/auth-schema";
-import { useCallback, useMemo } from "react";
 import {
   NEW_PASSWORD_DESCRIPTION,
   NEW_PASSWORD_PLACEHOLDER,
@@ -22,18 +22,34 @@ import {
   NEW_CREDENTIALS,
   NEW_PASSWORD_CONFIRM_PLACEHOLDER,
 } from "~/constants/auth-placeholders";
-import {
-  validatePasswordLength,
-  validatePasswordSpecialChar,
-  validatePasswordUppercase,
-} from "~/lib/password-validation";
 import { PasswordInput } from "~/components/password/password-input";
 import { PasswordRequirements } from "~/components/password/password-requirement";
+import { useApiMutation } from "~/lib/http/use-api-mutation";
+import { ResetPasswordResponse } from "~/lib/http/response-type/auth";
+import { ResetPasswordPayload } from "~/lib/http/request-type/auth";
+import { resetPassword } from "~/lib/http/endpoints/auth";
+import { toast } from "sonner-native";
+import { usePasswordValidation } from "~/hooks/use-password-validation";
 
 type NewPasswordFormFields = z.infer<typeof newPasswordSchema>;
 
 export default function NewPasswordPage() {
+  const { email } = useLocalSearchParams<{
+    email: string;
+  }>();
   const router = useRouter();
+
+  const resetPasswordMutation = useApiMutation<
+    ResetPasswordResponse,
+    ResetPasswordPayload
+  >({
+    mutationKey: ["auth", "sign-up"],
+    mutationFn: resetPassword,
+    onSuccess: () => router.replace("/return-message-forget"),
+    onError: () => toast.error("Something went wrong. Please try again later."),
+  });
+
+  const isResettingPassword = resetPasswordMutation.isPending;
 
   const methods = useForm<NewPasswordFormFields>({
     resolver: zodResolver(newPasswordSchema),
@@ -47,49 +63,15 @@ export default function NewPasswordPage() {
   const { handleSubmit, watch } = methods;
 
   const watchedPassword = watch("password");
-  const watchedConfirmPassword = watch("confirmPassword");
+  const validationResults = usePasswordValidation(watchedPassword);
 
-  // Memoized validation results
-  const validationResults = useMemo(() => {
-    if (!watchedPassword) {
-      return {
-        length: false,
-        uppercase: false,
-        specialChar: false,
-        allValid: false,
-      };
-    }
-
-    const length = validatePasswordLength(watchedPassword);
-    const uppercase = validatePasswordUppercase(watchedPassword);
-    const specialChar = validatePasswordSpecialChar(watchedPassword);
-    const allValid = length && uppercase && specialChar;
-
-    return { length, uppercase, specialChar, allValid };
-  }, [watchedPassword]);
-
-  // Memoized password match check
-  const doPasswordsMatch = useMemo(() => {
-    return (
-      watchedPassword &&
-      watchedConfirmPassword &&
-      watchedPassword === watchedConfirmPassword
-    );
-  }, [watchedPassword, watchedConfirmPassword]);
-
-  // Memoized form validity
-  const isFormValid = useMemo(() => {
-    return validationResults.allValid && doPasswordsMatch;
-  }, [validationResults.allValid, doPasswordsMatch]);
-
-  // Memoized submit handler
-  const onSubmit = useCallback(
-    (data: NewPasswordFormFields) => {
-      console.log("Form data:", data);
-      router.replace("/return-message-forget");
-    },
-    [router]
-  );
+  const onSubmit = (data: NewPasswordFormFields) => {
+    resetPasswordMutation.mutate({
+      email,
+      confirm_password: data.confirmPassword,
+      password: data.password,
+    });
+  };
 
   return (
     <FormProvider {...methods}>
@@ -145,12 +127,16 @@ export default function NewPasswordPage() {
               {/* Update Button */}
               <Button
                 className="bg-button text-buttontext"
-                disabled={!isFormValid}
+                disabled={isResettingPassword}
                 onPress={handleSubmit(onSubmit)}
               >
-                <Text className="text-white text-lg font-bold">
-                  {UPDATE_PASSWORD}
-                </Text>
+                {isResettingPassword ? (
+                  <ActivityIndicator size="small" color="white" />
+                ) : (
+                  <Text className="text-white text-lg font-bold">
+                    {UPDATE_PASSWORD}
+                  </Text>
+                )}
               </Button>
 
               {/* Cancel Button */}

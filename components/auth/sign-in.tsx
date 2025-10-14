@@ -110,8 +110,7 @@ export default function SignIn({ setIsSignIn }: SignInProps) {
     }
   );
 
-  const isForgettingPassword =
-    forgotPasswordMutation.isPending || forgotPasswordMutation.isSuccess;
+  const isForgettingPassword = forgotPasswordMutation.isPending;
 
   const handleForgetPassword = async () => {
     Keyboard.dismiss();
@@ -215,7 +214,7 @@ export default function SignIn({ setIsSignIn }: SignInProps) {
       <TouchableOpacity
         activeOpacity={0.6}
         onPress={handleForgetPassword}
-        className="mt-1 self-end"
+        className="mt-2 self-end"
         disabled={isForgettingPassword}
       >
         {isForgettingPassword ? (

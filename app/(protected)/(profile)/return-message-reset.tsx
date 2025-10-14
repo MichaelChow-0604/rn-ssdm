@@ -8,9 +8,19 @@ import {
   SIGN_IN,
 } from "~/constants/auth-placeholders";
 import { useAuth } from "~/context/auth-context";
+import { useTokenStore } from "~/store/use-token-store";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function ReturnMessageResetPage() {
+  const queryClient = useQueryClient();
+  const { clearTokens } = useTokenStore();
   const { setIsAuthenticated } = useAuth();
+
+  const handleBackToSignIn = () => {
+    queryClient.clear();
+    clearTokens();
+    setIsAuthenticated(false);
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -32,7 +42,7 @@ export default function ReturnMessageResetPage() {
 
         <Button
           className="w-full mt-8 bg-button rounded-xl"
-          onPress={() => setIsAuthenticated(false)}
+          onPress={handleBackToSignIn}
         >
           <Text className="text-white font-bold">{SIGN_IN}</Text>
         </Button>

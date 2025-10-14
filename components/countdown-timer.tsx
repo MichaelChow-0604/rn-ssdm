@@ -56,23 +56,26 @@ export const CountdownTimer = forwardRef<
     [resetTimer]
   );
 
-  // Timer countdown effect (decoupled from parent renders)
   useEffect(() => {
     if (!isTimerActive) return;
-
-    const interval = setInterval(() => {
-      setTimeLeft((prevTime) => {
-        if (prevTime <= 1) {
-          setIsTimerActive(false);
-          onExpireRef.current?.();
-          return 0;
-        }
-        return prevTime - 1;
-      });
+    const id = setInterval(() => {
+      setTimeLeft((t) => (t > 0 ? t - 1 : 0));
     }, 1000);
-
-    return () => clearInterval(interval);
+    return () => clearInterval(id);
   }, [isTimerActive]);
+
+  // Stop when it hits zero (no side effects here)
+  useEffect(() => {
+    if (timeLeft !== 0 || !isTimerActive) return;
+    setIsTimerActive(false);
+  }, [timeLeft, isTimerActive]);
+
+  // Notify parent after render commit
+  useEffect(() => {
+    if (!isTimerActive && timeLeft === 0) {
+      onExpireRef.current?.();
+    }
+  }, [isTimerActive, timeLeft]);
 
   return (
     <View

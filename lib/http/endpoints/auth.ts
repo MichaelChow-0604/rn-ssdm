@@ -1,4 +1,5 @@
 import {
+  ChangePasswordPayload,
   ConfirmForgotPasswordPayload,
   ConfirmSignInPayload,
   ConfirmSignUpPayload,
@@ -7,6 +8,7 @@ import {
   SignUpPayload,
 } from "../request-type/auth";
 import {
+  ChangePasswordResponse,
   ForgotPasswordOTPResponse,
   ForgotPasswordResponse,
   LogoutResponse,
@@ -98,6 +100,16 @@ export async function resetPassword(
   return request<ResetPasswordResponse>({
     method: "post",
     url: "/api/v1/users/reset-password",
+    data: payload,
+  });
+}
+
+export async function changePassword(
+  payload: ChangePasswordPayload
+): Promise<ChangePasswordResponse> {
+  return request<ChangePasswordResponse>({
+    method: "post",
+    url: "/api/v1/users/change-password",
     data: payload,
   });
 }

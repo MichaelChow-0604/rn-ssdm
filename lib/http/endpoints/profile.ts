@@ -1,9 +1,13 @@
 import {
+  DeleteUserResponse,
   GetProfileResponse,
   UpdateProfileResponse,
 } from "../response-type/profile";
 import { api } from "../axios";
-import { UpdateProfilePayload } from "../request-type/profile";
+import {
+  DeleteUserPayload,
+  UpdateProfilePayload,
+} from "../request-type/profile";
 
 export async function getProfile(): Promise<GetProfileResponse> {
   const { data } = await api.get<GetProfileResponse>("/api/v1/users/profile");
@@ -35,5 +39,15 @@ export async function updateProfile(
     }
   );
 
+  return data;
+}
+
+export async function deleteUser(
+  payload: DeleteUserPayload
+): Promise<DeleteUserResponse> {
+  const { data } = await api.delete<DeleteUserResponse>(
+    "/api/v1/users/delete",
+    { data: payload }
+  );
   return data;
 }

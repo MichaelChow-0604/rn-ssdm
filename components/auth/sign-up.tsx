@@ -6,7 +6,6 @@ import {
   Text,
   View,
 } from "react-native";
-import { useMemo } from "react";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Button } from "../ui/button";
@@ -14,7 +13,7 @@ import "~/global.css";
 import { signUpSchema } from "~/schema/auth-schema";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, Controller, FormProvider } from "react-hook-form";
+import { useForm, Controller, FormProvider, useWatch } from "react-hook-form";
 import {
   EMAIL_PLACEHOLDER,
   FIRST_NAME_PLACEHOLDER,
@@ -25,11 +24,6 @@ import {
   SIGN_UP,
 } from "~/constants/auth-placeholders";
 import { useRouter } from "expo-router";
-import {
-  validatePasswordLength,
-  validatePasswordSpecialChar,
-  validatePasswordUppercase,
-} from "~/lib/password-validation";
 import { PasswordInput } from "../password/password-input";
 import { PasswordRequirements } from "../password/password-requirement";
 import { signUp } from "~/lib/http/endpoints/auth";
@@ -37,6 +31,7 @@ import { toast } from "sonner-native";
 import { useApiMutation } from "~/lib/http/use-api-mutation";
 import { SignUpResponse } from "~/lib/http/response-type/auth";
 import { SignUpPayload } from "~/lib/http/request-type/auth";
+import { usePasswordValidation } from "~/hooks/use-password-validation";
 
 interface SignUpProps {
   setIsSignIn: (isSignIn: boolean) => void;
@@ -83,26 +78,16 @@ export default function SignUp({ setIsSignIn }: SignUpProps) {
 
   const {
     handleSubmit,
-    watch,
     formState: { errors },
   } = methods;
 
-  const watchedPassword = watch("password");
+  const watchedPassword = useWatch({
+    control: methods.control,
+    name: "password",
+    defaultValue: "",
+  });
 
-  const validationResults = useMemo(() => {
-    if (!watchedPassword) {
-      return {
-        length: false,
-        uppercase: false,
-        specialChar: false,
-      };
-    }
-    return {
-      length: validatePasswordLength(watchedPassword),
-      uppercase: validatePasswordUppercase(watchedPassword),
-      specialChar: validatePasswordSpecialChar(watchedPassword),
-    };
-  }, [watchedPassword]);
+  const validationResults = usePasswordValidation(watchedPassword);
 
   const onSubmit = (formData: SignUpFormFields): void => {
     signUpMutation.mutate(formData);

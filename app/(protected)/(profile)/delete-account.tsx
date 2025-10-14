@@ -6,9 +6,11 @@ import { Checkbox } from "~/components/ui/checkbox";
 import { Button } from "~/components/ui/button";
 import { useState } from "react";
 import { router } from "expo-router";
+import { useTokenStore } from "~/store/use-token-store";
 
 export default function DeleteAccount() {
   const [isChecked, setIsChecked] = useState(false);
+  const { tokens } = useTokenStore();
 
   const handleDeleteAccount = () => {
     router.push("/delete-confirm");
@@ -34,8 +36,8 @@ export default function DeleteAccount() {
           </View>
 
           <Text className="text-center text-lg font-bold">
-            Are you sure you want to delete the account linked with
-            123@yahoo.com?
+            Are you sure you want to delete the account linked with{" "}
+            {tokens.email}?
           </Text>
 
           <View className="flex-row items-center gap-3 w-[70%]">

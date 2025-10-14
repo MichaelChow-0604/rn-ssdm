@@ -19,3 +19,8 @@ export interface UpdateProfileResponse {
   lastName: string;
   profilePictureKey: string;
 }
+
+export interface DeleteUserResponse {
+  message: string;
+  timestamp: string;
+}

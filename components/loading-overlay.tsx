@@ -1,4 +1,5 @@
-import { ActivityIndicator, Modal, Text, View } from "react-native";
+import { ActivityIndicator, Text, View } from "react-native";
+import Modal from "react-native-modal";
 
 interface LoadingOverlayProps {
   visible: boolean;
@@ -13,22 +14,14 @@ export function LoadingOverlay({
 }: LoadingOverlayProps) {
   return (
     <Modal
-      visible={visible}
-      transparent
-      animationType="fade"
-      statusBarTranslucent
-      onDismiss={onDismiss}
+      isVisible={visible}
+      animationIn="fadeIn"
+      animationOut="fadeOut"
+      onModalHide={onDismiss}
     >
-      <View
-        className="flex-1 items-center justify-center bg-black/50"
-        pointerEvents="auto"
-      >
-        <View className="items-center justify-center rounded-2xl bg-white px-6 py-5">
-          <ActivityIndicator size="large" color="#438BF7" />
-          <Text className="mt-3 text-base text-gray-700 font-bold">
-            {label}
-          </Text>
-        </View>
+      <View className="items-center justify-center rounded-2xl bg-white px-6 py-5 flex self-center">
+        <ActivityIndicator size="large" color="#438BF7" />
+        <Text className="mt-3 text-base text-gray-700 font-bold">{label}</Text>
       </View>
     </Modal>
   );

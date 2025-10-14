@@ -1,12 +1,17 @@
 import {
+  ConfirmForgotPasswordPayload,
   ConfirmSignInPayload,
   ConfirmSignUpPayload,
+  ResetPasswordPayload,
   SignInPayload,
   SignUpPayload,
 } from "../request-type/auth";
 import {
+  ForgotPasswordOTPResponse,
+  ForgotPasswordResponse,
   LogoutResponse,
   ResendOTPResponse,
+  ResetPasswordResponse,
   SignInOTPResponse,
   SignInResponse,
   SignUpOTPResponse,
@@ -64,5 +69,35 @@ export async function logout(): Promise<LogoutResponse> {
   return request<LogoutResponse>({
     method: "post",
     url: "/api/v1/tokens/revocation",
+  });
+}
+
+export async function forgotPassword(
+  email: string
+): Promise<ForgotPasswordResponse> {
+  return request<ForgotPasswordResponse>({
+    method: "post",
+    url: "/api/v1/users/forgot-password",
+    data: { email },
+  });
+}
+
+export async function confirmForgotPassword(
+  payload: ConfirmForgotPasswordPayload
+): Promise<ForgotPasswordOTPResponse> {
+  return request<ForgotPasswordOTPResponse>({
+    method: "post",
+    url: "/api/v1/users/forgot-password-confirmation",
+    data: payload,
+  });
+}
+
+export async function resetPassword(
+  payload: ResetPasswordPayload
+): Promise<ResetPasswordResponse> {
+  return request<ResetPasswordResponse>({
+    method: "post",
+    url: "/api/v1/users/reset-password",
+    data: payload,
   });
 }

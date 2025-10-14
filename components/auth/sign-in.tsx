@@ -27,9 +27,12 @@ import {
   SIGN_IN,
   SIGN_UP,
 } from "~/constants/auth-placeholders";
-import { signIn } from "~/lib/http/endpoints/auth";
+import { forgotPassword, signIn } from "~/lib/http/endpoints/auth";
 import { toast } from "sonner-native";
-import { SignInResponse } from "~/lib/http/response-type/auth";
+import {
+  ForgotPasswordResponse,
+  SignInResponse,
+} from "~/lib/http/response-type/auth";
 import { SignInPayload } from "~/lib/http/request-type/auth";
 import { useApiMutation } from "~/lib/http/use-api-mutation";
 
@@ -92,6 +95,24 @@ export default function SignIn({ setIsSignIn }: SignInProps) {
     handleSignInSubmit(onSignInSubmit)();
   };
 
+  const forgotPasswordMutation = useApiMutation<ForgotPasswordResponse, string>(
+    {
+      mutationKey: ["auth", "forgot-password"],
+      mutationFn: forgotPassword,
+      onSuccess: ({ email, session }) => {
+        router.push({
+          pathname: "/(auth)/(forget-password)/otp-verification-forget",
+          params: { email, session },
+        });
+      },
+      onError: () =>
+        toast.error("Something went wrong. Please try again later."),
+    }
+  );
+
+  const isForgettingPassword =
+    forgotPasswordMutation.isPending || forgotPasswordMutation.isSuccess;
+
   const handleForgetPassword = async () => {
     Keyboard.dismiss();
 
@@ -112,12 +133,9 @@ export default function SignIn({ setIsSignIn }: SignInProps) {
       return;
     }
 
-    router.push({
-      pathname: "/(auth)/(forget-password)/otp-verification-forget",
-      params: {
-        email,
-      },
-    });
+    // TODO: Call API to send OTP
+    forgotPasswordMutation.mutate(email);
+    return;
   };
 
   // Clear all errors when screen comes into focus (when navigating back)
@@ -198,15 +216,20 @@ export default function SignIn({ setIsSignIn }: SignInProps) {
         activeOpacity={0.6}
         onPress={handleForgetPassword}
         className="mt-1 self-end"
+        disabled={isForgettingPassword}
       >
-        <Text className="text-redtext">{FORGET_PASSWORD}</Text>
+        {isForgettingPassword ? (
+          <ActivityIndicator size="small" color="#438BF7" />
+        ) : (
+          <Text className="text-redtext">{FORGET_PASSWORD}</Text>
+        )}
       </TouchableOpacity>
 
       {/* Sign in Button */}
       <Button
         className="bg-button mt-4 rounded-xl"
         onPress={handleSignIn}
-        disabled={isSigningIn}
+        disabled={isSigningIn || isForgettingPassword}
       >
         {isSigningIn ? (
           <ActivityIndicator size="small" color="white" />

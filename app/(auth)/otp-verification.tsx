@@ -24,178 +24,43 @@ import {
   OTP_VERIFICATION_TITLE_2,
   VERIFY,
 } from "~/constants/auth-placeholders";
-import { useAuth } from "~/context/auth-context";
-import { useCooldown } from "~/hooks/use-cooldown";
 import { ResendLink } from "~/components/auth/resend-link";
-import { useTokenStore } from "~/store/use-token-store";
-import {
-  confirmSignIn,
-  confirmSignUp,
-  resendConfirmation,
-} from "~/lib/http/endpoints/auth";
-import { useQueryClient } from "@tanstack/react-query";
 import { LoadingOverlay } from "~/components/loading-overlay";
-import { toast } from "sonner-native";
-import { contactKeys } from "~/lib/http/keys/contact";
-import { getContacts } from "~/lib/http/endpoints/contact";
 import ReLogin from "~/components/pop-up/re-login";
-import { useApiMutation } from "~/lib/http/use-api-mutation";
-import {
-  ResendOTPResponse,
-  SignInOTPResponse,
-  SignUpOTPResponse,
-} from "~/lib/http/response-type/auth";
-import {
-  ConfirmSignInPayload,
-  ConfirmSignUpPayload,
-} from "~/lib/http/request-type/auth";
-import { documentKeys } from "~/lib/http/keys/document";
-import { getDocuments } from "~/lib/http/endpoints/document";
-import { getProfile } from "~/lib/http/endpoints/profile";
+import { useOtpVerification } from "~/hooks/use-otp-verification";
+import { useOtpResend } from "~/hooks/use-otp-resend";
 
 export default function OTPVerificationPage() {
-  const { email, session, mode } = useLocalSearchParams();
-  const [currentSession, setCurrentSession] = useState(session);
+  const { email, session, mode } = useLocalSearchParams<{
+    email: string;
+    session: string;
+    mode: "signin" | "signup";
+  }>();
+
   const [otp, setOtp] = useState("");
   const [expired, setExpired] = useState(false);
-
-  const router = useRouter();
-  const queryClient = useQueryClient();
-
   const timerRef = useRef<CountdownTimerRef>(null);
-  const { secondsLeft: resendCooldown, start: startCooldown } = useCooldown(60);
+  const router = useRouter();
 
-  const [loginCount, setLoginCount] = useState(0);
-  const [showReLogin, setShowReLogin] = useState(false);
+  const { verify, isVerifying, showReLogin, onDismissOverlay, setSession } =
+    useOtpVerification({
+      email: String(email),
+      session: String(session),
+      mode: mode as "signin" | "signup",
+    });
 
-  const { setIsAuthenticated } = useAuth();
-
-  const resendMutation = useApiMutation<ResendOTPResponse, string>({
-    mutationKey: ["auth", "resend-confirmation"],
-    mutationFn: (email: string) => resendConfirmation(email),
-    onSuccess: ({ session: newSession }) => {
-      setCurrentSession(newSession);
-
+  const { resend, cooldownSeconds, isResending } = useOtpResend(
+    String(email),
+    (newSession) => {
+      setSession(newSession);
       timerRef.current?.resetTimer();
-      startCooldown();
-      toast.success("New OTP sent to your email.");
-    },
-    onError: () => toast.error("Something went wrong. Please try again later."),
-  });
-
-  const confirmSignInMutation = useApiMutation<
-    SignInOTPResponse,
-    ConfirmSignInPayload
-  >({
-    mutationKey: ["auth", "confirm-sign-in"],
-    mutationFn: confirmSignIn,
-    onSuccess: (data) => {
-      // If session is provided, it means the OTP is invalid, will give user 3 times to try
-      if (data.session) {
-        setLoginCount((prev) => {
-          const next = prev + 1;
-          if (next < 3) toast.error("Invalid OTP. Please try again.");
-          return next;
-        });
-        setCurrentSession(data.session);
-      } else {
-        // Store tokens in zustand for subsequent requests
-        useTokenStore.getState().setTokens({
-          email: String(email),
-          accessToken: data.accessToken,
-          refreshToken: data.refreshToken,
-          idToken: data.idToken,
-        });
-
-        console.log("ACCESS TOKEN", data.accessToken);
-        console.log("ID TOKEN", data.idToken);
-
-        // Warm contacts in the background (no await needed)
-        queryClient.prefetchQuery({
-          queryKey: contactKeys.list(),
-          queryFn: getContacts,
-        });
-
-        // Warm documents in the background (no await needed)
-        queryClient.prefetchQuery({
-          queryKey: documentKeys.list(),
-          queryFn: getDocuments,
-        });
-
-        // Warm profile in the background (no await needed)
-        queryClient.prefetchQuery({
-          queryKey: ["profile", "get"],
-          queryFn: getProfile,
-        });
-
-        setIsAuthenticated(true);
-        router.replace({ pathname: "/return-message", params: { mode } });
-      }
-    },
-    // No need to handle error, it will be handled by the onDismiss function
-    onError: () => {},
-  });
-
-  const confirmSignUpMutation = useApiMutation<
-    SignUpOTPResponse,
-    ConfirmSignUpPayload
-  >({
-    mutationKey: ["auth", "confirm-sign-up"],
-    mutationFn: confirmSignUp,
-    onSuccess: () => {
-      router.replace({ pathname: "/return-message", params: { mode } });
-    },
-    onError: ({ status }) => {
-      switch (status) {
-        case 400:
-          toast.error("Invalid OTP. Please try again.");
-          break;
-        default:
-          toast.error("Something went wrong. Please try again later.");
-      }
-    },
-  });
-
-  const isVerifying =
-    confirmSignInMutation.isPending || confirmSignUpMutation.isPending;
+      setExpired(false);
+    }
+  );
 
   const showLoadingOverlay = isVerifying && !showReLogin;
-
-  const handleResendCode = (): void => {
-    if (resendCooldown > 0 || resendMutation.isPending) return;
-    resendMutation.mutate(String(email));
-  };
-
-  const handleVerify = () => {
-    Keyboard.dismiss();
-
-    if (mode === "signin") {
-      confirmSignInMutation.mutate({
-        email: String(email),
-        session: String(currentSession),
-        confirmationCode: otp,
-      });
-      return;
-    }
-
-    if (mode === "signup") {
-      confirmSignUpMutation.mutate({
-        email: String(email),
-        session: String(currentSession),
-        confirmationCode: otp,
-      });
-      return;
-    }
-
-    throw new Error("Invalid mode");
-  };
-
-  const onDismiss = () => {
-    // Invalid OTP 3 times, force user to re-login
-    if (loginCount >= 3) {
-      setShowReLogin(true);
-    }
-  };
+  const verifyDisabled =
+    otp.length !== 6 || expired || showReLogin || isVerifying;
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -208,7 +73,7 @@ export default function OTPVerificationPage() {
           <LoadingOverlay
             visible={showLoadingOverlay}
             label="Verifying..."
-            onDismiss={onDismiss}
+            onDismiss={onDismissOverlay}
           />
 
           {/* Header */}
@@ -264,14 +129,8 @@ export default function OTPVerificationPage() {
             {/* Verify Button */}
             <Button
               className="bg-button text-buttontext"
-              disabled={
-                otp.length !== 6 ||
-                expired ||
-                showReLogin ||
-                confirmSignInMutation.isPending ||
-                confirmSignUpMutation.isPending
-              }
-              onPress={handleVerify}
+              disabled={verifyDisabled}
+              onPress={() => verify(otp)}
             >
               <Text className="text-white font-bold">{VERIFY}</Text>
             </Button>
@@ -294,9 +153,9 @@ export default function OTPVerificationPage() {
 
             <ResendLink
               label={RESEND}
-              cooldownSeconds={resendCooldown}
-              onPress={handleResendCode}
-              isLoading={resendMutation.isPending}
+              cooldownSeconds={cooldownSeconds}
+              onPress={resend}
+              isLoading={isResending}
             />
           </View>
         </KeyboardAvoidingView>

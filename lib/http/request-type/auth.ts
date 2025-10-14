@@ -22,3 +22,15 @@ export interface ConfirmSignInPayload {
   session: string;
   confirmationCode: string;
 }
+
+export interface ConfirmForgotPasswordPayload {
+  email: string;
+  session: string;
+  confirmationCode: string;
+}
+
+export interface ResetPasswordPayload {
+  email: string;
+  password: string;
+  confirm_password: string;
+}

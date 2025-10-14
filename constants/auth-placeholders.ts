@@ -6,7 +6,7 @@ export const SIGN_UP_DESCRIPTION = `I understood the`;
 // OTP Verification (Forget Password)
 export const OTP_VERIFICATION_FORGET_TITLE = `Check your email`;
 export const OTP_VERIFICATION_FORGET_DESC_1 = `One time password has been sent to your email:`;
-export const OTP_VERIFICATION_FORGET_DESC_2 = `Enter the 4-digit code mentioned in the email`;
+export const OTP_VERIFICATION_FORGET_DESC_2 = `Enter the 6-digit code mentioned in the email`;
 
 // New Password
 export const NEW_PASSWORD_TITLE = `Set a new password`;

@@ -57,3 +57,21 @@ export interface LogoutResponse {
   message: string;
   timestamp: string;
 }
+
+export interface ForgotPasswordResponse {
+  email: string;
+  session: string;
+  message: string;
+  timestamp: string;
+}
+
+export interface ForgotPasswordOTPResponse {
+  email: string;
+  message: string;
+  timestamp: string;
+}
+
+export interface ResetPasswordResponse {
+  message: string;
+  timestamp: string;
+}

@@ -58,7 +58,10 @@ export default function ProfileTab() {
   });
 
   return (
-    <SafeAreaView className="flex-1 bg-blue-100">
+    <SafeAreaView
+      className="flex-1 bg-blue-100"
+      edges={["top", "left", "right"]}
+    >
       {/* Curved blue topper */}
       <View className="h-[40%] bg-[#438BF7] rounded-b-[20px] absolute top-0 left-0 right-0" />
 
@@ -71,7 +74,11 @@ export default function ProfileTab() {
             <ActivityIndicator size="small" color="gray" />
           </View>
         ) : (
-          <ScrollView className="w-full" showsVerticalScrollIndicator={false}>
+          <ScrollView
+            className="w-full"
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ bottom: 40 }}
+          >
             {/* Profile pic */}
             <View className="flex items-center justify-center w-full gap-1 flex-col pt-20 pb-10">
               {/* Profile pic box */}

@@ -86,7 +86,6 @@ export default function SignUp({ setIsSignIn }: SignUpProps) {
     name: "password",
     defaultValue: "",
   });
-
   const validationResults = usePasswordValidation(watchedPassword);
 
   const onSubmit = (formData: SignUpFormFields): void => {

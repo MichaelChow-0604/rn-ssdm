@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button } from "~/components/ui/button";
-import { FormProvider, useForm } from "react-hook-form";
+import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { newPasswordSchema } from "~/schema/auth-schema";
@@ -60,9 +60,13 @@ export default function NewPasswordPage() {
     mode: "onChange",
   });
 
-  const { handleSubmit, watch } = methods;
+  const { handleSubmit } = methods;
 
-  const watchedPassword = watch("password");
+  const watchedPassword = useWatch({
+    control: methods.control,
+    name: "password",
+    defaultValue: "",
+  });
   const validationResults = usePasswordValidation(watchedPassword);
 
   const onSubmit = (data: NewPasswordFormFields) => {

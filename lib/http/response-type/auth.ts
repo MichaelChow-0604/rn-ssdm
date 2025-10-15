@@ -14,6 +14,7 @@ export interface SignUpResponse {
 
 export interface SignUpOTPResponse {
   email: string;
+  session?: string;
   message: string;
   timestamp: string;
 }

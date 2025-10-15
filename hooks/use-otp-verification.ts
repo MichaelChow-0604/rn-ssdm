@@ -44,28 +44,33 @@ export function useOtpVerification({ email, session, mode }: Params): Return {
   const queryClient = useQueryClient();
   const { setIsAuthenticated } = useAuth();
 
+  const handleLoginLimit = (newSession: string) => {
+    setLoginCount((prev) => {
+      const next = prev + 1;
+      if (next < 3) toast.error("Invalid OTP. Please try again.");
+      return next;
+    });
+
+    setCurrentSession(newSession);
+  };
+
   const confirmSignInMutation = useApiMutation<
     SignInOTPResponse,
     ConfirmSignInPayload
   >({
     mutationKey: ["auth", "confirm-sign-in"],
     mutationFn: confirmSignIn,
-    onSuccess: (data) => {
-      if (data.session) {
-        setLoginCount((prev) => {
-          const next = prev + 1;
-          if (next < 3) toast.error("Invalid OTP. Please try again.");
-          return next;
-        });
-        setCurrentSession(data.session);
+    onSuccess: ({ session, accessToken, refreshToken, idToken }) => {
+      if (session) {
+        handleLoginLimit(session);
         return;
       }
 
       useTokenStore.getState().setTokens({
         email,
-        accessToken: data.accessToken,
-        refreshToken: data.refreshToken,
-        idToken: data.idToken,
+        accessToken,
+        refreshToken,
+        idToken,
       });
 
       queryClient.prefetchQuery({
@@ -84,7 +89,7 @@ export function useOtpVerification({ email, session, mode }: Params): Return {
       setIsAuthenticated(true);
       router.replace({ pathname: "/return-message", params: { mode } });
     },
-    onError: () => {},
+    onError: () => toast.error("Something went wrong. Please try again later."),
   });
 
   const confirmSignUpMutation = useApiMutation<
@@ -93,15 +98,15 @@ export function useOtpVerification({ email, session, mode }: Params): Return {
   >({
     mutationKey: ["auth", "confirm-sign-up"],
     mutationFn: confirmSignUp,
-    onSuccess: () =>
-      router.replace({ pathname: "/return-message", params: { mode } }),
-    onError: ({ status }) => {
-      if (status === 400) {
-        toast.error("Invalid OTP. Please try again.");
+    onSuccess: ({ session }) => {
+      if (session) {
+        handleLoginLimit(session);
         return;
       }
-      toast.error("Something went wrong. Please try again later.");
+
+      router.replace({ pathname: "/return-message", params: { mode } });
     },
+    onError: () => toast.error("Something went wrong. Please try again later."),
   });
 
   const isVerifying =

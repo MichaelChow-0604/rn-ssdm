@@ -21,6 +21,7 @@ export interface ConfirmSignInPayload {
   email: string;
   session: string;
   confirmationCode: string;
+  pushToken: string;
 }
 
 export interface ConfirmForgotPasswordPayload {

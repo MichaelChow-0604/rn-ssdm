@@ -29,6 +29,7 @@ import { LoadingOverlay } from "~/components/loading-overlay";
 import ReLogin from "~/components/pop-up/re-login";
 import { useOtpVerification } from "~/hooks/use-otp-verification";
 import { useOtpResend } from "~/hooks/use-otp-resend";
+import { usePushNotification } from "~/hooks/use-push-notification";
 
 export default function OTPVerificationPage() {
   const { email, session, mode } = useLocalSearchParams<{
@@ -36,6 +37,8 @@ export default function OTPVerificationPage() {
     session: string;
     mode: "signin" | "signup";
   }>();
+
+  const { expoPushToken } = usePushNotification();
 
   const [otp, setOtp] = useState("");
   const [expired, setExpired] = useState(false);
@@ -47,6 +50,7 @@ export default function OTPVerificationPage() {
       email: String(email),
       session: String(session),
       mode: mode as "signin" | "signup",
+      pushToken: expoPushToken,
     });
 
   const { resend, cooldownSeconds, isResending } = useOtpResend(

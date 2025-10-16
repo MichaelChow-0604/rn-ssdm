@@ -25,6 +25,7 @@ interface Params {
   email: string;
   session: string;
   mode: "signin" | "signup";
+  pushToken: string;
 }
 
 interface Return {
@@ -35,7 +36,12 @@ interface Return {
   setSession: (s: string) => void;
 }
 
-export function useOtpVerification({ email, session, mode }: Params): Return {
+export function useOtpVerification({
+  email,
+  session,
+  mode,
+  pushToken = "",
+}: Params): Return {
   const [currentSession, setCurrentSession] = useState(session);
   const [loginCount, setLoginCount] = useState(0);
   const [showReLogin, setShowReLogin] = useState(false);
@@ -112,6 +118,13 @@ export function useOtpVerification({ email, session, mode }: Params): Return {
   const isVerifying =
     confirmSignInMutation.isPending || confirmSignUpMutation.isPending;
 
+  const extractedToken = (pushToken: string) => {
+    if (!pushToken) return "";
+
+    const match = pushToken.match(/\[(.*?)\]/);
+    return match ? match[1] : pushToken;
+  };
+
   function verify(otp: string) {
     Keyboard.dismiss();
 
@@ -120,6 +133,7 @@ export function useOtpVerification({ email, session, mode }: Params): Return {
         email,
         session: String(currentSession),
         confirmationCode: otp,
+        pushToken: extractedToken(pushToken),
       });
       return;
     }

@@ -1,4 +1,4 @@
-import { Platform } from "react-native";
+import { Alert, Linking, Platform } from "react-native";
 import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
 import Constants from "expo-constants";
@@ -30,7 +30,20 @@ export async function getPushToken() {
     }
 
     if (finalStatus !== "granted") {
-      handleRegistrationError("Permission for notifications was denied");
+      Alert.alert(
+        "Enable Notifications",
+        "Please enable notifications for a full functionality.",
+        [
+          {
+            text: "Later",
+            style: "default",
+          },
+          {
+            text: "Open Settings",
+            onPress: async () => await Linking.openSettings(),
+          },
+        ]
+      );
       return;
     }
 

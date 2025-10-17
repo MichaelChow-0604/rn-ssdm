@@ -1,7 +1,9 @@
 import {
   ActivityIndicator,
+  Alert,
   Image,
   Keyboard,
+  Linking,
   Pressable,
   Text,
   TouchableOpacity,
@@ -35,6 +37,7 @@ import {
 } from "~/lib/http/response-type/auth";
 import { SignInPayload } from "~/lib/http/request-type/auth";
 import { useApiMutation } from "~/lib/http/use-api-mutation";
+import * as Notifications from "expo-notifications";
 
 interface SignInProps {
   // For toggling the state in the parent AuthPage component
@@ -90,7 +93,28 @@ export default function SignIn({ setIsSignIn }: SignInProps) {
     signInMutation.mutate(formData);
   };
 
-  const handleSignIn = () => {
+  const handleSignIn = async () => {
+    Keyboard.dismiss();
+    const { status } = await Notifications.getPermissionsAsync();
+
+    if (status !== "granted") {
+      Alert.alert(
+        "Enable Notifications",
+        "Please enable notifications permission to continue.",
+        [
+          {
+            text: "Cancel",
+            style: "cancel",
+          },
+          {
+            text: "Open Settings",
+            onPress: async () => await Linking.openSettings(),
+          },
+        ]
+      );
+      return;
+    }
+
     clearSignInErrors();
     handleSignInSubmit(onSignInSubmit)();
   };

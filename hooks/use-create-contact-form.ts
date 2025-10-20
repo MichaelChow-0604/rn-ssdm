@@ -20,6 +20,7 @@ import { Option } from "~/components/ui/select";
 import {
   ICountry,
   getCountryByCca2,
+  isValidPhoneNumber,
 } from "react-native-international-phone-number";
 
 type NewContactFormFields = z.infer<typeof newContactSchema>;
@@ -44,6 +45,7 @@ export function useCreateContactForm() {
     control,
     handleSubmit,
     formState: { errors },
+    setError,
   } = useForm<NewContactFormFields>({
     defaultValues: {
       firstName: "",
@@ -93,9 +95,25 @@ export function useCreateContactForm() {
 
   // Form submission handler
   const onSubmit = (data: NewContactFormFields) => {
-    // E.g. +852 1234 5678
     const country = selectedCountry ?? getCountryByCca2("HK");
-    const phoneNumber = `${country?.idd?.root ?? ""} ${data.phone}`;
+    const rawPhone = (data.phone ?? "").trim();
+
+    // If not empty (Zod handles empty), validate by country
+    if (rawPhone.length > 0 && country) {
+      const normalized = rawPhone.replace(/[^\d+]/g, "");
+      const valid = isValidPhoneNumber(normalized, country);
+
+      if (!valid) {
+        setError("phone", {
+          type: "validate",
+          message: "Please enter a valid phone number for the selected country",
+        });
+        return;
+      }
+    }
+
+    // E.g. +852 1234 5678
+    const phoneNumber = `${country?.idd?.root ?? ""} ${rawPhone}`;
 
     const distributions: ("EMAIL" | "WHATSAPP" | "SMS")[] = ["EMAIL"];
     if (isWhatsappChecked) distributions.push("WHATSAPP");

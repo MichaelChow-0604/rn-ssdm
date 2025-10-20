@@ -1,5 +1,4 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useState } from "react";
 import {
   View,
   Text,
@@ -14,7 +13,6 @@ import { Button } from "~/components/ui/button";
 import { CANCEL, VERIFY } from "~/constants/auth-placeholders";
 import { Input } from "~/components/ui/input";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
-import { IncorrectPassword } from "~/components/pop-up/incorrect-password";
 import { useQueryClient } from "@tanstack/react-query";
 import { useApiMutation } from "~/lib/http/use-api-mutation";
 import { DeleteDocumentResponse } from "~/lib/http/response-type/document";
@@ -35,9 +33,6 @@ export default function DeleteDocConfirm() {
   const { documentId } = useLocalSearchParams();
   const queryClient = useQueryClient();
   const router = useRouter();
-
-  const [openIncorrectPasswordDialog, setOpenIncorrectPasswordDialog] =
-    useState(false);
 
   const {
     control,
@@ -66,7 +61,7 @@ export default function DeleteDocConfirm() {
       switch (status) {
         // Wrong password
         case 403:
-          setOpenIncorrectPasswordDialog(true);
+          toast.error("Incorrect password.");
           break;
         // Server error
         default:
@@ -148,11 +143,6 @@ export default function DeleteDocConfirm() {
           </View>
         </KeyboardAvoidingView>
       </TouchableWithoutFeedback>
-
-      <IncorrectPassword
-        visible={openIncorrectPasswordDialog}
-        setOpen={setOpenIncorrectPasswordDialog}
-      />
     </SafeAreaView>
   );
 }

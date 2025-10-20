@@ -16,4 +16,7 @@ export const uploadDocumentSchema = z.object({
     .optional()
     .or(z.literal("")),
   remarks: z.string().optional(),
+  recipients: z
+    .array(z.string())
+    .min(1, { message: "Please select at least one recipient" }),
 });

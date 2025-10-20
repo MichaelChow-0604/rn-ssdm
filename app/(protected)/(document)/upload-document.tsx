@@ -1,6 +1,4 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller } from "react-hook-form";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -11,112 +9,34 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { Option } from "~/components/ui/select";
-import { uploadDocumentSchema } from "~/schema/upload-document-schema";
 import { Feather } from "@expo/vector-icons";
-import { router } from "expo-router";
-import * as DocumentPicker from "expo-document-picker";
 import { Button } from "~/components/ui/button";
 import { BackButton } from "~/components/back-button";
 import { Textarea } from "~/components/ui/textarea";
-import * as z from "zod";
 import { RecipientsMultiSelect } from "~/components/documents/recipient-multi-select";
 import { SelectDropdown } from "~/components/select-dropdown";
 import { CATEGORIES, TYPES } from "~/constants/select-data";
-import { useContactsOptions } from "~/lib/contacts/hooks";
-import { FileData } from "~/lib/http/request-type/document";
 import { AlertDialog } from "~/components/alert-dialog";
-
-type UploadDocumentFormFields = z.infer<typeof uploadDocumentSchema>;
+import { useUploadDocumentForm } from "~/hooks/use-upload-document-form";
 
 export default function UploadDocument() {
-  const [selectedCategory, setSelectedCategory] = useState<Option>({
-    label: "Legal",
-    value: "LEGAL",
-  });
-  const [selectedType, setSelectedType] = useState<Option>({
-    label: "Will",
-    value: "WILL",
-  });
-
-  const { options: contactOptions } = useContactsOptions();
-  const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
-  const [selectedFile, setSelectedFile] = useState<FileData | null>(null);
-  const [fileReachedMaxSize, setFileReachedMaxSize] = useState(false);
-
-  const handleChooseFile = async () => {
-    const result = await DocumentPicker.getDocumentAsync({
-      type: [
-        "application/pdf",
-        "application/msword",
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        "image/jpeg",
-        "image/jpg",
-        "image/png",
-        "image/heic",
-      ],
-    });
-
-    if (!result.canceled) {
-      const file = result.assets[0];
-      setSelectedFile({
-        uri: file.uri,
-        name: file.name,
-        mimeType: file.mimeType ?? "",
-        size: file.size ?? 0,
-      });
-
-      if (file.size && file.size > 25 * 1024 * 1024) {
-        setFileReachedMaxSize(true);
-      }
-    }
-  };
-
   const {
     control,
-    handleSubmit,
-    formState: { errors },
-    watch,
-  } = useForm({
-    defaultValues: {
-      title: "",
-      description: "",
-      id: "",
-      reference_number: "",
-      remarks: "",
-    },
-    resolver: zodResolver(uploadDocumentSchema),
-  });
-
-  const watchedTitle = watch("title");
-  const watchedId = watch("id");
-  const hasTitle = !!watchedTitle?.trim();
-  const hasId = !!watchedId?.trim();
-  const hasRecipients = selectedContacts.length > 0;
-  const hasFile = !!selectedFile;
-
-  const isUploadDisabled = !(hasTitle && hasId && hasRecipients && hasFile);
-
-  const onSubmit = (data: UploadDocumentFormFields) => {
-    const previewData = {
-      title: data.title,
-      description: data.description,
-      category: selectedCategory?.value,
-      type: selectedType?.value,
-      recipients: JSON.stringify(selectedContacts), // serialize
-      userDocId: data.id,
-      reference_number: data.reference_number,
-      remarks: data.remarks,
-      file: selectedFile,
-    };
-
-    router.push({
-      pathname: "/preview-document",
-      params: {
-        previewData: JSON.stringify(previewData),
-      },
-    });
-  };
+    errors,
+    selectedCategory,
+    setSelectedCategory,
+    selectedType,
+    setSelectedType,
+    selectedContacts,
+    setSelectedContacts,
+    selectedFile,
+    setSelectedFile,
+    fileReachedMaxSize,
+    setFileReachedMaxSize,
+    contactOptions,
+    onSubmit,
+    handleChooseFile,
+  } = useUploadDocumentForm();
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -274,6 +194,12 @@ export default function UploadDocument() {
                 value={selectedContacts}
                 onChange={setSelectedContacts}
               />
+
+              {errors.recipients && (
+                <Text className="text-redtext text-sm">
+                  {errors.recipients.message}
+                </Text>
+              )}
             </View>
 
             {/* Description */}
@@ -357,19 +283,11 @@ export default function UploadDocument() {
 
           {/* Button container */}
           <Button
-            className={`w-[80%] my-8 ${
-              isUploadDisabled ? "bg-gray-300" : "bg-button"
-            }`}
-            onPress={handleSubmit(onSubmit)}
-            disabled={isUploadDisabled}
+            className="w-[80%] my-8 bg-button"
+            onPress={onSubmit}
+            disabled={!selectedFile}
           >
-            <Text
-              className={`font-bold ${
-                isUploadDisabled ? "text-gray-500" : "text-white"
-              }`}
-            >
-              Preview
-            </Text>
+            <Text className="font-bold text-white">Preview</Text>
           </Button>
         </ScrollView>
       </KeyboardAvoidingView>

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -33,7 +33,7 @@ export function useContactDetailForm({ id, apiContact }: Params) {
   const qc = useQueryClient();
 
   const [isEditing, setIsEditing] = useState(false);
-  const [profilePic, setProfilePic] = useState<IconData | undefined>(undefined);
+  const [profilePic, setProfilePic] = useState<IconData | null>(null);
   const [selectedCountry, setSelectedCountry] = useState<ICountry | undefined>(
     undefined
   );
@@ -71,7 +71,7 @@ export function useContactDetailForm({ id, apiContact }: Params) {
         mimeType: "image/png",
       });
     } else {
-      setProfilePic(undefined);
+      setProfilePic(null);
     }
 
     form.reset({
@@ -127,7 +127,7 @@ export function useContactDetailForm({ id, apiContact }: Params) {
 
     isUpdatingContact.mutate({
       id: String(apiContact.id),
-      profilePicture: profilePic,
+      profilePicture: profilePic ?? null,
       contactInfo: {
         firstName: data.firstName.trim(),
         lastName: data.lastName.trim(),

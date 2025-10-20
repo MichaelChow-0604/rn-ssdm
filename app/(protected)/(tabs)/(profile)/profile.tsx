@@ -4,7 +4,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Image,
   ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -27,6 +26,7 @@ import { LogoutResponse } from "~/lib/http/response-type/auth";
 import { useSettings } from "~/context/setting-context";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getProfile } from "~/lib/http/endpoints/profile";
+import { ProfileAvatar } from "~/components/profile-avatar";
 
 export default function ProfileTab() {
   const { setIsAuthenticated } = useAuth();
@@ -82,20 +82,18 @@ export default function ProfileTab() {
             {/* Profile pic */}
             <View className="flex items-center justify-center w-full gap-1 flex-col pt-20 pb-10">
               {/* Profile pic box */}
-              <View className="w-24 h-24 relative">
-                <Image
-                  source={
-                    profile?.profilePicture
-                      ? {
-                          uri: profile.profilePicture.startsWith("data:")
-                            ? profile.profilePicture
-                            : `data:image/png;base64,${profile.profilePicture}`,
-                        }
-                      : require("~/assets/images/default_icon.png")
-                  }
-                  className="w-24 h-24 rounded-full text-black"
-                />
-              </View>
+              <ProfileAvatar
+                source={
+                  profile?.profilePicture
+                    ? {
+                        uri: `data:image/png;base64,${profile.profilePicture}`,
+                        name: "profilePicture",
+                        mimeType: "image/png",
+                      }
+                    : null
+                }
+                isEditable={false}
+              />
 
               <Text className="text-xl font-bold text-white">
                 {profile?.firstName} {profile?.lastName}

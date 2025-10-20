@@ -10,12 +10,12 @@ export interface ContactInfo {
 }
 
 export interface CreateContactPayload {
-  profilePicture?: IconData;
+  profilePicture?: IconData | null;
   contactInfo: ContactInfo;
 }
 
 export interface UpdateContactPayload {
   id: string;
-  profilePicture?: IconData;
+  profilePicture?: IconData | null;
   contactInfo: ContactInfo;
 }

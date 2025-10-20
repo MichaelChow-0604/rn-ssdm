@@ -1,7 +1,5 @@
 import {
-  Image,
   Text,
-  TouchableOpacity,
   View,
   KeyboardAvoidingView,
   Platform,
@@ -10,128 +8,36 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { BackButton } from "~/components/back-button";
-import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { Card, CardHeader } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { Option } from "~/components/ui/select";
-import { useEffect, useState } from "react";
-import { newContactSchema } from "~/schema/new-contact-schema";
-import * as z from "zod";
-import { Controller, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { Controller } from "react-hook-form";
 import { Button } from "~/components/ui/button";
-import { router } from "expo-router";
 import { RelationshipSelect } from "~/components/contact/relationship-select";
 import { DistributionCheckbox } from "~/components/contact/distribution-checkbox";
-import { pickImage } from "~/lib/pick-image";
-import PhoneInput, {
-  ICountry,
-  getCountryByCca2,
-} from "react-native-international-phone-number";
-import { createContact } from "~/lib/http/endpoints/contact";
-import { toast } from "sonner-native";
-import { useApiMutation } from "~/lib/http/use-api-mutation";
-import { CreateContactResponse } from "~/lib/http/response-type/contact";
-import {
-  ContactInfo,
-  CreateContactPayload,
-  IconData,
-} from "~/lib/http/request-type/contact";
-import { contactKeys } from "~/lib/http/keys/contact";
-import { useQueryClient } from "@tanstack/react-query";
-
-type NewContactFormFields = z.infer<typeof newContactSchema>;
+import PhoneInput from "react-native-international-phone-number";
+import { useCreateContactForm } from "~/hooks/use-create-contact-form";
+import { ProfileAvatar } from "~/components/profile-avatar";
 
 export default function CreateContactPage() {
-  const [profilePic, setProfilePic] = useState<IconData | undefined>(undefined);
-  const [isWhatsappChecked, setIsWhatsappChecked] = useState(false);
-  const [isSMSChecked, setIsSMSChecked] = useState(false);
-  const [selectedRelationship, setSelectedRelationship] = useState<Option>({
-    label: "Family",
-    value: "FAMILY",
-  });
-
-  const queryClient = useQueryClient();
-
-  const createContactMutation = useApiMutation<
-    CreateContactResponse,
-    CreateContactPayload
-  >({
-    mutationKey: ["contact", "create"],
-    mutationFn: createContact,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: contactKeys.list() });
-      router.back();
-      toast.success("Contact created successfully.");
-    },
-    onError: () =>
-      toast.error("Failed to create contact. Please try again later."),
-  });
-
-  const isCreatingContact =
-    createContactMutation.isPending || createContactMutation.isSuccess;
-
-  const onSubmit = (data: NewContactFormFields) => {
-    // E.g. +852 1234 5678
-    const country = selectedCountry ?? getCountryByCca2("HK");
-    const phoneNumber = `${country?.idd?.root ?? ""} ${data.phone}`;
-
-    const distributions: ("EMAIL" | "WHATSAPP" | "SMS")[] = ["EMAIL"];
-    if (isWhatsappChecked) distributions.push("WHATSAPP");
-    if (isSMSChecked) distributions.push("SMS");
-
-    const contactInfo: ContactInfo = {
-      firstName: data.firstName.trim(),
-      lastName: data.lastName.trim(),
-      phone: phoneNumber.replace(/ /g, ""),
-      email: data.email.trim(),
-      relationship: selectedRelationship?.value ?? "",
-      communicationOption: distributions,
-    };
-
-    createContactMutation.mutate({
-      profilePicture: profilePic,
-      contactInfo,
-    });
-  };
-
-  const handlePickImage = async () => {
-    const res = await pickImage();
-
-    if (res)
-      setProfilePic({
-        uri: res.uri,
-        name: res.fileName ?? "",
-        mimeType: res.mimeType ?? "",
-      });
-  };
-
   const {
     control,
+    errors,
+    profilePic,
+    setProfilePic,
+    handlePickImage,
+    isWhatsappChecked,
+    setIsWhatsappChecked,
+    isSMSChecked,
+    setIsSMSChecked,
+    selectedRelationship,
+    setSelectedRelationship,
+    selectedCountry,
+    handleSelectedCountry,
     handleSubmit,
-    formState: { errors },
-  } = useForm({
-    defaultValues: {
-      firstName: "",
-      lastName: "",
-      phone: "",
-      email: "",
-    },
-    resolver: zodResolver(newContactSchema),
-  });
-
-  const [selectedCountry, setSelectedCountry] = useState<ICountry | undefined>(
-    undefined
-  );
-
-  function handleSelectedCountry(country: ICountry) {
-    setSelectedCountry(country);
-  }
-
-  useEffect(() => {
-    if (!selectedCountry) setSelectedCountry(getCountryByCca2("HK"));
-  }, [selectedCountry]);
+    onSubmit,
+    isCreatingContact,
+  } = useCreateContactForm();
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -154,25 +60,12 @@ export default function CreateContactPage() {
           {/* Profile pic */}
           <View className="h-[15%] flex items-center justify-center w-full gap-1 flex-col">
             {/* Profile pic box */}
-            <View className="w-24 h-24 relative">
-              <TouchableOpacity
-                className="rounded-full"
-                activeOpacity={0.8}
-                onPress={handlePickImage}
-              >
-                <Image
-                  source={
-                    profilePic
-                      ? { uri: profilePic.uri }
-                      : require("~/assets/images/default_icon.png")
-                  }
-                  className="w-24 h-24 rounded-full text-black"
-                />
-                <View className="bg-white rounded-full absolute p-1 bottom-0 right-[-2]">
-                  <FontAwesome6 name="pen" size={12} color="black" />
-                </View>
-              </TouchableOpacity>
-            </View>
+            <ProfileAvatar
+              source={profilePic}
+              isEditable={true}
+              onSelectImage={handlePickImage}
+              onRemoveImage={() => setProfilePic(null)}
+            />
           </View>
 
           {/* Form section */}

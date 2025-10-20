@@ -4,12 +4,8 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  TouchableOpacity,
-  Image,
-  Pressable,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { Card } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { BackButton } from "~/components/back-button";
@@ -21,7 +17,7 @@ import { GetProfileResponse } from "~/lib/http/response-type/profile";
 import { useQuery } from "@tanstack/react-query";
 import { getProfile } from "~/lib/http/endpoints/profile";
 import { LoadingOverlay } from "~/components/loading-overlay";
-import Entypo from "@expo/vector-icons/Entypo";
+import { ProfileAvatar } from "~/components/profile-avatar";
 
 export default function EditProfile() {
   const { data: profile } = useQuery<GetProfileResponse>({
@@ -60,37 +56,12 @@ export default function EditProfile() {
 
           {/* Profile pic */}
           <View className="flex items-center justify-center w-full gap-1 flex-col pt-20 pb-10">
-            <View className="w-24 h-24 relative">
-              <TouchableOpacity
-                className="rounded-full"
-                activeOpacity={0.8}
-                onPress={handlePickImage}
-              >
-                <Image
-                  source={
-                    profilePic?.uri
-                      ? { uri: profilePic.uri }
-                      : require("~/assets/images/default_icon.png")
-                  }
-                  className="w-24 h-24 rounded-full text-black"
-                />
-                {/* Edit icon */}
-                <View className="bg-white rounded-full absolute p-1 bottom-0 right-[-2]">
-                  <FontAwesome6 name="pen" size={12} color="black" />
-                </View>
-
-                {/* Remove profile pic icon */}
-                {profilePic && (
-                  <Pressable
-                    className="bg-gray-100 opacity-70 rounded-full absolute p-1 top-0 right-[-2]"
-                    onPress={() => setProfilePic(null)}
-                    hitSlop={10}
-                  >
-                    <Entypo name="cross" size={12} color="black" />
-                  </Pressable>
-                )}
-              </TouchableOpacity>
-            </View>
+            <ProfileAvatar
+              source={profilePic}
+              isEditable={true}
+              onSelectImage={handlePickImage}
+              onRemoveImage={() => setProfilePic(null)}
+            />
 
             {/* Preview current name while editing */}
             <Text className="text-xl font-bold text-white">

@@ -1,5 +1,4 @@
 import {
-  Image,
   Text,
   TouchableOpacity,
   View,
@@ -28,9 +27,9 @@ import { contactKeys } from "~/lib/http/keys/contact";
 import { getContactById } from "~/lib/http/endpoints/contact";
 import { GetContactResponse } from "~/lib/http/response-type/contact";
 import { LoadingOverlay } from "~/components/loading-overlay";
-import { ProfileAvatar } from "~/components/contact/profile-avatar";
 import { useContactDeleteCheck } from "~/hooks/use-contact-delete-check";
 import { useContactDetailForm } from "~/hooks/use-contact-detail-form";
+import { ProfileAvatar } from "~/components/profile-avatar";
 
 const detailSchema = newContactSchema.extend({
   profilePicUri: z.string().nullable().optional(),
@@ -64,6 +63,7 @@ export default function ContactDetailPage() {
     setIsEditing,
     isUpdatingContact,
     profilePic,
+    setProfilePic,
     selectedCountry,
     setSelectedCountry,
     handlePickImage,
@@ -124,9 +124,10 @@ export default function ContactDetailPage() {
             {/* Profile pic */}
             <View className="h-[15%] flex items-center justify-center w-full gap-1 flex-col">
               <ProfileAvatar
-                imageUri={profilePic?.uri ?? null}
-                editable={isEditing}
-                onPress={handlePickImage}
+                source={profilePic}
+                isEditable={isEditing}
+                onSelectImage={handlePickImage}
+                onRemoveImage={() => setProfilePic(null)}
               />
             </View>
 

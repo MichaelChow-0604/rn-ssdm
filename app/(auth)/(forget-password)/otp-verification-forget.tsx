@@ -17,11 +17,11 @@ import {
   CountdownTimer,
   CountdownTimerRef,
 } from "~/components/countdown-timer";
-import { useOtpResend } from "~/hooks/use-otp-resend";
+import { useOtpResend } from "~/hooks/auth/use-otp-resend";
 import { ResendLink } from "~/components/auth/resend-link";
 import { LoadingOverlay } from "~/components/loading-overlay";
 import ReLogin from "~/components/pop-up/re-login";
-import { useForgotPasswordOTP } from "~/hooks/use-forgot-password-otp";
+import { useForgotPasswordOTP } from "~/hooks/auth/use-forgot-password-otp";
 
 export default function OTPVerificationForgetPage() {
   const { email, session } = useLocalSearchParams<{

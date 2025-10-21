@@ -27,8 +27,8 @@ import {
 import { ResendLink } from "~/components/auth/resend-link";
 import { LoadingOverlay } from "~/components/loading-overlay";
 import ReLogin from "~/components/pop-up/re-login";
-import { useOtpVerification } from "~/hooks/use-otp-verification";
-import { useOtpResend } from "~/hooks/use-otp-resend";
+import { useOtpVerification } from "~/hooks/auth/use-otp-verification";
+import { useOtpResend } from "~/hooks/auth/use-otp-resend";
 import { usePushNotification } from "~/hooks/use-push-notification";
 
 export default function OTPVerificationPage() {

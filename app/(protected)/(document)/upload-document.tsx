@@ -17,7 +17,7 @@ import { RecipientsMultiSelect } from "~/components/documents/recipient-multi-se
 import { SelectDropdown } from "~/components/select-dropdown";
 import { CATEGORIES, TYPES } from "~/constants/select-data";
 import { AlertDialog } from "~/components/pop-up/alert-dialog";
-import { useUploadDocumentForm } from "~/hooks/use-upload-document-form";
+import { useUploadDocumentForm } from "~/hooks/document/use-upload-document-form";
 
 export default function UploadDocument() {
   const {

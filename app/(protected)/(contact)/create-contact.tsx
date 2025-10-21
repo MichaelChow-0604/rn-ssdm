@@ -16,7 +16,7 @@ import { Button } from "~/components/ui/button";
 import { RelationshipSelect } from "~/components/contact/relationship-select";
 import { DistributionCheckbox } from "~/components/contact/distribution-checkbox";
 import PhoneInput from "react-native-international-phone-number";
-import { useCreateContactForm } from "~/hooks/use-create-contact-form";
+import { useCreateContactForm } from "~/hooks/contact/use-create-contact-form";
 import { ProfileAvatar } from "~/components/profile-avatar";
 
 export default function CreateContactPage() {

@@ -27,8 +27,8 @@ import { contactKeys } from "~/lib/http/keys/contact";
 import { getContactById } from "~/lib/http/endpoints/contact";
 import { GetContactResponse } from "~/lib/http/response-type/contact";
 import { LoadingOverlay } from "~/components/loading-overlay";
-import { useContactDeleteCheck } from "~/hooks/use-contact-delete-check";
-import { useContactDetailForm } from "~/hooks/use-contact-detail-form";
+import { useContactDeleteCheck } from "~/hooks/contact/use-contact-delete-check";
+import { useContactDetailForm } from "~/hooks/contact/use-contact-detail-form";
 import { ProfileAvatar } from "~/components/profile-avatar";
 
 const detailSchema = newContactSchema.extend({
@@ -68,7 +68,7 @@ export default function ContactDetailPage() {
     setSelectedCountry,
     handlePickImage,
     onSave,
-  } = useContactDetailForm({ id: String(id), apiContact });
+  } = useContactDetailForm({ apiContact });
 
   const {
     control,

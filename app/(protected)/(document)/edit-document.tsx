@@ -24,7 +24,7 @@ import {
   ReadOnlyTextarea,
 } from "~/components/documents/view-and-edit/readonly-fields";
 import { LoadingOverlay } from "~/components/loading-overlay";
-import { useEditDocumentForm } from "~/hooks/use-edit-document-form";
+import { useEditDocumentForm } from "~/hooks/document/use-edit-document-form";
 import Feather from "@expo/vector-icons/Feather";
 import * as Clipboard from "expo-clipboard";
 import { toast } from "sonner-native";

@@ -26,11 +26,10 @@ const detailSchema = newContactSchema.extend({
 export interface ContactDetailFormValues extends z.infer<typeof detailSchema> {}
 
 interface Params {
-  id: string;
   apiContact?: GetContactResponse | null;
 }
 
-export function useContactDetailForm({ id, apiContact }: Params) {
+export function useContactDetailForm({ apiContact }: Params) {
   const qc = useQueryClient();
 
   const [isEditing, setIsEditing] = useState(false);

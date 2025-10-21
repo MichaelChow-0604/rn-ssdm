@@ -23,7 +23,7 @@ import {
 } from "~/constants/auth-placeholders";
 import { PasswordInput } from "~/components/password/password-input";
 import { PasswordRequirements } from "~/components/password/password-requirement";
-import { useNewPasswordForm } from "~/hooks/use-new-password-form";
+import { useNewPasswordForm } from "~/hooks/auth/use-new-password-form";
 
 type NewPasswordFormFields = z.infer<typeof newPasswordSchema>;
 

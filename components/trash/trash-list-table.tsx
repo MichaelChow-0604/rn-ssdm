@@ -40,8 +40,8 @@ export default function TrashListTable() {
   );
 
   const columns = useMemo<ColumnDef<DocumentRow>[]>(() => {
-    return TRASH_COLUMNS(() => refetch());
-  }, [refetch]);
+    return TRASH_COLUMNS();
+  }, []);
 
   const table = useReactTable({
     data: tableData,

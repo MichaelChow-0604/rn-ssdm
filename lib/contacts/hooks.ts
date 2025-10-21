@@ -1,14 +1,8 @@
-// lib/contacts/hooks.ts
 import { useEffect, useMemo } from "react";
-import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { contactKeys } from "~/lib/http/keys/contact";
 import { getContactById, getContacts } from "~/lib/http/endpoints/contact";
-import {
-  buildNameIndex,
-  summariesToOptions,
-  toRecipientDetails,
-  RecipientDetail,
-} from "./adapters";
+import { buildNameIndex, summariesToOptions } from "./adapters";
 
 export function useContactsOptions() {
   // This hits cache immediately due to prefetch in otp page
@@ -23,32 +17,9 @@ export function useContactsOptions() {
   return { options, nameIndex };
 }
 
-export function useContactsDetails(ids: string[]) {
-  // Fetch details only when needed (e.g., before submit)
-  const results = useQueries({
-    queries: ids.map((id) => ({
-      queryKey: contactKeys.detail(id),
-      queryFn: () => getContactById(id),
-      enabled: !!id,
-      staleTime: 5 * 60 * 1000,
-    })),
-  });
-
-  const isLoading = results.some((r) => r.isLoading);
-  const contacts = results
-    .map((r) => r.data?.contact)
-    .filter(Boolean) as Awaited<ReturnType<typeof getContactById>>["contact"][];
-
-  const recipientDetails: RecipientDetail[] = useMemo(
-    () => toRecipientDetails(contacts),
-    [contacts]
-  );
-
-  return { isLoading, recipientDetails };
-}
-
 export function usePrefetchContactDetails(ids: string[]) {
   const qc = useQueryClient();
+
   useEffect(() => {
     ids.forEach((id) => {
       qc.prefetchQuery({

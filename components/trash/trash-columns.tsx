@@ -13,7 +13,7 @@ export interface DocumentRow {
   category: string;
 }
 
-export function TRASH_COLUMNS(onDeleted: () => void): ColumnDef<DocumentRow>[] {
+export function TRASH_COLUMNS(): ColumnDef<DocumentRow>[] {
   return [
     {
       accessorKey: "title",
@@ -60,9 +60,7 @@ export function TRASH_COLUMNS(onDeleted: () => void): ColumnDef<DocumentRow>[] {
     {
       id: "actions",
       header: () => null,
-      cell: ({ row }) => (
-        <DotDropdown documentId={row.original.id} onDeleted={onDeleted} />
-      ),
+      cell: ({ row }) => <DotDropdown documentId={row.original.id} />,
       meta: { className: "w-[10%] flex items-center justify-center" },
     },
   ];

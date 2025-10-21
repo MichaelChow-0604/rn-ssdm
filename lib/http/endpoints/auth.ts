@@ -19,97 +19,89 @@ import {
   SignUpOTPResponse,
   SignUpResponse,
 } from "../response-type/auth";
-import { request } from "../request";
+import { api } from "../client";
 
 export async function signUp(payload: SignUpPayload): Promise<SignUpResponse> {
-  return request<SignUpResponse>({
-    method: "post",
-    url: "/api/v1/users",
-    data: payload,
-  });
+  const { data } = await api.post<SignUpResponse>("/api/v1/users", payload);
+  return data;
 }
 
 export async function confirmSignUp(
   payload: ConfirmSignUpPayload
 ): Promise<SignUpOTPResponse> {
-  return request<SignUpOTPResponse>({
-    method: "post",
-    url: "/api/v1/users/confirmation",
-    data: payload,
-  });
+  const { data } = await api.post<SignUpOTPResponse>(
+    "/api/v1/users/confirmation",
+    payload
+  );
+  return data;
 }
 
 export async function resendConfirmation(
   email: string
 ): Promise<ResendOTPResponse> {
-  return request<ResendOTPResponse>({
-    method: "post",
-    url: "/api/v1/users/resend-confirmation",
-    data: { email },
-  });
+  const { data } = await api.post<ResendOTPResponse>(
+    "/api/v1/users/resend-confirmation",
+    { email }
+  );
+  return data;
 }
 
 export async function signIn(payload: SignInPayload): Promise<SignInResponse> {
-  return request<SignInResponse>({
-    method: "post",
-    url: "/api/v1/tokens",
-    data: payload,
-  });
+  const { data } = await api.post<SignInResponse>("/api/v1/tokens", payload);
+  return data;
 }
 
 export async function confirmSignIn(
   payload: ConfirmSignInPayload
 ): Promise<SignInOTPResponse> {
-  return request<SignInOTPResponse>({
-    method: "post",
-    url: "/api/v1/tokens/confirmation",
-    data: payload,
-  });
+  const { data } = await api.post<SignInOTPResponse>(
+    "/api/v1/tokens/confirmation",
+    payload
+  );
+  return data;
 }
 
 export async function logout(): Promise<LogoutResponse> {
-  return request<LogoutResponse>({
-    method: "post",
-    url: "/api/v1/tokens/revocation",
-  });
+  const { data } = await api.post<LogoutResponse>("/api/v1/tokens/revocation");
+  return data;
 }
 
 export async function forgotPassword(
   email: string
 ): Promise<ForgotPasswordResponse> {
-  return request<ForgotPasswordResponse>({
-    method: "post",
-    url: "/api/v1/users/forgot-password",
-    data: { email },
-  });
+  const { data } = await api.post<ForgotPasswordResponse>(
+    "/api/v1/users/forgot-password",
+    { email }
+  );
+  return data;
 }
 
 export async function confirmForgotPassword(
   payload: ConfirmForgotPasswordPayload
 ): Promise<ForgotPasswordOTPResponse> {
-  return request<ForgotPasswordOTPResponse>({
-    method: "post",
-    url: "/api/v1/users/forgot-password-confirmation",
-    data: payload,
-  });
+  const { data } = await api.post<ForgotPasswordOTPResponse>(
+    "/api/v1/users/forgot-password-confirmation",
+    payload
+  );
+  return data;
 }
 
 export async function resetPassword(
   payload: ResetPasswordPayload
 ): Promise<ResetPasswordResponse> {
-  return request<ResetPasswordResponse>({
-    method: "post",
-    url: "/api/v1/users/reset-password",
-    data: payload,
-  });
+  const { data } = await api.post<ResetPasswordResponse>(
+    "/api/v1/users/reset-password",
+    payload
+  );
+  return data;
 }
 
 export async function changePassword(
   payload: ChangePasswordPayload
 ): Promise<ChangePasswordResponse> {
-  return request<ChangePasswordResponse>({
-    method: "post",
-    url: "/api/v1/users/change-password",
-    data: payload,
-  });
+  const { data } = await api.post<ChangePasswordResponse>(
+    "/api/v1/users/change-password",
+    payload
+  );
+  return data;
 }

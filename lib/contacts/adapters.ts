@@ -1,5 +1,4 @@
 import { MultiOption } from "~/lib/types";
-import { GetContactResponse } from "~/lib/http/response-type/contact";
 
 interface ContactSummary {
   id: number;
@@ -28,23 +27,4 @@ export function buildNameIndex(
     map[String(s.id)] = toFullName(s.firstName, s.lastName);
   }
   return map;
-}
-
-// Build recipients payload for upload API from full details
-export interface RecipientDetail {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-}
-
-export function toRecipientDetails(
-  contacts: GetContactResponse["contact"][]
-): RecipientDetail[] {
-  return contacts.map((c) => ({
-    id: String(c.id),
-    name: toFullName(c.firstName, c.lastName),
-    email: c.email,
-    phone: c.phone,
-  }));
 }

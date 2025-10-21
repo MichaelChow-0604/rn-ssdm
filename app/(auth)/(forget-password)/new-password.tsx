@@ -1,4 +1,4 @@
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -9,8 +9,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button } from "~/components/ui/button";
-import { FormProvider, useForm, useWatch } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { FormProvider } from "react-hook-form";
 import * as z from "zod";
 import { newPasswordSchema } from "~/schema/auth-schema";
 import {
@@ -24,12 +23,7 @@ import {
 } from "~/constants/auth-placeholders";
 import { PasswordInput } from "~/components/password/password-input";
 import { PasswordRequirements } from "~/components/password/password-requirement";
-import { useApiMutation } from "~/lib/http/use-api-mutation";
-import { ResetPasswordResponse } from "~/lib/http/response-type/auth";
-import { ResetPasswordPayload } from "~/lib/http/request-type/auth";
-import { resetPassword } from "~/lib/http/endpoints/auth";
-import { toast } from "sonner-native";
-import { usePasswordValidation } from "~/hooks/use-password-validation";
+import { useNewPasswordForm } from "~/hooks/use-new-password-form";
 
 type NewPasswordFormFields = z.infer<typeof newPasswordSchema>;
 
@@ -37,48 +31,12 @@ export default function NewPasswordPage() {
   const { email } = useLocalSearchParams<{
     email: string;
   }>();
-  const router = useRouter();
 
-  const resetPasswordMutation = useApiMutation<
-    ResetPasswordResponse,
-    ResetPasswordPayload
-  >({
-    mutationKey: ["auth", "sign-up"],
-    mutationFn: resetPassword,
-    onSuccess: () => router.replace("/return-message-forget"),
-    onError: () => toast.error("Something went wrong. Please try again later."),
-  });
-
-  const isResettingPassword = resetPasswordMutation.isPending;
-
-  const methods = useForm<NewPasswordFormFields>({
-    resolver: zodResolver(newPasswordSchema),
-    defaultValues: {
-      password: "",
-      confirmPassword: "",
-    },
-    mode: "onChange",
-  });
-
-  const { handleSubmit } = methods;
-
-  const watchedPassword = useWatch({
-    control: methods.control,
-    name: "password",
-    defaultValue: "",
-  });
-  const validationResults = usePasswordValidation(watchedPassword);
-
-  const onSubmit = (data: NewPasswordFormFields) => {
-    resetPasswordMutation.mutate({
-      email,
-      confirm_password: data.confirmPassword,
-      password: data.password,
-    });
-  };
+  const { form, isResettingPassword, validationResults, onSubmit, onCancel } =
+    useNewPasswordForm({ email: String(email) });
 
   return (
-    <FormProvider {...methods}>
+    <FormProvider {...form}>
       <SafeAreaView className="flex-1 bg-white">
         <KeyboardAvoidingView
           style={{ flexGrow: 1 }}
@@ -132,7 +90,7 @@ export default function NewPasswordPage() {
               <Button
                 className="bg-button text-buttontext"
                 disabled={isResettingPassword}
-                onPress={handleSubmit(onSubmit)}
+                onPress={onSubmit}
               >
                 {isResettingPassword ? (
                   <ActivityIndicator size="small" color="white" />
@@ -147,7 +105,7 @@ export default function NewPasswordPage() {
               <Button
                 className="bg-white border-button active:bg-slate-100"
                 variant="outline"
-                onPress={() => router.replace("/")}
+                onPress={onCancel}
               >
                 <Text className="text-button font-bold">{CANCEL}</Text>
               </Button>

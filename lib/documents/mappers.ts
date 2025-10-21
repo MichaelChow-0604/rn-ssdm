@@ -19,7 +19,7 @@ export interface DocumentVM {
 }
 
 export function toDocumentVM(r?: GetDocumentResponse): DocumentVM {
-  const status = r?.status ?? "";
+  const status = r?.status ?? "FAILED";
   const updatedAt = r?.updatedAt ?? "";
   const { uploadDate, uploadTime } = getUploadMeta(status, updatedAt);
 

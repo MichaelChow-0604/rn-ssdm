@@ -4,6 +4,7 @@ import {
   Platform,
   ScrollView,
   Text,
+  TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -24,6 +25,9 @@ import {
 } from "~/components/documents/view-and-edit/readonly-fields";
 import { LoadingOverlay } from "~/components/loading-overlay";
 import { useEditDocumentForm } from "~/hooks/use-edit-document-form";
+import Feather from "@expo/vector-icons/Feather";
+import * as Clipboard from "expo-clipboard";
+import { toast } from "sonner-native";
 
 export default function EditDocument() {
   const { documentId } = useLocalSearchParams<{ documentId: string }>();
@@ -69,6 +73,13 @@ export default function EditDocument() {
       )}
     />
   );
+
+  const handleCopyTransactionId = async () => {
+    if (!data) return;
+
+    await Clipboard.setStringAsync(data.transactionId);
+    toast.success("Transaction ID copied to clipboard");
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -278,8 +289,25 @@ export default function EditDocument() {
             <View className="flex-col gap-4 w-[80%]">
               {/* Transaction ID */}
               <View className="flex-col gap-1">
-                <Label className="text-black">Transaction ID</Label>
-                <ReadOnlyTextarea value={data.transactionId} />
+                <View className="flex-row items-center justify-between">
+                  <Label className="text-black">Transaction ID</Label>
+                  <Feather name="copy" size={16} color="gray" />
+                </View>
+
+                {/* For Android */}
+                <TouchableOpacity
+                  onPress={handleCopyTransactionId}
+                  activeOpacity={0.8}
+                >
+                  <Textarea
+                    className="font-bold bg-blue-50 opacity-80 border-0 text-blue-500 active:opacity-70"
+                    value={data.transactionId}
+                    editable={false}
+                    /* For iOS */
+                    onPress={handleCopyTransactionId}
+                    selectTextOnFocus={false}
+                  />
+                </TouchableOpacity>
               </View>
 
               {/* Upload Date */}

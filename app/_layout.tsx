@@ -5,7 +5,6 @@ import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 
 import "~/global.css";
 import { AuthProvider } from "~/context/auth-context";
-import { ProfileProvider } from "~/context/profile-context";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner-native";
 import { SettingsProvider } from "~/context/setting-context";
@@ -28,20 +27,18 @@ export default function RootLayout() {
       <QueryClientProvider client={queryClient}>
         <BottomSheetModalProvider>
           <AuthProvider>
-            <ProfileProvider>
-              <SettingsProvider>
-                {/* <BuoyDebugger /> */}
+            <SettingsProvider>
+              {/* <BuoyDebugger /> */}
 
-                <Stack screenOptions={{ headerShown: false }}>
-                  <Stack.Screen name="index" />
-                  <Stack.Screen name="(auth)" />
-                  <Stack.Screen name="(protected)" />
-                  <Stack.Screen name="terms-and-conditions" />
-                </Stack>
+              <Stack screenOptions={{ headerShown: false }}>
+                <Stack.Screen name="index" />
+                <Stack.Screen name="(auth)" />
+                <Stack.Screen name="(protected)" />
+                <Stack.Screen name="terms-and-conditions" />
+              </Stack>
 
-                <PortalHost />
-              </SettingsProvider>
-            </ProfileProvider>
+              <PortalHost />
+            </SettingsProvider>
           </AuthProvider>
         </BottomSheetModalProvider>
       </QueryClientProvider>

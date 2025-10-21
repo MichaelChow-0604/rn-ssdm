@@ -1,6 +1,6 @@
 import { Modal, Text, View } from "react-native";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 
 interface AlertDialogProps {
   visible: boolean;

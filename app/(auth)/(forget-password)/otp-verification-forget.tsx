@@ -1,4 +1,4 @@
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { useRef, useState } from "react";
 import { Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -21,76 +21,33 @@ import { useOtpResend } from "~/hooks/use-otp-resend";
 import { ResendLink } from "~/components/auth/resend-link";
 import { LoadingOverlay } from "~/components/loading-overlay";
 import ReLogin from "~/components/pop-up/re-login";
-import { useApiMutation } from "~/lib/http/use-api-mutation";
-import { ForgotPasswordOTPResponse } from "~/lib/http/response-type/auth";
-import { ConfirmForgotPasswordPayload } from "~/lib/http/request-type/auth";
-import { confirmForgotPassword } from "~/lib/http/endpoints/auth";
-import { toast } from "sonner-native";
+import { useForgotPasswordOTP } from "~/hooks/use-forgot-password-otp";
 
 export default function OTPVerificationForgetPage() {
   const { email, session } = useLocalSearchParams<{
     email: string;
     session: string;
   }>();
-  const [currentSession, setCurrentSession] = useState(session);
-  const [otpCount, setOtpCount] = useState(0);
-  const [showReForget, setShowReForget] = useState(false);
-  const router = useRouter();
 
   const timerRef = useRef<CountdownTimerRef>(null);
 
   const [otp, setOtp] = useState("");
   const [expired, setExpired] = useState(false);
 
+  const { verify, isVerifying, showReForget, onDismissOverlay, setSession } =
+    useForgotPasswordOTP({
+      email: String(email),
+      session: String(session),
+    });
+
   const { resend, cooldownSeconds, isResending } = useOtpResend(
     String(email),
     (newSession) => {
-      setCurrentSession(newSession);
+      setSession(newSession);
       timerRef.current?.resetTimer();
       setExpired(false);
     }
   );
-
-  const confirmForgotPasswordMutation = useApiMutation<
-    ForgotPasswordOTPResponse,
-    ConfirmForgotPasswordPayload
-  >({
-    mutationKey: ["auth", "confirm-forgot-password"],
-    mutationFn: confirmForgotPassword,
-    onSuccess: (data) => {
-      if (data.session) {
-        setOtpCount((prev) => {
-          const next = prev + 1;
-          if (next < 3) toast.error("Invalid OTP. Please try again.");
-          return next;
-        });
-        setCurrentSession(data.session);
-        return;
-      }
-
-      router.replace({
-        pathname: "/(auth)/(forget-password)/new-password",
-        params: { email },
-      });
-    },
-    onError: () => {
-      toast.error("Something went wrong. Please try again later.");
-    },
-  });
-
-  const isVerifying = confirmForgotPasswordMutation.isPending;
-
-  function onDismissOverlay() {
-    if (otpCount >= 3) setShowReForget(true);
-  }
-
-  function verify(otp: string) {
-    confirmForgotPasswordMutation.mutate({
-      email: String(email),
-      session: String(currentSession),
-      confirmationCode: otp,
-    });
-  }
 
   const verifyDisabled =
     otp.length !== 6 || expired || showReForget || isVerifying;

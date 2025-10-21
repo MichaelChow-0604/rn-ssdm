@@ -16,7 +16,7 @@ import { Textarea } from "~/components/ui/textarea";
 import { RecipientsMultiSelect } from "~/components/documents/recipient-multi-select";
 import { SelectDropdown } from "~/components/select-dropdown";
 import { CATEGORIES, TYPES } from "~/constants/select-data";
-import { AlertDialog } from "~/components/alert-dialog";
+import { AlertDialog } from "~/components/pop-up/alert-dialog";
 import { useUploadDocumentForm } from "~/hooks/use-upload-document-form";
 
 export default function UploadDocument() {

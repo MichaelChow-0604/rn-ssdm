@@ -8,6 +8,7 @@ import { newContactSchema } from "~/schema/new-contact-schema";
 import {
   getCountryByPhoneNumber,
   ICountry,
+  isValidPhoneNumber,
 } from "react-native-international-phone-number";
 import { useApiMutation } from "~/lib/http/use-api-mutation";
 import { updateContact } from "~/lib/http/endpoints/contact";
@@ -118,9 +119,28 @@ export function useContactDetailForm({ id, apiContact }: Params) {
 
   const onSave = form.handleSubmit(async (data) => {
     if (!apiContact) return;
-    const phoneNumber = `${selectedCountry?.idd?.root ?? ""} ${
-      data.phone
-    }`.replace(/ /g, "");
+
+    const country = selectedCountry;
+    const rawPhone = (data.phone ?? "").trim();
+
+    // If not empty (Zod handles empty), validate by country
+    if (rawPhone.length > 0 && country) {
+      const normalized = rawPhone.replace(/[^\d+]/g, "");
+      const valid = isValidPhoneNumber(normalized, country);
+
+      if (!valid) {
+        form.setError("phone", {
+          type: "validate",
+          message: "Invalid mobile number for selected country",
+        });
+        return;
+      }
+    }
+
+    const phoneNumber = `${country?.idd?.root ?? ""} ${rawPhone}`.replace(
+      / /g,
+      ""
+    );
     const unique = Array.from(
       new Set(["EMAIL", ...data.distributions])
     ) as ContactDetailFormValues["distributions"];

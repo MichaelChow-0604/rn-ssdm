@@ -106,7 +106,7 @@ export function useCreateContactForm() {
       if (!valid) {
         setError("phone", {
           type: "validate",
-          message: "Please enter a valid phone number for the selected country",
+          message: "Invalid mobile number for selected country",
         });
         return;
       }

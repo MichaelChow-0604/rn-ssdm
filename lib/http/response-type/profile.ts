@@ -5,7 +5,7 @@ export interface GetProfileResponse {
   phone: string;
   firstName: string;
   lastName: string;
-  profilePicture: string;
+  profilePictureUrl: string;
   status: string;
   createdAt: string;
   updatedAt: string;

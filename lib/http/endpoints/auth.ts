@@ -3,6 +3,7 @@ import {
   ConfirmForgotPasswordPayload,
   ConfirmSignInPayload,
   ConfirmSignUpPayload,
+  ResendConfirmationPayload,
   ResetPasswordPayload,
   SignInPayload,
   SignUpPayload,
@@ -37,11 +38,11 @@ export async function confirmSignUp(
 }
 
 export async function resendConfirmation(
-  email: string
+  payload: ResendConfirmationPayload
 ): Promise<ResendOTPResponse> {
   const { data } = await api.post<ResendOTPResponse>(
     "/api/v1/users/resend-confirmation",
-    { email }
+    payload
   );
   return data;
 }

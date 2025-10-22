@@ -30,9 +30,9 @@ export default function ContactListTab() {
   const [searchQuery, setSearchQuery] = useState("");
 
   const items: Contact[] = (data?.contactSummaries ?? []).map((s) => ({
-    id: String(s.id),
+    id: s.id,
     name: `${s.firstName} ${s.lastName}`.trim(),
-    avatarUri: s.profilePicture,
+    profilePictureUrl: s.profilePictureUrl,
   }));
 
   const query = searchQuery.trim();
@@ -86,7 +86,7 @@ export default function ContactListTab() {
       ) : (
         <SectionList
           sections={sections}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.id.toString()}
           stickySectionHeadersEnabled
           contentContainerStyle={{
             flexGrow: 1,
@@ -97,9 +97,9 @@ export default function ContactListTab() {
           )}
           renderItem={({ item }) => (
             <ContactRow
-              id={item.id}
+              id={item.id.toString()}
               name={item.name}
-              avatarUri={item.avatarUri}
+              profilePictureUrl={item.profilePictureUrl}
               onPress={(id) => {
                 queryClient.prefetchQuery({
                   queryKey: contactKeys.detail(id),

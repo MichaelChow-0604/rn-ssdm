@@ -84,11 +84,11 @@ export default function ProfileTab() {
               {/* Profile pic box */}
               <ProfileAvatar
                 source={
-                  profile?.profilePicture
+                  profile?.profilePictureUrl
                     ? {
-                        uri: `data:image/png;base64,${profile.profilePicture}`,
+                        uri: profile.profilePictureUrl,
                         name: "profilePicture",
-                        mimeType: "image/png",
+                        mimeType: "image/jpeg",
                       }
                     : null
                 }

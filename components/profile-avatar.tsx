@@ -1,8 +1,10 @@
 import React from "react";
-import { TouchableOpacity, View, Image, Pressable } from "react-native";
+import { TouchableOpacity, View, Pressable, StyleSheet } from "react-native";
+import { Image } from "expo-image";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import Entypo from "@expo/vector-icons/Entypo";
 import { IconData } from "~/lib/types";
+import { BLURHASH } from "~/lib/constants";
 
 interface ProfileAvatarProps {
   source?: IconData | null; // Image source (e.g., from profilePic in hooks)
@@ -20,7 +22,7 @@ export const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
   showRemoveIcon = true,
 }) => {
   const imageSource = source?.uri
-    ? { uri: source.uri }
+    ? source.uri
     : require("~/assets/images/default_icon.png");
 
   return (
@@ -31,7 +33,19 @@ export const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
         onPress={isEditable ? onSelectImage : undefined} // Only allow press if editable
         disabled={!isEditable}
       >
-        <Image source={imageSource} className="w-24 h-24 rounded-full" />
+        <View style={styles.container}>
+          <Image
+            source={imageSource}
+            style={styles.image}
+            transition={150}
+            priority="high"
+            cachePolicy="disk"
+            recyclingKey={source?.uri}
+            placeholder={{ blurhash: BLURHASH }}
+            contentFit="cover"
+            placeholderContentFit="cover"
+          />
+        </View>
 
         {/* Edit icon */}
         {isEditable && (
@@ -54,3 +68,19 @@ export const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    width: 92,
+    height: 92,
+    borderRadius: 46,
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  image: {
+    width: 92,
+    height: 92,
+    borderRadius: 46,
+  },
+});

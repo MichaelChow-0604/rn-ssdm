@@ -1,5 +1,7 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { IconData } from "./types";
+import { ImageManipulator, SaveFormat } from "expo-image-manipulator";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -100,4 +102,22 @@ export function beautifyResponse(response: any) {
 // test purpose
 export function delayApi(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+export async function compressToJpeg(input: IconData): Promise<IconData> {
+  const ctx = ImageManipulator.manipulate(input.uri).resize({
+    width: 128,
+    height: 128,
+  });
+  const image = await ctx.renderAsync();
+  const result = await image.saveAsync({
+    format: SaveFormat.JPEG,
+    compress: 0.1,
+  });
+
+  return {
+    uri: result.uri,
+    name: input.name,
+    mimeType: "image/jpeg",
+  };
 }

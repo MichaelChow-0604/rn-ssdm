@@ -22,6 +22,7 @@ import {
   getCountryByCca2,
   isValidPhoneNumber,
 } from "react-native-international-phone-number";
+import { compressToJpeg } from "~/lib/utils";
 
 type NewContactFormFields = z.infer<typeof newContactSchema>;
 
@@ -94,7 +95,7 @@ export function useCreateContactForm() {
   };
 
   // Form submission handler
-  const onSubmit = (data: NewContactFormFields) => {
+  const onSubmit = async (data: NewContactFormFields) => {
     const country = selectedCountry ?? getCountryByCca2("HK");
     const rawPhone = (data.phone ?? "").trim();
 
@@ -106,7 +107,7 @@ export function useCreateContactForm() {
       if (!valid) {
         setError("phone", {
           type: "validate",
-          message: "Invalid mobile number for selected country",
+          message: "Invalid mobile number format for the selected location",
         });
         return;
       }
@@ -128,8 +129,12 @@ export function useCreateContactForm() {
       communicationOption: distributions,
     };
 
+    const compressedProfilePic = profilePic
+      ? await compressToJpeg(profilePic)
+      : null;
+
     createContactMutation.mutate({
-      profilePicture: profilePic ?? null,
+      profilePicture: compressedProfilePic,
       contactInfo,
     });
   };

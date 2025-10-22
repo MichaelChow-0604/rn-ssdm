@@ -17,6 +17,7 @@ import { GetContactResponse } from "~/lib/http/response-type/contact";
 import { toast } from "sonner-native";
 import { pickImage } from "~/lib/pick-image";
 import { IconData } from "~/lib/types";
+import { compressToJpeg } from "~/lib/utils";
 
 const detailSchema = newContactSchema.extend({
   profilePicUri: z.string().nullable().optional(),
@@ -62,11 +63,10 @@ export function useContactDetailForm({ apiContact }: Params) {
       ? apiContact.phone.replace(country.idd.root, "")
       : apiContact.phone;
 
-    const hasPicture = !!apiContact.profilePicture;
+    const hasPicture = !!apiContact.profilePictureUrl;
     if (hasPicture) {
-      const dataUri = `data:image/png;base64,${apiContact.profilePicture}`;
       setProfilePic({
-        uri: dataUri,
+        uri: apiContact.profilePictureUrl ?? "",
         name: "profilePicture",
         mimeType: "image/png",
       });
@@ -79,9 +79,7 @@ export function useContactDetailForm({ apiContact }: Params) {
       lastName: apiContact.lastName,
       phone: national,
       email: apiContact.email,
-      profilePicUri: hasPicture
-        ? `data:image/png;base64,${apiContact.profilePicture}`
-        : null,
+      profilePicUri: hasPicture ? apiContact.profilePictureUrl ?? "" : null,
       relationship: apiContact.relationship ?? null,
       distributions: apiContact.contactOptions?.length
         ? (Array.from(
@@ -143,6 +141,10 @@ export function useContactDetailForm({ apiContact }: Params) {
     const unique = Array.from(
       new Set(["EMAIL", ...data.distributions])
     ) as ContactDetailFormValues["distributions"];
+
+    const compressedProfilePic = profilePic
+      ? await compressToJpeg(profilePic)
+      : null;
 
     isUpdatingContact.mutate({
       id: String(apiContact.id),

@@ -16,7 +16,7 @@ interface ContactSummary {
   id: number;
   firstName: string;
   lastName: string;
-  profilePicture?: string;
+  profilePictureUrl?: string;
 }
 
 export interface GetContactsResponse {
@@ -34,7 +34,7 @@ export interface GetContactResponse {
   lastName: string;
   relationship: string;
   contactOptions: string[];
-  profilePicture?: string;
+  profilePictureUrl?: string;
   createdAt: string;
   updatedAt: string;
   message: string;

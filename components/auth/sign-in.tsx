@@ -59,13 +59,11 @@ export default function SignIn({ setIsSignIn }: SignInProps) {
       });
     },
     onError: ({ status }) => {
-      switch (status) {
-        case 400:
-          toast.error("Invalid credentials. User not found.");
-          break;
-        default:
-          toast.error("Something went wrong. Please try again later.");
+      if (status === 400) {
+        toast.error("Invalid credentials. User not found.");
+        return;
       }
+      toast.error("Something went wrong. Please try again later.");
     },
   });
 
@@ -129,8 +127,13 @@ export default function SignIn({ setIsSignIn }: SignInProps) {
           params: { email, session },
         });
       },
-      onError: () =>
-        toast.error("Something went wrong. Please try again later."),
+      onError: ({ status }) => {
+        if (status === 400) {
+          toast.error("User not found.");
+          return;
+        }
+        toast.error("Something went wrong. Please try again later.");
+      },
     }
   );
 

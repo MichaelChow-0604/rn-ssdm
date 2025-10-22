@@ -3,11 +3,23 @@ import { useCooldown } from "~/hooks/use-cooldown";
 import { useApiMutation } from "~/lib/http/use-api-mutation";
 import { resendConfirmation } from "~/lib/http/endpoints/auth";
 import { ResendOTPResponse } from "~/lib/http/response-type/auth";
+import { ResendConfirmationPayload } from "~/lib/http/request-type/auth";
 
-export function useOtpResend(email: string, onSession: (s: string) => void) {
+interface Params {
+  email: string;
+  isLogin: boolean;
+}
+
+export function useOtpResend(
+  { email, isLogin }: Params,
+  onSession: (s: string) => void
+) {
   const { secondsLeft, start } = useCooldown(60);
 
-  const resendMutation = useApiMutation<ResendOTPResponse, string>({
+  const resendMutation = useApiMutation<
+    ResendOTPResponse,
+    ResendConfirmationPayload
+  >({
     mutationKey: ["auth", "resend-confirmation"],
     mutationFn: resendConfirmation,
     onSuccess: ({ session }) => {
@@ -20,7 +32,7 @@ export function useOtpResend(email: string, onSession: (s: string) => void) {
 
   function resend() {
     if (secondsLeft > 0 || resendMutation.isPending) return;
-    resendMutation.mutate(String(email));
+    resendMutation.mutate({ email, isLogin });
   }
 
   return {

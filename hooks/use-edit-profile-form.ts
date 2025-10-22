@@ -38,13 +38,12 @@ export function useEditProfileForm({ profile }: Params) {
   useEffect(() => {
     if (!profile) return;
 
-    const hasPicture = !!profile.profilePicture;
+    const hasPicture = !!profile.profilePictureUrl;
     if (hasPicture) {
-      const dataUri = `data:image/png;base64,${profile.profilePicture}`;
       setProfilePic({
-        uri: dataUri,
+        uri: profile.profilePictureUrl,
         name: "profilePicture",
-        mimeType: "image/png",
+        mimeType: "image/jpeg",
       });
     } else {
       setProfilePic(null);
@@ -53,9 +52,7 @@ export function useEditProfileForm({ profile }: Params) {
     form.reset({
       firstName: profile.firstName,
       lastName: profile.lastName,
-      profilePicUri: hasPicture
-        ? `data:image/png;base64,${profile.profilePicture}`
-        : null,
+      profilePicUri: hasPicture ? profile.profilePictureUrl : null,
     });
   }, [profile, form]);
 

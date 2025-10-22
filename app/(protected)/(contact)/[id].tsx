@@ -210,7 +210,7 @@ export default function ContactDetailPage() {
                         onChangePhoneNumber={onChange}
                         selectedCountry={selectedCountry}
                         onChangeSelectedCountry={setSelectedCountry}
-                        placeholder="Mobile number"
+                        placeholder="Mobile no."
                         disabled={!isEditing}
                       />
                     )}

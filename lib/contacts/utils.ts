@@ -1,8 +1,8 @@
-import { StoredContact } from "../storage/contact";
+import { GetContactResponse } from "../http/response-type/contact";
 import { Contact } from "../types";
 
 // derive display name
-export function fullName(c: StoredContact) {
+export function fullName(c: GetContactResponse) {
   return `${c.firstName} ${c.lastName}`.trim();
 }
 
@@ -42,10 +42,10 @@ export function buildSections(contacts: Contact[]) {
   }));
 }
 
-export function toListItem(c: StoredContact): Contact {
+export function toListItem(c: GetContactResponse): Contact {
   return {
     id: c.id,
     name: fullName(c),
-    avatarUri: c.profilePicUri ?? undefined,
+    profilePictureUrl: c.profilePictureUrl,
   };
 }

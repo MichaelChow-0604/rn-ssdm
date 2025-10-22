@@ -1,15 +1,22 @@
-import { Image, Text, TouchableOpacity } from "react-native";
+import { StyleSheet, Text, TouchableOpacity } from "react-native";
+import { Image } from "expo-image";
+import { BLURHASH } from "~/lib/constants";
 
 interface ContactRowProps {
   id: string;
   name: string;
-  avatarUri?: string;
+  profilePictureUrl?: string;
   onPress: (id: string) => void;
 }
 
-export function ContactRow({ id, name, avatarUri, onPress }: ContactRowProps) {
-  const iconDataUri = avatarUri
-    ? `data:image/jpeg;base64,${avatarUri}`
+export function ContactRow({
+  id,
+  name,
+  profilePictureUrl,
+  onPress,
+}: ContactRowProps) {
+  const source = profilePictureUrl
+    ? profilePictureUrl
     : require("~/assets/images/default_icon.png");
 
   return (
@@ -18,15 +25,24 @@ export function ContactRow({ id, name, avatarUri, onPress }: ContactRowProps) {
       className="flex-row items-center gap-3 px-6 py-3 border-b border-gray-200"
       onPress={() => onPress(id)}
     >
-      {avatarUri ? (
-        <Image
-          source={{ uri: iconDataUri }}
-          className="w-10 h-10 rounded-full"
-        />
-      ) : (
-        <Image source={iconDataUri} className="w-10 h-10 rounded-full" />
-      )}
+      <Image
+        source={source}
+        style={styles.image}
+        transition={150}
+        priority="high"
+        cachePolicy="disk"
+        recyclingKey={id}
+        placeholder={{ blurhash: BLURHASH }}
+      />
       <Text className="text-black font-semibold">{name}</Text>
     </TouchableOpacity>
   );
 }
+
+const styles = StyleSheet.create({
+  image: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+  },
+});

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "expo-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner-native";
@@ -44,19 +44,23 @@ export function useOtpVerification({
 }: Params): Return {
   const [currentSession, setCurrentSession] = useState(session);
   const [loginCount, setLoginCount] = useState(0);
+  const lastLoginCountRef = useRef(0);
   const [showReLogin, setShowReLogin] = useState(false);
 
   const router = useRouter();
   const queryClient = useQueryClient();
   const { setIsAuthenticated } = useAuth();
 
-  const handleLoginLimit = (newSession: string) => {
-    setLoginCount((prev) => {
-      const next = prev + 1;
-      if (next < 3) toast.error("Invalid OTP. Please try again.");
-      return next;
-    });
+  useEffect(() => {
+    const prev = lastLoginCountRef.current;
+    if (loginCount > prev && loginCount < 3) {
+      toast.error("Invalid OTP. Please try again.");
+    }
+    lastLoginCountRef.current = loginCount;
+  }, [loginCount]);
 
+  const handleLoginLimit = (newSession: string) => {
+    setLoginCount((prev) => prev + 1);
     setCurrentSession(newSession);
   };
 
@@ -71,6 +75,9 @@ export function useOtpVerification({
         handleLoginLimit(session);
         return;
       }
+
+      console.log("accessToken", accessToken);
+      console.log("idToken", idToken);
 
       useTokenStore.getState().setTokens({
         email,

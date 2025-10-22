@@ -1,7 +1,7 @@
 export interface Contact {
-  id: string;
+  id: number;
   name: string;
-  avatarUri?: string;
+  profilePictureUrl?: string;
 }
 
 export type FilterOption = "documentType" | "category" | "uploadDate";

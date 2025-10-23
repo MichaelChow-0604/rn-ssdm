@@ -28,13 +28,25 @@ export interface ContactDetailFormValues extends z.infer<typeof detailSchema> {}
 
 interface Params {
   apiContact?: GetContactResponse | null;
+  initialProfilePictureUrl?: string;
 }
 
-export function useContactDetailForm({ apiContact }: Params) {
+export function useContactDetailForm({
+  apiContact,
+  initialProfilePictureUrl,
+}: Params) {
   const qc = useQueryClient();
 
   const [isEditing, setIsEditing] = useState(false);
-  const [profilePic, setProfilePic] = useState<IconData | null>(null);
+  const [profilePic, setProfilePic] = useState<IconData | null>(
+    initialProfilePictureUrl
+      ? {
+          uri: initialProfilePictureUrl,
+          name: "profilePicture",
+          mimeType: "image/jpeg",
+        }
+      : null
+  );
   const [selectedCountry, setSelectedCountry] = useState<ICountry | undefined>(
     undefined
   );
@@ -68,7 +80,7 @@ export function useContactDetailForm({ apiContact }: Params) {
       setProfilePic({
         uri: apiContact.profilePictureUrl ?? "",
         name: "profilePicture",
-        mimeType: "image/png",
+        mimeType: "image/jpeg",
       });
     } else {
       setProfilePic(null);

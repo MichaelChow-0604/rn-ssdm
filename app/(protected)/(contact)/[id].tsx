@@ -40,7 +40,14 @@ const detailSchema = newContactSchema.extend({
 type FormValues = z.infer<typeof detailSchema>;
 
 export default function ContactDetailPage() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, previewProfilePictureUrl } = useLocalSearchParams<{
+    id: string;
+    previewProfilePictureUrl: string | string[];
+  }>();
+
+  const previewUrl = Array.isArray(previewProfilePictureUrl)
+    ? previewProfilePictureUrl[0]
+    : previewProfilePictureUrl;
 
   const queryClient = useQueryClient();
   const { data: apiContact, status } = useQuery<GetContactResponse, Error, any>(
@@ -68,7 +75,10 @@ export default function ContactDetailPage() {
     setSelectedCountry,
     handlePickImage,
     onSave,
-  } = useContactDetailForm({ apiContact });
+  } = useContactDetailForm({
+    apiContact,
+    initialProfilePictureUrl: previewUrl,
+  });
 
   const {
     control,

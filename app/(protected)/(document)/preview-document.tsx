@@ -28,6 +28,7 @@ import { UploadDocumentResponse } from "~/lib/http/response-type/document";
 import { uploadDocument } from "~/lib/http/endpoints/document";
 import { useQueryClient } from "@tanstack/react-query";
 import { documentKeys } from "~/lib/http/keys/document";
+import { toast } from "sonner-native";
 
 interface PreviewData {
   title: string;
@@ -90,7 +91,12 @@ export default function PreviewDocument() {
         },
       });
     },
-    onError: (err) => {
+    onError: ({ status }) => {
+      if (status === 409) {
+        toast.error("You have already uploaded this document before.");
+        return;
+      }
+
       router.replace({
         pathname: "/return-message",
         params: { mode: "error" },

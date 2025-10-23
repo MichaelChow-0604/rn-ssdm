@@ -16,6 +16,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { contactKeys } from "~/lib/http/keys/contact";
 import { getContactById, getContacts } from "~/lib/http/endpoints/contact";
 import { useMemo, useState } from "react";
+import { Image as ExpoImage } from "expo-image";
 
 export default function ContactListTab() {
   const queryClient = useQueryClient();
@@ -100,13 +101,24 @@ export default function ContactListTab() {
               id={item.id.toString()}
               name={item.name}
               profilePictureUrl={item.profilePictureUrl}
-              onPress={(id) => {
-                queryClient.prefetchQuery({
+              onPress={async (id) => {
+                const detail = await queryClient.fetchQuery({
                   queryKey: contactKeys.detail(id),
                   queryFn: () => getContactById(id),
                   staleTime: 5 * 60 * 1000,
                 });
-                router.push({ pathname: "/[id]", params: { id: String(id) } });
+
+                if (detail?.profilePictureUrl) {
+                  ExpoImage.prefetch(detail.profilePictureUrl);
+                }
+
+                router.push({
+                  pathname: "/[id]",
+                  params: {
+                    id: String(id),
+                    previewProfilePictureurl: item.profilePictureUrl ?? "",
+                  },
+                });
               }}
             />
           )}

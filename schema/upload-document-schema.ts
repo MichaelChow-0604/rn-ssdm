@@ -1,10 +1,11 @@
 import * as z from "zod";
 
 export const uploadDocumentSchema = z.object({
-  title: z.string().min(1, { message: "Title is required" }),
+  title: z.string().trim().min(1, { message: "Title is required" }),
   description: z.string().optional(),
   id: z
     .string()
+    .trim()
     .min(1, { message: "ID is required" })
     .regex(/^[a-zA-Z0-9]+$/, { message: "ID must be alphanumeric" }),
   reference_number: z

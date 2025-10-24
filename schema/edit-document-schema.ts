@@ -3,6 +3,7 @@ import * as z from "zod";
 export const editDocumentSchema = z.object({
   id: z
     .string()
+    .trim()
     .min(1, { message: "ID is required" })
     .regex(/^[a-zA-Z0-9]+$/, { message: "ID must be alphanumeric" }),
   reference_number: z

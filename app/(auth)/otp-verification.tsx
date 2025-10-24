@@ -127,6 +127,7 @@ export default function OTPVerificationPage() {
             onExpire={() => setExpired(true)}
             onReset={() => setExpired(false)}
             className="mt-1 mb-4"
+            persistKey={`otp_${email}`}
           />
 
           <View className="flex flex-col gap-4 w-full">

@@ -14,7 +14,7 @@ export function useOtpResend(
   { email, isLogin }: Params,
   onSession: (s: string) => void
 ) {
-  const { secondsLeft, start } = useCooldown(60);
+  const { secondsLeft, start } = useCooldown(60, `otp_resend_${email}`);
 
   const resendMutation = useApiMutation<
     ResendOTPResponse,

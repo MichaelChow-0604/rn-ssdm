@@ -1,18 +1,24 @@
 import React, {
   useCallback,
   useEffect,
-  useState,
   useImperativeHandle,
   forwardRef,
   useRef,
+  useState,
 } from "react";
-import { Text, View } from "react-native";
+import { AppState, Text, View } from "react-native";
+import { useLocalStorage } from "~/hooks/use-local-storage";
 
 interface CountdownTimerProps {
   initialTime?: number; // in seconds, default 300 (5 minutes)
   onExpire?: () => void;
   onReset?: () => void;
   className?: string;
+  /**
+   * Optional storage key to persist the expiry across backgrounding/app restarts.
+   * Use something stable and unique, e.g. `otp_${email}`.
+   */
+  persistKey?: string;
 }
 
 export interface CountdownTimerRef {
@@ -22,71 +28,112 @@ export interface CountdownTimerRef {
 export const CountdownTimer = forwardRef<
   CountdownTimerRef,
   CountdownTimerProps
->(({ initialTime = 300, onExpire, onReset, className = "" }, ref) => {
-  const [timeLeft, setTimeLeft] = useState(initialTime);
-  const [isTimerActive, setIsTimerActive] = useState(true);
+>(
+  (
+    { initialTime = 300, onExpire, onReset, className = "", persistKey },
+    ref
+  ) => {
+    // Persisted expiry timestamp (ms) when persistKey is provided
+    const { value: storedExpiresAt, set: setStoredExpiresAt } = useLocalStorage<
+      number | null
+    >(persistKey ? `countdown_${persistKey}` : "countdown__noop", null);
 
-  const onExpireRef = useRef(onExpire);
-  useEffect(() => {
-    onExpireRef.current = onExpire;
-  }, [onExpire]);
+    // Local expiry (ms). Always the source of truth for remaining time.
+    const [expiresAt, setExpiresAt] = useState<number>(
+      () => Date.now() + initialTime * 1000
+    );
+    const [timeLeft, setTimeLeft] = useState<number>(() =>
+      Math.max(0, Math.ceil((expiresAt - Date.now()) / 1000))
+    );
 
-  // Format time as MM:SS
-  const formatTime = useCallback((seconds: number) => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes.toString().padStart(2, "0")}:${remainingSeconds
-      .toString()
-      .padStart(2, "0")}`;
-  }, []);
+    const onExpireRef = useRef(onExpire);
+    useEffect(() => {
+      onExpireRef.current = onExpire;
+    }, [onExpire]);
 
-  // Reset timer function
-  const resetTimer = useCallback(() => {
-    setTimeLeft(initialTime);
-    setIsTimerActive(true);
-    onReset?.();
-  }, [initialTime, onReset]);
+    // Initialize/rehydrate expiry from storage (or write a fresh one)
+    useEffect(() => {
+      const now = Date.now();
 
-  // Expose only resetTimer (stable handle)
-  useImperativeHandle(
-    ref,
-    () => ({
-      resetTimer,
-    }),
-    [resetTimer]
-  );
+      if (!persistKey) {
+        const next = now + initialTime * 1000;
+        setExpiresAt(next);
+        setTimeLeft(Math.max(0, Math.ceil((next - now) / 1000)));
+        return;
+      }
 
-  useEffect(() => {
-    if (!isTimerActive) return;
-    const id = setInterval(() => {
-      setTimeLeft((t) => (t > 0 ? t - 1 : 0));
-    }, 1000);
-    return () => clearInterval(id);
-  }, [isTimerActive]);
+      if (storedExpiresAt && storedExpiresAt > now) {
+        setExpiresAt(storedExpiresAt);
+        setTimeLeft(Math.max(0, Math.ceil((storedExpiresAt - now) / 1000)));
+        return;
+      }
 
-  // Stop when it hits zero (no side effects here)
-  useEffect(() => {
-    if (timeLeft !== 0 || !isTimerActive) return;
-    setIsTimerActive(false);
-  }, [timeLeft, isTimerActive]);
+      const fresh = now + initialTime * 1000;
+      setExpiresAt(fresh);
+      setStoredExpiresAt(fresh);
+      setTimeLeft(Math.max(0, Math.ceil((fresh - now) / 1000)));
+    }, [persistKey, storedExpiresAt, initialTime, setStoredExpiresAt]);
 
-  // Notify parent after render commit
-  useEffect(() => {
-    if (!isTimerActive && timeLeft === 0) {
-      onExpireRef.current?.();
-    }
-  }, [isTimerActive, timeLeft]);
+    // Tick every second while mounted (foreground). Uses absolute expiry for correctness.
+    useEffect(() => {
+      const id = setInterval(() => {
+        const now = Date.now();
+        const left = Math.max(0, Math.ceil((expiresAt - now) / 1000));
+        setTimeLeft(left);
+      }, 1000);
+      return () => clearInterval(id);
+    }, [expiresAt]);
 
-  return (
-    <View
-      className={`items-center gap-1 flex flex-row justify-end w-full ${className}`}
-    >
-      <Text className="text-subtitle">
-        {isTimerActive ? "Expire in:" : "Expired"}
-      </Text>
-      <Text className="text-red-500 font-bold">{formatTime(timeLeft)}</Text>
-    </View>
-  );
-});
+    // Update immediately on app foreground
+    useEffect(() => {
+      const sub = AppState.addEventListener("change", (state) => {
+        if (state !== "active") return;
+        const now = Date.now();
+        const left = Math.max(0, Math.ceil((expiresAt - now) / 1000));
+        setTimeLeft(left);
+      });
+      return () => sub.remove();
+    }, [expiresAt]);
+
+    // Fire onExpire once when time hits zero; reset when time goes back > 0
+    const notifiedRef = useRef(false);
+    useEffect(() => {
+      if (timeLeft === 0 && !notifiedRef.current) {
+        notifiedRef.current = true;
+        onExpireRef.current?.();
+      }
+      if (timeLeft > 0) notifiedRef.current = false;
+    }, [timeLeft]);
+
+    // Reset = write a new expiry (and persist if enabled)
+    const resetTimer = useCallback(() => {
+      const next = Date.now() + initialTime * 1000;
+      setExpiresAt(next);
+      setTimeLeft(Math.max(0, Math.ceil((next - Date.now()) / 1000)));
+      if (persistKey) setStoredExpiresAt(next);
+      onReset?.();
+    }, [initialTime, onReset, persistKey, setStoredExpiresAt]);
+
+    useImperativeHandle(ref, () => ({ resetTimer }), [resetTimer]);
+
+    const isExpired = timeLeft === 0;
+
+    const formatted = `${String(Math.floor(timeLeft / 60)).padStart(
+      2,
+      "0"
+    )}:${String(timeLeft % 60).padStart(2, "0")}`;
+
+    return (
+      <View
+        className={`items-center gap-1 flex flex-row justify-end w-full ${className}`}
+      >
+        <Text className="text-subtitle">
+          {isExpired ? "Expired" : "Expire in:"}
+        </Text>
+        <Text className="text-red-500 font-bold">{formatted}</Text>
+      </View>
+    );
+  }
+);
 
 CountdownTimer.displayName = "CountdownTimer";

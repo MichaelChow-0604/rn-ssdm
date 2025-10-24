@@ -59,15 +59,24 @@ export default function SignIn({ setIsSignIn }: SignInProps) {
       });
     },
     onError: ({ status }) => {
-      if (status === 400) {
-        toast.error("Invalid credentials. User not found.");
-        return;
+      switch (status) {
+        case 400:
+          toast.error("Invalid credentials. User not found.");
+          break;
+
+        case 403:
+          toast.error(
+            "Your account is unverified. Please sign up again to complete the verification process."
+          );
+          break;
+
+        default:
+          toast.error("Something went wrong. Please try again later.");
       }
-      toast.error("Something went wrong. Please try again later.");
     },
   });
 
-  const isSigningIn = signInMutation.isPending || signInMutation.isSuccess;
+  const isSigningIn = signInMutation.isPending;
 
   // Sign in validation form
   const {

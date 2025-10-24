@@ -56,8 +56,7 @@ export default function DeleteConfirm() {
       toast.error("Failed to delete contact. Please try again later."),
   });
 
-  const isDeletingContact =
-    deleteContactMutation.isPending || deleteContactMutation.isSuccess;
+  const isDeletingContact = deleteContactMutation.isPending;
 
   async function handleDelete() {
     if (canDelete !== "true") return;

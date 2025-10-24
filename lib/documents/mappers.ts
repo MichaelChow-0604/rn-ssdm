@@ -31,7 +31,7 @@ export function toDocumentVM(r?: GetDocumentResponse): DocumentVM {
     referenceNumber: r?.referenceNo ?? "",
     description: r?.description ?? "",
     remarks: r?.remarks ?? "",
-    fileName: r?.fileName ?? "",
+    fileName: decodeURIComponent(r?.fileName ?? ""),
     transactionId: r?.transactionId ?? "",
     status,
     updatedAt,

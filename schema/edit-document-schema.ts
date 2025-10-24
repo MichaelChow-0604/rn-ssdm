@@ -17,5 +17,5 @@ export const editDocumentSchema = z.object({
   remarks: z.string().optional(),
   recipients: z
     .array(z.string())
-    .min(1, { message: "Recipients are required" }),
+    .min(1, { message: "Please select at least one recipient" }),
 });

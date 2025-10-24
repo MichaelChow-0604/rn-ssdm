@@ -79,16 +79,18 @@ export function useEditDocumentForm({ documentId }: Params) {
     });
   }
 
-  function handleSave() {
+  const handleSave = form.handleSubmit((data) => {
+    if (!data) return;
+
     mutation.mutate({
       id: String(documentId),
-      userDocId: form.getValues("id"),
-      referenceNo: form.getValues("reference_number") ?? "",
-      recipients: form.getValues("recipients"),
-      description: form.getValues("description") ?? "",
-      remarks: form.getValues("remarks") ?? "",
+      userDocId: data.id,
+      referenceNo: data.reference_number ?? "",
+      recipients: data.recipients,
+      description: data.description ?? "",
+      remarks: data.remarks ?? "",
     });
-  }
+  });
 
   return {
     data,
@@ -97,7 +99,7 @@ export function useEditDocumentForm({ documentId }: Params) {
     setIsEditing,
     handleEdit,
     handleSave,
-    isUpdatingDocument: mutation.isPending || mutation.isSuccess,
+    isUpdatingDocument: mutation.isPending,
     form, // exposes control, errors, watch, setValue, etc.
   };
 }

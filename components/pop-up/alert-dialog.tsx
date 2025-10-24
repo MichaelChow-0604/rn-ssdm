@@ -29,7 +29,7 @@ export function AlertDialog({
       >
         <View className="items-center justify-center rounded-2xl bg-white px-6 py-5 w-[90%]">
           <AntDesign name="exclamation-circle" size={24} color="#E42D2D" />
-          <Text className="mt-2 text-xl text-gray-700 font-bold">{title}</Text>
+          <Text className="mt-2 text-lg text-gray-700 font-bold">{title}</Text>
 
           <Text className="my-4 text-medium text-gray-700 font-medium text-center">
             {label}

@@ -112,8 +112,20 @@ export function useContactDetailForm({
       qc.invalidateQueries({ queryKey: contactKeys.list() });
       toast.success("Contact updated successfully.");
     },
-    onError: () =>
-      toast.error("Failed to update contact. Please try again later."),
+    onError: ({ status }) => {
+      switch (status) {
+        case 400:
+          toast.error("Profile picture size is too large.");
+          return;
+        case 403:
+          toast.error(
+            "Only JPEG, PNG, GIF, BMP and HEIC images are allowed for profile picture."
+          );
+          return;
+        default:
+          toast.error("Failed to update contact. Please try again later.");
+      }
+    },
   });
 
   async function handlePickImage() {
@@ -160,7 +172,7 @@ export function useContactDetailForm({
 
     isUpdatingContact.mutate({
       id: String(apiContact.id),
-      profilePicture: profilePic ?? null,
+      profilePicture: compressedProfilePic ?? null,
       contactInfo: {
         firstName: data.firstName.trim(),
         lastName: data.lastName.trim(),

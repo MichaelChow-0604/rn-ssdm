@@ -62,7 +62,7 @@ export default function SignUp({ setIsSignIn }: SignUpProps) {
     },
   });
 
-  const isSigningUp = signUpMutation.isPending || signUpMutation.isSuccess;
+  const isSigningUp = signUpMutation.isPending;
 
   const methods = useForm<SignUpFormFields>({
     defaultValues: {

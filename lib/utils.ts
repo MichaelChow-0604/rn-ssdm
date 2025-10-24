@@ -2,6 +2,7 @@ import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { IconData } from "./types";
 import { ImageManipulator, SaveFormat } from "expo-image-manipulator";
+import { File } from "expo-file-system";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -105,6 +106,18 @@ export function delayApi(ms: number): Promise<void> {
 }
 
 export async function compressToJpeg(input: IconData): Promise<IconData> {
+  // Only compress when original file size is greater than 2MB
+  try {
+    const file = new File(input.uri);
+    const info = file.info();
+    const TWO_MB = 2 * 1024 * 1024;
+
+    if (info.exists && typeof info.size === "number" && info.size <= TWO_MB)
+      return input;
+  } catch {
+    return input;
+  }
+
   const ctx = ImageManipulator.manipulate(input.uri).resize({
     width: 128,
     height: 128,
@@ -112,7 +125,7 @@ export async function compressToJpeg(input: IconData): Promise<IconData> {
   const image = await ctx.renderAsync();
   const result = await image.saveAsync({
     format: SaveFormat.JPEG,
-    compress: 0.1,
+    compress: 0.5,
   });
 
   return {

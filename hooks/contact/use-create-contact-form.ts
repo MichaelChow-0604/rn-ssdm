@@ -68,8 +68,20 @@ export function useCreateContactForm() {
       router.back();
       toast.success("Contact created successfully.");
     },
-    onError: () =>
-      toast.error("Failed to create contact. Please try again later."),
+    onError: ({ status }) => {
+      switch (status) {
+        case 400:
+          toast.error("Profile picture size is too large.");
+          return;
+        case 403:
+          toast.error(
+            "Only JPEG, PNG, GIF, BMP and HEIC images are allowed for profile picture."
+          );
+          return;
+        default:
+          toast.error("Failed to create contact. Please try again later.");
+      }
+    },
   });
 
   // Effect to set default country
@@ -159,7 +171,6 @@ export function useCreateContactForm() {
     // Handlers
     handlePickImage,
     // Mutation status
-    isCreatingContact:
-      createContactMutation.isPending || createContactMutation.isSuccess,
+    isCreatingContact: createContactMutation.isPending,
   };
 }

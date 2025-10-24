@@ -53,16 +53,23 @@ export default function DotDropdown({ documentId, status }: DotDropdownProps) {
       });
       queryClient.invalidateQueries({ queryKey: documentKeys.list() });
     },
-    onError: (err) =>
-      toast.error("Failed to move document to trash. Please try again later."),
+    onError: ({ status }) => {
+      // User try to move the document to trash when the document is still processing
+      if (status === 400) {
+        toast.error(
+          "Please wait for the document to be processed before moving it to trash."
+        );
+        return;
+      }
+      toast.error("Failed to move document to trash. Please try again later.");
+    },
   });
 
   const onConfirmMoveToTrash = () => {
     moveToTrashMutation.mutate({ id: documentId, status: "TRASH" });
   };
 
-  const isMoveToTrashLoading =
-    moveToTrashMutation.isPending || moveToTrashMutation.isSuccess;
+  const isMoveToTrashLoading = moveToTrashMutation.isPending;
 
   // Direct delete for FAILED documents
   const deleteMutation = useApiMutation<
@@ -88,7 +95,7 @@ export default function DotDropdown({ documentId, status }: DotDropdownProps) {
   };
 
   const isDeleteLoading =
-    moveToTrashMutation.isPending || moveToTrashMutation.isSuccess;
+    moveToTrashMutation.isPending || deleteMutation.isPending;
 
   // If the document's status is UPLOADED or PROCESSING, show the move to trash alert
   // If the document's status is FAILED, show the direct delete alert

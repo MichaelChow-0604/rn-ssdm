@@ -11,6 +11,7 @@ import { router } from "expo-router";
 import { toast } from "sonner-native";
 import { updateProfile } from "~/lib/http/endpoints/profile";
 import { pickImage } from "~/lib/pick-image";
+import { compressToJpeg } from "~/lib/utils";
 
 const detailSchema = profileSchema.extend({
   profilePicUri: z.string().nullable().optional(),
@@ -64,8 +65,19 @@ export function useEditProfileForm({ profile }: Params) {
       qc.invalidateQueries({ queryKey: ["profile", "get"] });
       toast.success("Profile updated successfully.");
     },
-    onError: (err) => {
-      toast.error("Failed to update profile. Please try again later.");
+    onError: ({ status }) => {
+      switch (status) {
+        case 400:
+          toast.error("Profile picture size is too large.");
+          return;
+        case 403:
+          toast.error(
+            "Only JPEG, PNG, GIF, BMP and HEIC images are allowed for profile picture."
+          );
+          return;
+        default:
+          toast.error("Failed to update profile. Please try again later.");
+      }
     },
   });
 
@@ -82,8 +94,12 @@ export function useEditProfileForm({ profile }: Params) {
   const onSave = form.handleSubmit(async (data) => {
     if (!profile) return;
 
+    const compressedProfilePic = profilePic
+      ? await compressToJpeg(profilePic)
+      : null;
+
     isUpdatingProfile.mutate({
-      profilePicture: profilePic ?? null,
+      profilePicture: compressedProfilePic,
       profileInfoJson: {
         firstName: data.firstName.trim(),
         lastName: data.lastName.trim(),

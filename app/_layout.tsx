@@ -9,6 +9,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner-native";
 import { SettingsProvider } from "~/context/setting-context";
 import { BuoyDebugger } from "~/lib/buoy-debugger";
+import { StatusBar } from "react-native";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -24,6 +25,7 @@ const queryClient = new QueryClient({
 export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
+      <StatusBar translucent={false} />
       <QueryClientProvider client={queryClient}>
         <BottomSheetModalProvider>
           <AuthProvider>

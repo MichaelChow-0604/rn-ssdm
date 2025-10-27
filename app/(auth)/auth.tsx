@@ -8,16 +8,18 @@ import Animated, {
   LinearTransition,
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useBehavior } from "~/hooks/use-behavior";
 
 export default function AuthPage() {
   // State for toggle between sign in and sign up forms
   const [isSignIn, setIsSignIn] = useState(true);
-  const behaviour = useBehavior();
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={behaviour}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        keyboardVerticalOffset={0}
+      >
         <View className="bg-white items-center">
           {/* Form */}
           {isSignIn ? (

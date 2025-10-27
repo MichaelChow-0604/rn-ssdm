@@ -82,7 +82,8 @@ export default function DeleteDocConfirm() {
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <KeyboardAvoidingView
           className="flex-1 items-center px-8 justify-center"
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          keyboardVerticalOffset={0}
         >
           {/* Header */}
           <FontAwesome5 name="user-shield" size={100} color="#438BF7" />

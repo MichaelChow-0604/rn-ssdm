@@ -43,7 +43,8 @@ export default function EditProfile() {
 
       <KeyboardAvoidingView
         className="flex-1 items-start px-4"
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        keyboardVerticalOffset={0}
       >
         <BackButton className="absolute top-4 left-4 z-50" />
 

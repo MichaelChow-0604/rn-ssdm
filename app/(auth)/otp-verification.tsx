@@ -71,7 +71,8 @@ export default function OTPVerificationPage() {
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <KeyboardAvoidingView
           className="flex-1 items-center px-8 justify-center"
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          keyboardVerticalOffset={0}
         >
           <ReLogin visible={showReLogin} />
           <LoadingOverlay

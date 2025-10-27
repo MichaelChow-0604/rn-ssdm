@@ -105,8 +105,9 @@ export default function ChangePassword() {
     <FormProvider {...methods}>
       <SafeAreaView className="flex-1 bg-white">
         <KeyboardAvoidingView
-          style={{ flexGrow: 1 }}
-          behavior={Platform.select({ ios: "padding", android: "height" })}
+          style={{ flex: 1 }}
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          keyboardVerticalOffset={0}
         >
           {/* Header */}
           <View className="flex-row items-center gap-2 px-4 pt-4 pb-8">

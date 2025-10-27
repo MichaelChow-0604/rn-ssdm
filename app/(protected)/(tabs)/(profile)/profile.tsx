@@ -1,11 +1,4 @@
-import {
-  View,
-  Text,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  ActivityIndicator,
-} from "react-native";
+import { View, Text, ScrollView, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Card } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
@@ -65,10 +58,7 @@ export default function ProfileTab() {
       {/* Curved blue topper */}
       <View className="h-[40%] bg-[#438BF7] rounded-b-[20px] absolute top-0 left-0 right-0" />
 
-      <KeyboardAvoidingView
-        className="flex-1 items-start px-4"
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-      >
+      <View className="flex-1 px-4">
         {isLoading || isRefetching ? (
           <View className="flex-1 w-full items-center justify-center mt-32">
             <ActivityIndicator size="small" color="gray" />
@@ -118,7 +108,7 @@ export default function ProfileTab() {
             </Card>
           </ScrollView>
         )}
-      </KeyboardAvoidingView>
+      </View>
 
       <LogoutConfirm
         visible={dialogOpen}

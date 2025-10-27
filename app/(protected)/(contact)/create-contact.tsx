@@ -46,7 +46,8 @@ export default function CreateContactPage() {
 
       <KeyboardAvoidingView
         className="flex-1 items-start px-4"
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        keyboardVerticalOffset={0}
       >
         {/* Header */}
         <View className="flex-row gap-4 items-center my-8 justify-start w-full">

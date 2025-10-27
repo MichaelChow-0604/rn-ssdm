@@ -104,7 +104,8 @@ export default function ContactDetailPage() {
       ) : (
         <KeyboardAvoidingView
           className="flex-1 px-4"
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          keyboardVerticalOffset={0}
         >
           <LoadingOverlay
             visible={isUpdatingContact}

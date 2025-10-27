@@ -83,7 +83,8 @@ export default function DeleteConfirm() {
       {/* Content */}
       <KeyboardAvoidingView
         className="flex-1 justify-center gap-8 mb-12"
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        keyboardVerticalOffset={0}
       >
         <View className="flex-col items-center gap-6 w-[85%] mx-auto">
           {/* Icon */}

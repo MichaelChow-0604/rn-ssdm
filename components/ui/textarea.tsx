@@ -1,5 +1,5 @@
 import * as React from "react";
-import { TextInput, type TextInputProps } from "react-native";
+import { Platform, TextInput, type TextInputProps } from "react-native";
 import { cn } from "~/lib/utils";
 
 function Textarea({
@@ -36,6 +36,7 @@ function Textarea({
       multiline={multiline}
       numberOfLines={numberOfLines}
       textAlignVertical="top"
+      scrollEnabled={Platform.OS === "ios" ? false : props.scrollEnabled}
       style={autoExpand && height ? { height } : undefined}
       onContentSizeChange={
         autoExpand ? handleContentSizeChange : props.onContentSizeChange

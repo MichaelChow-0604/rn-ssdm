@@ -8,13 +8,17 @@ import { ResendConfirmationPayload } from "~/lib/http/request-type/auth";
 interface Params {
   email: string;
   isLogin: boolean;
+  session: string;
 }
 
 export function useOtpResend(
-  { email, isLogin }: Params,
+  { email, isLogin, session }: Params,
   onSession: (s: string) => void
 ) {
-  const { secondsLeft, start } = useCooldown(60, `otp_resend_${email}`);
+  const { secondsLeft, start } = useCooldown(
+    60,
+    `otp_resend_${email}_${session}`
+  );
 
   const resendMutation = useApiMutation<
     ResendOTPResponse,

@@ -54,7 +54,7 @@ export default function OTPVerificationPage() {
     });
 
   const { resend, cooldownSeconds, isResending } = useOtpResend(
-    { email: String(email), isLogin: mode === "signin" },
+    { email: String(email), isLogin: mode === "signin", session },
     (newSession) => {
       setSession(newSession);
       timerRef.current?.resetTimer();

@@ -56,7 +56,7 @@ export default function OTPVerificationForgetPage() {
     <SafeAreaView className="flex-1 bg-white">
       <View className="flex-1 items-start px-8">
         <BackButton className="my-12" />
-        <ReLogin visible={showReForget} />
+        <ReLogin visible={showReForget} mode="forget-password" />
         <LoadingOverlay
           visible={isVerifying}
           label="Verifying..."

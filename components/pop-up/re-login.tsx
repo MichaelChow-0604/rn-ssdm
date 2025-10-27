@@ -5,9 +5,10 @@ import { router } from "expo-router";
 
 interface ReLoginProps {
   visible: boolean;
+  mode: "signin" | "signup" | "forget-password";
 }
 
-export default function ReLogin({ visible }: ReLoginProps) {
+export default function ReLogin({ visible, mode }: ReLoginProps) {
   const handleGoBackToSignIn = () => {
     router.replace("/auth");
   };
@@ -26,7 +27,11 @@ export default function ReLogin({ visible }: ReLoginProps) {
         <Card className="bg-white w-[80%] rounded-2xl">
           <CardContent className="py-6 gap-4">
             <Text className="text-center text-lg font-semibold">
-              Your session has expired. Please login again.
+              {mode === "forget-password"
+                ? "Your session has expired. Please start over again."
+                : mode === "signin"
+                ? "Your session has expired. Please sign in again."
+                : "Your session has expired. Please sign up again."}
             </Text>
 
             <Button

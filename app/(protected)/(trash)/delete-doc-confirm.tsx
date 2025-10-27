@@ -61,7 +61,7 @@ export default function DeleteDocConfirm() {
       switch (status) {
         // Wrong password
         case 403:
-          toast.error("Incorrect password.");
+          toast.error("Invalid password.");
           break;
         // Server error
         default:

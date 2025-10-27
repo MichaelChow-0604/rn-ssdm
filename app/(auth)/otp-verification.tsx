@@ -74,7 +74,7 @@ export default function OTPVerificationPage() {
           behavior={Platform.OS === "ios" ? "padding" : undefined}
           keyboardVerticalOffset={0}
         >
-          <ReLogin visible={showReLogin} />
+          <ReLogin visible={showReLogin} mode={mode} />
           <LoadingOverlay
             visible={showLoadingOverlay}
             label="Verifying..."

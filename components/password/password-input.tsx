@@ -45,6 +45,7 @@ export function PasswordInput<TFieldValues extends FieldValues>({
           placeholderClassName="text-placeholder"
           placeholder={placeholder}
           secureTextEntry={!isPasswordVisible}
+          returnKeyType="default"
         />
         <Pressable
           onPress={togglePasswordVisibility}

@@ -8,6 +8,7 @@ import { api } from "./client";
 import { isPublicPath, isRenewalPath } from "./paths";
 import { renewAccessToken } from "./refresh";
 import { useTokenStore } from "../../store/use-token-store";
+import { forceLogout } from "../logout-helper";
 
 interface Tokens {
   idToken: string;
@@ -103,8 +104,7 @@ api.interceptors.response.use(
       } catch (refreshErr) {
         // Refresh failed, meaning the user is not authenticated anymore, log the user out
         onTokenRefreshed(null);
-        useTokenStore.getState().clearTokens();
-        console.log("NOW LOG THE FK OUT");
+        forceLogout("token-refresh-failed");
         return Promise.reject(refreshErr);
       } finally {
         isRefreshing = false;

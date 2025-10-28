@@ -5,22 +5,12 @@ import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 
 import "~/global.css";
 import { AuthProvider } from "~/context/auth-context";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner-native";
 import { SettingsProvider } from "~/context/setting-context";
 import { BuoyDebugger } from "~/lib/buoy-debugger";
 import { StatusBar } from "react-native";
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 60_000, // 1 min: typical app-wide baseline
-      gcTime: 30 * 60_000, // 30 min: keeps data around for quick back/forward
-      refetchOnWindowFocus: true, // On RN, refetch on app foreground
-      refetchOnReconnect: true,
-    },
-  },
-});
+import { queryClient } from "~/lib/react-query";
 
 export default function RootLayout() {
   return (

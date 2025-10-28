@@ -8,7 +8,7 @@ export async function pickImage(): Promise<ImagePickerAsset | null> {
 
   if (status !== "granted") {
     Alert.alert(
-      "Grant Permission to Access Media Library",
+      "Grant Permission",
       "Please grant permission to access your media library to select an image.",
       [
         {

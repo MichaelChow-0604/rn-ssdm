@@ -1,10 +1,28 @@
 import * as ImagePicker from "expo-image-picker";
 import { ImagePickerAsset } from "expo-image-picker";
+import { Alert, Linking } from "react-native";
 import { toast } from "sonner-native";
 
 export async function pickImage(): Promise<ImagePickerAsset | null> {
   const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-  if (status !== "granted") return null;
+
+  if (status !== "granted") {
+    Alert.alert(
+      "Grant Permission to Access Media Library",
+      "Please grant permission to access your media library to select an image.",
+      [
+        {
+          text: "Later",
+          style: "default",
+        },
+        {
+          text: "Open Settings",
+          onPress: async () => await Linking.openSettings(),
+        },
+      ]
+    );
+    return null;
+  }
 
   const result = await ImagePicker.launchImageLibraryAsync({
     mediaTypes: ["images"],

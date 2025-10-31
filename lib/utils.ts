@@ -100,11 +100,6 @@ export function beautifyResponse(response: any) {
   return JSON.stringify(response, null, 2);
 }
 
-// test purpose
-export function delayApi(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
 export async function compressToJpeg(input: IconData): Promise<IconData> {
   // Only compress when original file size is greater than 2MB
   try {

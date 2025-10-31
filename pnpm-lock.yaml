@@ -18,21 +18,6 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.2.1
         version: 5.2.1(react-hook-form@7.62.0(react@19.1.0))
-      '@react-buoy/core':
-        specifier: ^0.1.12
-        version: 0.1.12(react-native@0.81.4(@babel/core@7.28.4)(@types/react@19.1.12)(react@19.1.0))(react@19.1.0)
-      '@react-buoy/env':
-        specifier: ^0.1.12
-        version: 0.1.12(react-native@0.81.4(@babel/core@7.28.4)(@types/react@19.1.12)(react@19.1.0))(react@19.1.0)
-      '@react-buoy/network':
-        specifier: ^0.1.12
-        version: 0.1.12(@tanstack/react-query@5.90.2(react@19.1.0))(react-native@0.81.4(@babel/core@7.28.4)(@types/react@19.1.12)(react@19.1.0))(react@19.1.0)
-      '@react-buoy/react-query':
-        specifier: ^0.1.12
-        version: 0.1.12(@tanstack/react-query@5.90.2(react@19.1.0))(react-native@0.81.4(@babel/core@7.28.4)(@types/react@19.1.12)(react@19.1.0))(react@19.1.0)
-      '@react-buoy/storage':
-        specifier: ^0.1.12
-        version: 0.1.12(@react-native-async-storage/async-storage@2.2.0(react-native@0.81.4(@babel/core@7.28.4)(@types/react@19.1.12)(react@19.1.0)))(react-native@0.81.4(@babel/core@7.28.4)(@types/react@19.1.12)(react@19.1.0))(react@19.1.0)
       '@react-native-async-storage/async-storage':
         specifier: 2.2.0
         version: 2.2.0(react-native@0.81.4(@babel/core@7.28.4)(@types/react@19.1.12)(react@19.1.0))
@@ -81,9 +66,6 @@ importers:
       '@rn-primitives/tooltip':
         specifier: ~1.2.0
         version: 1.2.0(@rn-primitives/portal@1.3.0(@types/react@19.1.12)(react-native-web@0.21.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-native@0.81.4(@babel/core@7.28.4)(@types/react@19.1.12)(react@19.1.0))(react@19.1.0)(use-sync-external-store@1.5.0(react@19.1.0)))(@types/react@19.1.12)(react-dom@19.1.0(react@19.1.0))(react-native-web@0.21.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-native@0.81.4(@babel/core@7.28.4)(@types/react@19.1.12)(react@19.1.0))(react@19.1.0)
-      '@shopify/flash-list':
-        specifier: 2.0.2
-        version: 2.0.2(@babel/runtime@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(@types/react@19.1.12)(react@19.1.0))(react@19.1.0)
       '@tanstack/react-query':
         specifier: 5.90.2
         version: 5.90.2(react@19.1.0)
@@ -1561,44 +1543,6 @@ packages:
   '@radix-ui/rect@1.1.1':
     resolution: {integrity: sha512-HPwpGIzkl28mWyZqG52jiqDJ12waP11Pa1lGoiyUkIEuMLBP0oeK/C89esbXrxsky5we7dfd8U58nm0SgAWpVw==}
 
-  '@react-buoy/core@0.1.12':
-    resolution: {integrity: sha512-WspgcZiuXHfXl9BT8KT2r9FEsy4wrxHS5AtuRAj/z27miijKmgCVfJAO3MlNYDIM1HMz8GghnySjGn/pOcik6g==}
-    peerDependencies:
-      react: '*'
-      react-native: '*'
-
-  '@react-buoy/env@0.1.12':
-    resolution: {integrity: sha512-PMScEqlh+ZTA8Rr2xiLwmZJZDn1DfI21GWcITjgV1vhfi7U8csBKEWCDRmMe4cH0xVsbihSEPWFGh9PTFS8KQg==}
-    peerDependencies:
-      react: '*'
-      react-native: '*'
-
-  '@react-buoy/network@0.1.12':
-    resolution: {integrity: sha512-sNwc4h+FasGR/NWBImp1o6TdOcuEbSnAblco9uBlqVyPw5wEuiNsejFHKn2B0M1NqoAmJvA9vQI3KnU9hmPzZw==}
-    peerDependencies:
-      react: '*'
-      react-native: '*'
-
-  '@react-buoy/react-query@0.1.12':
-    resolution: {integrity: sha512-kWB/NDLPWtwgHeQH1XJBCeGt6UKgyHBXrZwY3GjirITWicFMErKl3DFqt4FiCnj3kiPm+iSm1VQGXYGd3ZAYAw==}
-    peerDependencies:
-      '@tanstack/react-query': 5.90.2
-      react: '*'
-      react-native: '*'
-
-  '@react-buoy/shared-ui@0.1.12':
-    resolution: {integrity: sha512-zSXb41OEEBquqe8RROxVc6YjN5uqSstR20lE5PtK3JK0RbTD6GG/uonFzqEd+xEwe5b+o7nbXUaoBj80dfULzw==}
-    peerDependencies:
-      react: '*'
-      react-native: '*'
-
-  '@react-buoy/storage@0.1.12':
-    resolution: {integrity: sha512-ztNNoFYm8fVbjk7xCV5iJETXkNo7WjsN6//DKZ5U917SDkigDaSyqZFRQoWMr1kRDkNnIcfqKZdvO/9Pn7ePaA==}
-    peerDependencies:
-      '@react-native-async-storage/async-storage': '>=1.0.0'
-      react: '*'
-      react-native: '*'
-
   '@react-native-async-storage/async-storage@2.2.0':
     resolution: {integrity: sha512-gvRvjR5JAaUZF8tv2Kcq/Gbt3JHwbKFYfmb445rhOj6NUMx3qPLixmDx5pZAyb9at1bYvJ4/eTUipU5aki45xw==}
     peerDependencies:
@@ -1958,13 +1902,6 @@ packages:
 
   '@rtsao/scc@1.1.0':
     resolution: {integrity: sha512-zt6OdqaDoOnJ1ZYsCYGt9YmWzDXl4vQdKTyJev62gFhRGKdx7mcT54V9KIjg+d2wi9EXsPvAPKe7i7WjfVWB8g==}
-
-  '@shopify/flash-list@2.0.2':
-    resolution: {integrity: sha512-zhlrhA9eiuEzja4wxVvotgXHtqd3qsYbXkQ3rsBfOgbFA9BVeErpDE/yEwtlIviRGEqpuFj/oU5owD6ByaNX+w==}
-    peerDependencies:
-      '@babel/runtime': '*'
-      react: '*'
-      react-native: '*'
 
   '@sinclair/typebox@0.27.8':
     resolution: {integrity: sha512-+Fj43pSMwJs4KRrH/938Uf+uAELIgVBmQzg/q1YG10djyfA3TnrU8N8XzqCh/okZdszqBQTZf96idMfE5lnwTA==}
@@ -2659,10 +2596,6 @@ packages:
 
   convert-source-map@2.0.0:
     resolution: {integrity: sha512-Kvp459HrV2FEJ1CAsi1Ku+MY3kasH19TFykTz2xWmMeq6bk2NU3XXvfJ+Q61m0xktWwt+1HSYf3JZsTms3aRJg==}
-
-  copy-anything@3.0.5:
-    resolution: {integrity: sha512-yCEafptTtb4bk7GLEQoM8KVJpxAfdBJYaXyzQEgQQQgYrZiDp8SJmGKlYza6CYjEDNstAdNdKA3UuoULlEbS6w==}
-    engines: {node: '>=12.13'}
 
   core-js-compat@3.45.1:
     resolution: {integrity: sha512-tqTt5T4PzsMIZ430XGviK4vzYSoeNJ6CXODi6c/voxOT6IZqBht5/EKaSNnYiEjjRYxjVz7DQIsOsY0XNi8PIA==}
@@ -3728,10 +3661,6 @@ packages:
   is-weakset@2.0.4:
     resolution: {integrity: sha512-mfcwb6IzQyOKTs84CQMrOwW4gQcaTOAWJ0zzJCl2WSPDrWk/OzDaImWFH3djXhb24g4eudZfLRozAvPGw4d9hQ==}
     engines: {node: '>= 0.4'}
-
-  is-what@4.1.16:
-    resolution: {integrity: sha512-ZhMwEosbFJkA0YhFnNDgTM4ZxDRsS6HqTo7qsZM08fehyRYIYa0yHu5R6mgo1n/8MgaPBXiPimPD77baVFYg+A==}
-    engines: {node: '>=12.13'}
 
   is-wsl@2.2.0:
     resolution: {integrity: sha512-fKzAra0rGJUUBwGBgNkHZuToZcn+TtXHpeCgmkMJMMYx1sQDYaCSyjJBSCa2nH1DGm7s3n1oBnohoVTBaN7Lww==}
@@ -5104,10 +5033,6 @@ packages:
     resolution: {integrity: sha512-8EbVDiu9iN/nESwxeSxDKe0dunta1GOlHufmSSXxMD2z2/tMZpDMpvXQGsc+ajGo8y2uYUmixaSRUc/QPoQ0GA==}
     engines: {node: '>=16 || 14 >=14.17'}
     hasBin: true
-
-  superjson@2.2.2:
-    resolution: {integrity: sha512-5JRxVqC8I8NuOUjzBbvVJAKNM8qoVuH0O77h4WInc/qC2q5IreqKxYwgkga3PfA22OayK2ikceb/B26dztPl+Q==}
-    engines: {node: '>=16'}
 
   supports-color@5.5.0:
     resolution: {integrity: sha512-QjVjwdXIt408MIiAqCX4oUKsgU2EqAGzs2Ppkm4aQYbjm+ZEWEcW4SfFNTr4uMNZma0ey4f5lgLrkB0aX0QMow==}
@@ -7180,48 +7105,6 @@ snapshots:
 
   '@radix-ui/rect@1.1.1': {}
 
-  '@react-buoy/core@0.1.12(react-native@0.81.4(@babel/core@7.28.4)(@types/react@19.1.12)(react@19.1.0))(react@19.1.0)':
-    dependencies:
-      '@react-buoy/shared-ui': 0.1.12(react-native@0.81.4(@babel/core@7.28.4)(@types/react@19.1.12)(react@19.1.0))(react@19.1.0)
-      react: 19.1.0
-      react-native: 0.81.4(@babel/core@7.28.4)(@types/react@19.1.12)(react@19.1.0)
-
-  '@react-buoy/env@0.1.12(react-native@0.81.4(@babel/core@7.28.4)(@types/react@19.1.12)(react@19.1.0))(react@19.1.0)':
-    dependencies:
-      '@react-buoy/shared-ui': 0.1.12(react-native@0.81.4(@babel/core@7.28.4)(@types/react@19.1.12)(react@19.1.0))(react@19.1.0)
-      react: 19.1.0
-      react-native: 0.81.4(@babel/core@7.28.4)(@types/react@19.1.12)(react@19.1.0)
-
-  '@react-buoy/network@0.1.12(@tanstack/react-query@5.90.2(react@19.1.0))(react-native@0.81.4(@babel/core@7.28.4)(@types/react@19.1.12)(react@19.1.0))(react@19.1.0)':
-    dependencies:
-      '@react-buoy/react-query': 0.1.12(@tanstack/react-query@5.90.2(react@19.1.0))(react-native@0.81.4(@babel/core@7.28.4)(@types/react@19.1.12)(react@19.1.0))(react@19.1.0)
-      '@react-buoy/shared-ui': 0.1.12(react-native@0.81.4(@babel/core@7.28.4)(@types/react@19.1.12)(react@19.1.0))(react@19.1.0)
-      react: 19.1.0
-      react-native: 0.81.4(@babel/core@7.28.4)(@types/react@19.1.12)(react@19.1.0)
-    transitivePeerDependencies:
-      - '@tanstack/react-query'
-
-  '@react-buoy/react-query@0.1.12(@tanstack/react-query@5.90.2(react@19.1.0))(react-native@0.81.4(@babel/core@7.28.4)(@types/react@19.1.12)(react@19.1.0))(react@19.1.0)':
-    dependencies:
-      '@react-buoy/shared-ui': 0.1.12(react-native@0.81.4(@babel/core@7.28.4)(@types/react@19.1.12)(react@19.1.0))(react@19.1.0)
-      '@tanstack/react-query': 5.90.2(react@19.1.0)
-      react: 19.1.0
-      react-native: 0.81.4(@babel/core@7.28.4)(@types/react@19.1.12)(react@19.1.0)
-
-  '@react-buoy/shared-ui@0.1.12(react-native@0.81.4(@babel/core@7.28.4)(@types/react@19.1.12)(react@19.1.0))(react@19.1.0)':
-    dependencies:
-      react: 19.1.0
-      react-native: 0.81.4(@babel/core@7.28.4)(@types/react@19.1.12)(react@19.1.0)
-      superjson: 2.2.2
-
-  '@react-buoy/storage@0.1.12(@react-native-async-storage/async-storage@2.2.0(react-native@0.81.4(@babel/core@7.28.4)(@types/react@19.1.12)(react@19.1.0)))(react-native@0.81.4(@babel/core@7.28.4)(@types/react@19.1.12)(react@19.1.0))(react@19.1.0)':
-    dependencies:
-      '@react-buoy/shared-ui': 0.1.12(react-native@0.81.4(@babel/core@7.28.4)(@types/react@19.1.12)(react@19.1.0))(react@19.1.0)
-      '@react-native-async-storage/async-storage': 2.2.0(react-native@0.81.4(@babel/core@7.28.4)(@types/react@19.1.12)(react@19.1.0))
-      '@tanstack/react-query': 5.90.2(react@19.1.0)
-      react: 19.1.0
-      react-native: 0.81.4(@babel/core@7.28.4)(@types/react@19.1.12)(react@19.1.0)
-
   '@react-native-async-storage/async-storage@2.2.0(react-native@0.81.4(@babel/core@7.28.4)(@types/react@19.1.12)(react@19.1.0))':
     dependencies:
       merge-options: 3.0.4
@@ -7661,13 +7544,6 @@ snapshots:
       react-native-web: 0.21.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
 
   '@rtsao/scc@1.1.0': {}
-
-  '@shopify/flash-list@2.0.2(@babel/runtime@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(@types/react@19.1.12)(react@19.1.0))(react@19.1.0)':
-    dependencies:
-      '@babel/runtime': 7.28.4
-      react: 19.1.0
-      react-native: 0.81.4(@babel/core@7.28.4)(@types/react@19.1.12)(react@19.1.0)
-      tslib: 2.8.1
 
   '@sinclair/typebox@0.27.8': {}
 
@@ -8481,10 +8357,6 @@ snapshots:
       - supports-color
 
   convert-source-map@2.0.0: {}
-
-  copy-anything@3.0.5:
-    dependencies:
-      is-what: 4.1.16
 
   core-js-compat@3.45.1:
     dependencies:
@@ -9718,8 +9590,6 @@ snapshots:
     dependencies:
       call-bound: 1.0.4
       get-intrinsic: 1.3.0
-
-  is-what@4.1.16: {}
 
   is-wsl@2.2.0:
     dependencies:
@@ -11258,10 +11128,6 @@ snapshots:
       mz: 2.7.0
       pirates: 4.0.7
       ts-interface-checker: 0.1.13
-
-  superjson@2.2.2:
-    dependencies:
-      copy-anything: 3.0.5
 
   supports-color@5.5.0:
     dependencies:

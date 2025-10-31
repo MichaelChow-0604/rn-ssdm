@@ -8,7 +8,6 @@ import { AuthProvider } from "~/context/auth-context";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner-native";
 import { SettingsProvider } from "~/context/setting-context";
-import { BuoyDebugger } from "~/lib/buoy-debugger";
 import { StatusBar } from "react-native";
 import { queryClient } from "~/lib/react-query";
 
@@ -20,8 +19,6 @@ export default function RootLayout() {
         <BottomSheetModalProvider>
           <AuthProvider>
             <SettingsProvider>
-              {/* <BuoyDebugger /> */}
-
               <Stack screenOptions={{ headerShown: false }}>
                 <Stack.Screen name="index" />
                 <Stack.Screen name="(auth)" />

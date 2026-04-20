@@ -32,5 +32,6 @@ export default function Index() {
 
   return (
     <Redirect href={accepted ? "/(auth)/auth" : "/terms-and-conditions"} />
+    // <Redirect href="/push-test" />
   );
 }

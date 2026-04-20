@@ -28,6 +28,7 @@ import { useEditDocumentForm } from "~/hooks/document/use-edit-document-form";
 import Feather from "@expo/vector-icons/Feather";
 import * as Clipboard from "expo-clipboard";
 import { toast } from "sonner-native";
+import * as Linking from "expo-linking";
 
 export default function EditDocument() {
   const { documentId } = useLocalSearchParams<{ documentId: string }>();
@@ -77,8 +78,11 @@ export default function EditDocument() {
   const handleCopyTransactionId = async () => {
     if (!data) return;
 
-    await Clipboard.setStringAsync(data.transactionId);
-    toast.success("Transaction ID copied to clipboard");
+    // await Clipboard.setStringAsync(data.transactionId);
+    // toast.success("Transaction ID copied to clipboard");
+    await Linking.openURL(
+      `https://amoy.polygonscan.com/tx/${data.transactionId}`
+    );
   };
 
   return (
@@ -292,7 +296,7 @@ export default function EditDocument() {
               <View className="flex-col gap-1">
                 <View className="flex-row items-center justify-between">
                   <Label className="text-black">Transaction ID</Label>
-                  <Feather name="copy" size={16} color="gray" />
+                  <Feather name="link" size={16} color="gray" />
                 </View>
 
                 {/* For Android */}
@@ -311,16 +315,16 @@ export default function EditDocument() {
                 </TouchableOpacity>
               </View>
 
-              {/* Upload Date */}
+              {/* Upload Date & Time */}
               <View className="flex-col gap-1">
                 <Label className="text-black">Upload Date</Label>
-                <ReadOnlyInput value={data.uploadDate} />
-              </View>
-
-              {/* Upload Time */}
-              <View className="flex-col gap-1">
-                <Label className="text-black">Upload Time</Label>
-                <ReadOnlyInput value={data.uploadTime} />
+                <ReadOnlyInput
+                  value={
+                    data.status !== "FAILED"
+                      ? `${data.uploadDate} at ${data.uploadTime}`
+                      : `${data.uploadDate}`
+                  }
+                />
               </View>
             </View>
           </ScrollView>

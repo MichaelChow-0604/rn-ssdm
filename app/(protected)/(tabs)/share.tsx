@@ -104,7 +104,9 @@ export default function ShareTab() {
         {/* CID Pin */}
         <View className="flex-col gap-1">
           <View className="flex-row items-center">
-            <Text className="w-[80px] text-center font-bold">CID</Text>
+            <Text className="w-[80px] text-center font-bold">
+              Document Unique ID
+            </Text>
             <Controller
               name="cidPin"
               control={control}

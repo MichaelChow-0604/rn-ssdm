@@ -1,16 +1,19 @@
-import { Image, Pressable, ScrollView, Text, View } from "react-native";
-import { useMemo, useState } from "react";
+import {
+  ActivityIndicator,
+  Image,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Button } from "../ui/button";
-import { Checkbox } from "../ui/checkbox";
 import "~/global.css";
-import { TermsAndPolicies } from "../pop-up/terms-and-policies";
 import { signUpSchema } from "~/schema/auth-schema";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, Controller, FormProvider } from "react-hook-form";
-import AcceptAlert from "../pop-up/accept-alert";
+import { useForm, Controller, FormProvider, useWatch } from "react-hook-form";
 import {
   EMAIL_PLACEHOLDER,
   FIRST_NAME_PLACEHOLDER,
@@ -19,16 +22,16 @@ import {
   PASSWORD_PLACEHOLDER,
   SIGN_IN,
   SIGN_UP,
-  SIGN_UP_DESCRIPTION,
 } from "~/constants/auth-placeholders";
 import { useRouter } from "expo-router";
-import {
-  validatePasswordLength,
-  validatePasswordSpecialChar,
-  validatePasswordUppercase,
-} from "~/lib/password-validation";
 import { PasswordInput } from "../password/password-input";
 import { PasswordRequirements } from "../password/password-requirement";
+import { signUp } from "~/lib/http/endpoints/auth";
+import { toast } from "sonner-native";
+import { useApiMutation } from "~/lib/http/use-api-mutation";
+import { SignUpResponse } from "~/lib/http/response-type/auth";
+import { SignUpPayload } from "~/lib/http/request-type/auth";
+import { usePasswordValidation } from "~/hooks/use-password-validation";
 
 interface SignUpProps {
   setIsSignIn: (isSignIn: boolean) => void;
@@ -37,10 +40,29 @@ interface SignUpProps {
 type SignUpFormFields = z.infer<typeof signUpSchema>;
 
 export default function SignUp({ setIsSignIn }: SignUpProps) {
-  const [checked, setChecked] = useState(false);
-  const [showAcceptTerms, setShowAcceptTerms] = useState(false);
-  const [openTNP, setOpenTNP] = useState(false);
   const router = useRouter();
+
+  const signUpMutation = useApiMutation<SignUpResponse, SignUpPayload>({
+    mutationKey: ["auth", "sign-up"],
+    mutationFn: signUp,
+    onSuccess: ({ email, session }) => {
+      router.replace({
+        pathname: "/(auth)/otp-verification",
+        params: { email, session, mode: "signup" },
+      });
+    },
+    onError: ({ status }) => {
+      switch (status) {
+        case 400:
+          toast.error("User already exists.");
+          break;
+        default:
+          toast.error("Something went wrong. Please try again later.");
+      }
+    },
+  });
+
+  const isSigningUp = signUpMutation.isPending;
 
   const methods = useForm<SignUpFormFields>({
     defaultValues: {
@@ -56,44 +78,23 @@ export default function SignUp({ setIsSignIn }: SignUpProps) {
 
   const {
     handleSubmit,
-    watch,
     formState: { errors },
   } = methods;
 
-  const watchedPassword = watch("password");
+  const watchedPassword = useWatch({
+    control: methods.control,
+    name: "password",
+    defaultValue: "",
+  });
+  const validationResults = usePasswordValidation(watchedPassword);
 
-  const validationResults = useMemo(() => {
-    if (!watchedPassword) {
-      return {
-        length: false,
-        uppercase: false,
-        specialChar: false,
-      };
-    }
-    return {
-      length: validatePasswordLength(watchedPassword),
-      uppercase: validatePasswordUppercase(watchedPassword),
-      specialChar: validatePasswordSpecialChar(watchedPassword),
-    };
-  }, [watchedPassword]);
-
-  const onSubmit = (data: SignUpFormFields) => {
-    if (checked) {
-      router.push({
-        pathname: "/otp-verification",
-        params: { email: data.email, mode: "signup" },
-      });
-    } else {
-      setShowAcceptTerms(true);
-    }
+  const onSubmit = (formData: SignUpFormFields): void => {
+    signUpMutation.mutate(formData);
   };
 
   return (
     <FormProvider {...methods}>
       <ScrollView className="w-[80%]" showsVerticalScrollIndicator={false}>
-        <TermsAndPolicies visible={openTNP} setOpen={setOpenTNP} />
-        <AcceptAlert visible={showAcceptTerms} setOpen={setShowAcceptTerms} />
-
         {/* Header */}
         <View className="items-center justify-center pt-12 pb-12 gap-2 w-full">
           <Image
@@ -167,6 +168,7 @@ export default function SignUp({ setIsSignIn }: SignUpProps) {
                   onBlur={onBlur}
                   value={value}
                   autoCorrect={false}
+                  autoCapitalize="none"
                   className="bg-textfield border-0 text-black"
                   placeholderClassName="text-placeholder"
                   placeholder={EMAIL_PLACEHOLDER}
@@ -204,29 +206,17 @@ export default function SignUp({ setIsSignIn }: SignUpProps) {
           />
         </View>
 
-        {/* Terms and Conditions */}
-        <View className="flex-row justify-center mt-4 gap-2">
-          <Checkbox
-            checked={checked}
-            onCheckedChange={() => setChecked(!checked)}
-            className={`native:h-[16] native:w-[16] native:rounded-none border-subtitle ${
-              checked ? "bg-black" : "bg-white"
-            }`}
-          />
-          <Text className="text-subtitle text-sm">
-            {SIGN_UP_DESCRIPTION}{" "}
-            <Text className="text-buttontext" onPress={() => setOpenTNP(true)}>
-              terms & policy.
-            </Text>
-          </Text>
-        </View>
-
         {/* Sign up Button */}
         <Button
-          className="bg-button mt-4 rounded-xl"
+          className="bg-button mt-8 rounded-xl"
           onPress={handleSubmit(onSubmit)}
+          disabled={isSigningUp}
         >
-          <Text className="text-white font-semibold">{SIGN_UP}</Text>
+          {isSigningUp ? (
+            <ActivityIndicator size="small" color="white" />
+          ) : (
+            <Text className="text-white font-semibold">{SIGN_UP}</Text>
+          )}
         </Button>
 
         {/* Sign up switch */}

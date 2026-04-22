@@ -7,7 +7,6 @@ import {
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
-  Pressable,
 } from "react-native";
 import { OtpInput } from "react-native-otp-entry";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -16,7 +15,7 @@ import {
   CountdownTimerRef,
 } from "~/components/countdown-timer";
 import { Button } from "~/components/ui/button";
-import AntDesign from "@expo/vector-icons/AntDesign";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import {
   CANCEL,
   DIDNT_GET_CODE,
@@ -25,60 +24,87 @@ import {
   OTP_VERIFICATION_TITLE_2,
   VERIFY,
 } from "~/constants/auth-placeholders";
-import { useAuth } from "~/context/auth-context";
+import { ResendLink } from "~/components/auth/resend-link";
+import { LoadingOverlay } from "~/components/loading-overlay";
+import ReLogin from "~/components/pop-up/re-login";
+import { useOtpVerification } from "~/hooks/auth/use-otp-verification";
+import { useOtpResend } from "~/hooks/auth/use-otp-resend";
+import { usePushNotification } from "~/hooks/use-push-notification";
 
 export default function OTPVerificationPage() {
-  const { email, mode } = useLocalSearchParams();
+  const { email, session, mode } = useLocalSearchParams<{
+    email: string;
+    session: string;
+    mode: "signin" | "signup";
+  }>();
+
+  const { expoPushToken } = usePushNotification();
+
   const [otp, setOtp] = useState("");
-  const router = useRouter();
+  const [expired, setExpired] = useState(false);
   const timerRef = useRef<CountdownTimerRef>(null);
+  const router = useRouter();
 
-  const { setIsAuthenticated } = useAuth();
-
-  const handleTimerExpire = () => {
-    console.log("Timer expired");
-  };
-
-  const handleTimerReset = () => {
-    console.log("Timer reset");
-    // Add your resend code logic here
-  };
-
-  const handleResendCode = () => {
-    // Call the resetTimer function from the timer component
-    timerRef.current?.resetTimer();
-    handleTimerReset();
-  };
-
-  const handleVerify = () => {
-    setIsAuthenticated(true);
-    router.replace({
-      pathname: "/return-message",
-      params: { mode },
+  const { verify, isVerifying, showReLogin, onDismissOverlay, setSession } =
+    useOtpVerification({
+      email: String(email),
+      session: String(session),
+      mode: mode as "signin" | "signup",
+      pushToken: expoPushToken,
     });
-  };
+
+  const { resend, cooldownSeconds, isResending } = useOtpResend(
+    { email: String(email), isLogin: mode === "signin", session },
+    (newSession) => {
+      setSession(newSession);
+      timerRef.current?.resetTimer();
+      setExpired(false);
+    }
+  );
+
+  const showLoadingOverlay = isVerifying && !showReLogin;
+  const verifyDisabled =
+    otp.length !== 6 || expired || showReLogin || isVerifying;
 
   return (
     <SafeAreaView className="flex-1 bg-white">
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <KeyboardAvoidingView
           className="flex-1 items-center px-8 justify-center"
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          keyboardVerticalOffset={0}
         >
+          <ReLogin visible={showReLogin} mode={mode} />
+          <LoadingOverlay
+            visible={showLoadingOverlay}
+            label="Verifying..."
+            onDismiss={onDismissOverlay}
+          />
+
           {/* Header */}
-          <AntDesign name="Safety" size={100} color="#438BF7" />
+          <MaterialCommunityIcons
+            name="shield-account"
+            size={100}
+            color="#438BF7"
+          />
           <Text className="text-4xl font-bold py-4">
             {OTP_VERIFICATION_TITLE_2}
           </Text>
 
           {/* Description */}
           <Text className="text-subtitle text-center text-lg">
-            {OTP_VERIFICATION_DESC} {email}
+            {OTP_VERIFICATION_DESC}
+          </Text>
+
+          {/* Email */}
+          <Text className="text-subtitle text-center text-lg font-semibold">
+            {email}
           </Text>
 
           {/* OTP Input */}
           <OtpInput
-            numberOfDigits={4}
+            numberOfDigits={6}
+            autoFocus={false}
             focusColor="#438BF7"
             theme={{
               containerStyle: {
@@ -99,22 +125,23 @@ export default function OTPVerificationPage() {
           <CountdownTimer
             ref={timerRef}
             initialTime={300} // 5 minutes
-            onExpire={handleTimerExpire}
-            onReset={handleTimerReset}
+            onExpire={() => setExpired(true)}
+            onReset={() => setExpired(false)}
             className="mt-1 mb-4"
+            persistKey={`otp_${email}`}
           />
 
-          {/* Verify Button */}
           <View className="flex flex-col gap-4 w-full">
+            {/* Verify Button */}
             <Button
               className="bg-button text-buttontext"
-              disabled={otp.length !== 4}
-              onPress={handleVerify}
+              disabled={verifyDisabled}
+              onPress={() => verify(otp)}
             >
               <Text className="text-white font-bold">{VERIFY}</Text>
             </Button>
 
-            {/* Resend Code Button */}
+            {/* Cancel Button */}
             <Button
               className="border-button bg-white active:bg-slate-100"
               variant="outline"
@@ -130,11 +157,12 @@ export default function OTPVerificationPage() {
               {DIDNT_GET_CODE}
             </Text>
 
-            <Pressable onPress={handleResendCode}>
-              <Text className="text-button text-center text-lg font-bold">
-                {RESEND}
-              </Text>
-            </Pressable>
+            <ResendLink
+              label={RESEND}
+              cooldownSeconds={cooldownSeconds}
+              onPress={resend}
+              isLoading={isResending}
+            />
           </View>
         </KeyboardAvoidingView>
       </TouchableWithoutFeedback>

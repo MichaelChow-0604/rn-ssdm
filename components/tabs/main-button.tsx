@@ -1,13 +1,11 @@
-import { TouchableOpacity, View, Platform } from "react-native";
+import { TouchableOpacity, View } from "react-native";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { router } from "expo-router";
 
 export default function MainButton() {
   return (
     <TouchableOpacity
-      className={`bg-icon absolute left-1/2 -translate-x-1/2 w-20 h-20 rounded-full items-center justify-center ${
-        Platform.OS === "ios" ? "bottom-0.5" : "bottom-8"
-      }`}
+      className="bg-icon absolute left-1/2 -translate-x-1/2 w-20 h-20 rounded-full items-center justify-center bottom-2"
       activeOpacity={0.7}
       onPress={() => {
         router.push("/upload-document");

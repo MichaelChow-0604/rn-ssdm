@@ -1,30 +1,69 @@
 import {
+  ActivityIndicator,
   SectionList,
   Text,
   TouchableOpacity,
   View,
-  SafeAreaView,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import SearchBar from "~/components/search-bar";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { router } from "expo-router";
-import { useMemo } from "react";
 import { Contact } from "~/lib/types";
-import { useContactList } from "~/hooks/use-contact-list";
-import { buildSections, toListItem } from "~/lib/contacts/utils";
+import { buildSections, normalizeName } from "~/lib/contacts/utils";
 import { ContactRow } from "~/components/contact/contact-row";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { contactKeys } from "~/lib/http/keys/contact";
+import { getContactById, getContacts } from "~/lib/http/endpoints/contact";
+import { useMemo, useState } from "react";
+import { Image as ExpoImage } from "expo-image";
 
 export default function ContactListTab() {
-  const contacts = useContactList();
+  const queryClient = useQueryClient();
 
-  const items = useMemo<Contact[]>(() => contacts.map(toListItem), [contacts]);
-  const sections = useMemo(() => buildSections(items), [items]);
+  const { data, isLoading, isFetching, refetch, isRefetching } = useQuery({
+    queryKey: contactKeys.list(),
+    queryFn: getContacts,
+    staleTime: 60_000,
+    gcTime: 30 * 60_000,
+  });
+
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const items: Contact[] = (data?.contactSummaries ?? []).map((s) => ({
+    id: s.id,
+    name: `${s.firstName} ${s.lastName}`.trim(),
+    profilePictureUrl: s.profilePictureUrl,
+  }));
+
+  const query = searchQuery.trim();
+  const queryNorm = normalizeName(query).toLowerCase();
+  const filteredItems = query.length
+    ? items.filter((c) =>
+        normalizeName(c.name).toLowerCase().includes(queryNorm)
+      )
+    : items;
+
+  const sections = buildSections(filteredItems);
+
+  const RenderEmptyComponent = useMemo(() => {
+    return filteredItems.length === 0 && searchQuery.length > 0 ? (
+      <NoSearchResults />
+    ) : (
+      <EmptyState />
+    );
+  }, [filteredItems, searchQuery]);
 
   return (
     <SafeAreaView className="flex-1 bg-white">
       {/* Header */}
       <View className="flex-row items-center justify-between px-4 gap-4 py-6">
-        <SearchBar className="flex-1" placeholder="Search contacts" />
+        <SearchBar
+          className="flex-1"
+          placeholder="Search contacts"
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
 
         <TouchableOpacity
           activeOpacity={0.8}
@@ -41,28 +80,54 @@ export default function ContactListTab() {
       </View>
 
       {/* Contact list */}
-      <SectionList
-        sections={sections}
-        keyExtractor={(item) => item.id}
-        stickySectionHeadersEnabled
-        contentContainerStyle={{
-          flexGrow: 1,
-        }}
-        ListEmptyComponent={<EmptyState />}
-        renderSectionHeader={({ section }) => (
-          <SectionHeader title={section.title} />
-        )}
-        renderItem={({ item }) => (
-          <ContactRow
-            id={item.id}
-            name={item.name}
-            avatarUri={item.avatarUri}
-            onPress={(id) => router.push({ pathname: "/[id]", params: { id } })}
-          />
-        )}
-        initialNumToRender={20}
-        windowSize={10}
-      />
+      {isLoading || isFetching || isRefetching ? (
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator size="small" color="#438BF7" className="mb-20" />
+        </View>
+      ) : (
+        <SectionList
+          sections={sections}
+          keyExtractor={(item) => item.id.toString()}
+          stickySectionHeadersEnabled
+          contentContainerStyle={{
+            flexGrow: 1,
+          }}
+          ListEmptyComponent={RenderEmptyComponent}
+          renderSectionHeader={({ section }) => (
+            <SectionHeader title={section.title} />
+          )}
+          renderItem={({ item }) => (
+            <ContactRow
+              id={item.id.toString()}
+              name={item.name}
+              profilePictureUrl={item.profilePictureUrl}
+              onPress={async (id) => {
+                const detail = await queryClient.fetchQuery({
+                  queryKey: contactKeys.detail(id),
+                  queryFn: () => getContactById(id),
+                  staleTime: 5 * 60 * 1000,
+                });
+
+                if (detail?.profilePictureUrl) {
+                  ExpoImage.prefetch(detail.profilePictureUrl);
+                }
+
+                router.push({
+                  pathname: "/[id]",
+                  params: {
+                    id: String(id),
+                    previewProfilePictureurl: item.profilePictureUrl ?? "",
+                  },
+                });
+              }}
+            />
+          )}
+          initialNumToRender={20}
+          windowSize={10}
+          onRefresh={() => refetch()}
+          refreshing={isRefetching}
+        />
+      )}
     </SafeAreaView>
   );
 }
@@ -80,6 +145,16 @@ function EmptyState({ text = "No contact yet" }: { text?: string }) {
     <View className="flex-1 items-center justify-center">
       <Text className="text-center text-gray-400 text-2xl font-bold">
         {text}
+      </Text>
+    </View>
+  );
+}
+
+function NoSearchResults() {
+  return (
+    <View className="flex-1 items-center justify-center">
+      <Text className="text-center text-gray-400 text-2xl font-bold">
+        No results found
       </Text>
     </View>
   );

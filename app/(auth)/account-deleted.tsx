@@ -2,18 +2,11 @@ import { Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Feather from "@expo/vector-icons/Feather";
 import { useRouter } from "expo-router";
-import { useEffect } from "react";
 import { RETURN_SUCCESS } from "~/constants/auth-placeholders";
 import { Button } from "~/components/ui/button";
-import { useAuth } from "~/context/auth-context";
 
 export default function AccountDeleted() {
   const router = useRouter();
-  const { setIsAuthenticated } = useAuth();
-
-  useEffect(() => {
-    setIsAuthenticated(false);
-  }, []);
 
   return (
     <SafeAreaView className="flex-1 bg-white">

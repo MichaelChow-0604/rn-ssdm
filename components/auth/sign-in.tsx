@@ -1,4 +1,14 @@
-import { Image, Pressable, Text, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  Keyboard,
+  Linking,
+  Pressable,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Button } from "../ui/button";
@@ -11,7 +21,6 @@ import {
   signInSchema,
 } from "~/schema/auth-schema";
 import { useFocusEffect, useRouter } from "expo-router";
-import { useCallback } from "react";
 import {
   DONT_HAVE_ACCOUNT,
   EMAIL_PLACEHOLDER,
@@ -20,6 +29,15 @@ import {
   SIGN_IN,
   SIGN_UP,
 } from "~/constants/auth-placeholders";
+import { forgotPassword, signIn } from "~/lib/http/endpoints/auth";
+import { toast } from "sonner-native";
+import {
+  ForgotPasswordResponse,
+  SignInResponse,
+} from "~/lib/http/response-type/auth";
+import { SignInPayload } from "~/lib/http/request-type/auth";
+import { useApiMutation } from "~/lib/http/use-api-mutation";
+import * as Notifications from "expo-notifications";
 
 interface SignInProps {
   // For toggling the state in the parent AuthPage component
@@ -31,12 +49,42 @@ type SignInFormFields = z.infer<typeof signInSchema>;
 export default function SignIn({ setIsSignIn }: SignInProps) {
   const router = useRouter();
 
+  const signInMutation = useApiMutation<SignInResponse, SignInPayload>({
+    mutationKey: ["auth", "sign-in"],
+    mutationFn: signIn,
+    onSuccess: ({ email, session }) => {
+      router.replace({
+        pathname: "/(auth)/otp-verification",
+        params: { email, session, mode: "signin" },
+      });
+    },
+    onError: ({ status }) => {
+      switch (status) {
+        case 400:
+          toast.error("Invalid credentials. User not found.");
+          break;
+
+        case 403:
+          toast.error(
+            "Your account is unverified. Please sign up again to complete the verification process."
+          );
+          break;
+
+        default:
+          toast.error("Something went wrong. Please try again later.");
+      }
+    },
+  });
+
+  const isSigningIn = signInMutation.isPending;
+
   // Sign in validation form
   const {
     control: signInControl,
     handleSubmit: handleSignInSubmit,
     formState: { errors: signInErrors },
-    watch,
+    getValues,
+    setError,
     clearErrors: clearSignInErrors,
   } = useForm({
     defaultValues: {
@@ -47,69 +95,95 @@ export default function SignIn({ setIsSignIn }: SignInProps) {
     mode: "onSubmit",
   });
 
-  // Forget password validation form
-  const {
-    formState: { errors: forgetPasswordErrors },
-    trigger: triggerForgetPassword,
-    setValue,
-    clearErrors: clearForgetPasswordErrors,
-    reset: resetForgetPassword,
-  } = useForm({
-    defaultValues: {
-      email: "",
-    },
-    resolver: zodResolver(forgetPasswordValidationSchema),
-    mode: "onSubmit",
-  });
-
-  const watchedEmail = watch("email");
-
-  const onSignInSubmit = (data: SignInFormFields) => {
-    console.log("Sign in data:", data);
-
-    router.push({
-      pathname: "/(auth)/otp-verification",
-      params: {
-        email: data.email,
-        mode: "signin",
-      },
-    });
+  const onSignInSubmit = (formData: SignInFormFields): void => {
+    Keyboard.dismiss();
+    signInMutation.mutate(formData);
   };
 
-  const handleSignIn = () => {
-    // Clear forget password errors when sign-in is submitted
-    clearForgetPasswordErrors();
-    resetForgetPassword();
+  const handleSignIn = async () => {
+    Keyboard.dismiss();
+    const { status } = await Notifications.getPermissionsAsync();
+
+    if (status !== "granted") {
+      Alert.alert(
+        "Enable Notifications",
+        "Please enable notifications permission to continue.",
+        [
+          {
+            text: "Cancel",
+            style: "cancel",
+          },
+          {
+            text: "Open Settings",
+            onPress: async () => await Linking.openSettings(),
+          },
+        ]
+      );
+      return;
+    }
+
+    clearSignInErrors();
     handleSignInSubmit(onSignInSubmit)();
   };
 
-  const handleForgetPassword = async () => {
-    // Set the email value in the forget password form
-    setValue("email", watchedEmail);
+  const forgotPasswordMutation = useApiMutation<ForgotPasswordResponse, string>(
+    {
+      mutationKey: ["auth", "forgot-password"],
+      mutationFn: forgotPassword,
+      onSuccess: ({ email, session }) => {
+        router.push({
+          pathname: "/(auth)/(forget-password)/otp-verification-forget",
+          params: { email, session },
+        });
+      },
+      onError: ({ status }) => {
+        switch (status) {
+          case 400:
+            toast.error("User not found.");
+            break;
 
-    // Validate email field using the custom validation schema
-    const isEmailValid = await triggerForgetPassword("email", {
-      shouldFocus: false,
-    });
+          case 403:
+            toast.error(
+              "Your account is unverified. Please sign up again to complete the verification process."
+            );
+            break;
 
-    if (isEmailValid) {
-      // Navigate to forget password flow
-      router.push({
-        pathname: "/(auth)/(forget-password)/otp-verification-forget",
-        params: {
-          email: watchedEmail,
-        },
-      });
+          default:
+            toast.error("Something went wrong. Please try again later.");
+        }
+      },
     }
+  );
+
+  const isForgettingPassword = forgotPasswordMutation.isPending;
+
+  const handleForgetPassword = async () => {
+    Keyboard.dismiss();
+
+    // Only email error should be visible in forget-password flow
+    clearSignInErrors(["password", "email"]);
+
+    const email = (getValues("email") || "").trim();
+
+    if (!email) {
+      setError("email", { message: "Please enter the email first" });
+      return;
+    }
+
+    const result = forgetPasswordValidationSchema.safeParse({ email });
+    if (!result.success) {
+      const msg = result.error.issues[0]?.message ?? "Invalid email address";
+      setError("email", { type: "manual", message: msg });
+      return;
+    }
+
+    // TODO: Call API to send OTP
+    forgotPasswordMutation.mutate(email);
+    return;
   };
 
   // Clear all errors when screen comes into focus (when navigating back)
-  useFocusEffect(
-    useCallback(() => {
-      clearSignInErrors();
-      clearForgetPasswordErrors();
-    }, [clearSignInErrors, clearForgetPasswordErrors])
-  );
+  useFocusEffect(() => clearSignInErrors());
 
   return (
     <View className="w-[80%]">
@@ -137,6 +211,7 @@ export default function SignIn({ setIsSignIn }: SignInProps) {
                 onBlur={onBlur}
                 value={value}
                 autoCorrect={false}
+                autoCapitalize="none"
                 placeholder={EMAIL_PLACEHOLDER}
                 placeholderClassName="text-placeholder"
                 className="bg-textfield border-0 text-black"
@@ -144,12 +219,7 @@ export default function SignIn({ setIsSignIn }: SignInProps) {
             )}
           />
           {/* Email validation error */}
-          {/* Show only the most recent error - prioritize forget password error */}
-          {forgetPasswordErrors.email ? (
-            <Text className="text-redtext text-sm">
-              {forgetPasswordErrors.email.message}
-            </Text>
-          ) : signInErrors.email ? (
+          {signInErrors.email ? (
             <Text className="text-redtext text-sm">
               {signInErrors.email.message}
             </Text>
@@ -168,6 +238,7 @@ export default function SignIn({ setIsSignIn }: SignInProps) {
                 onChangeText={onChange}
                 onBlur={onBlur}
                 value={value}
+                autoCapitalize="none"
                 placeholderClassName="text-placeholder"
                 className="bg-textfield border-0 text-black"
                 placeholder={PASSWORD_PLACEHOLDER}
@@ -176,7 +247,7 @@ export default function SignIn({ setIsSignIn }: SignInProps) {
             )}
           />
           {/* Only show password error if there's no forget password error */}
-          {!forgetPasswordErrors.email && signInErrors.password && (
+          {signInErrors.password && (
             <Text className="text-redtext text-sm">
               {signInErrors.password.message}
             </Text>
@@ -188,14 +259,27 @@ export default function SignIn({ setIsSignIn }: SignInProps) {
       <TouchableOpacity
         activeOpacity={0.6}
         onPress={handleForgetPassword}
-        className="mt-1 items-end"
+        className="mt-2 self-end"
+        disabled={isForgettingPassword}
       >
-        <Text className="text-redtext">{FORGET_PASSWORD}</Text>
+        {isForgettingPassword ? (
+          <ActivityIndicator size="small" color="#438BF7" />
+        ) : (
+          <Text className="text-redtext">{FORGET_PASSWORD}</Text>
+        )}
       </TouchableOpacity>
 
       {/* Sign in Button */}
-      <Button className="bg-button mt-4 rounded-xl" onPress={handleSignIn}>
-        <Text className="text-white font-semibold">{SIGN_IN}</Text>
+      <Button
+        className="bg-button mt-4 rounded-xl"
+        onPress={handleSignIn}
+        disabled={isSigningIn || isForgettingPassword}
+      >
+        {isSigningIn ? (
+          <ActivityIndicator size="small" color="white" />
+        ) : (
+          <Text className="text-white font-semibold">{SIGN_IN}</Text>
+        )}
       </Button>
 
       {/* Sign up switch */}

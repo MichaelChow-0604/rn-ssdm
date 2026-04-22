@@ -1,39 +1,54 @@
-import {
-  ActivityIndicator,
-  Animated,
-  KeyboardAvoidingView,
-  Platform,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { ScrollView, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { BackButton } from "~/components/back-button";
 import { router, useLocalSearchParams } from "expo-router";
 import { Label } from "~/components/ui/label";
 import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
-import { getContactById, StoredContact } from "~/lib/storage/contact";
-import { useMemo, useEffect, useState, useRef } from "react";
+import { useMemo } from "react";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { Button } from "~/components/ui/button";
-import { addDocument } from "~/lib/storage/document";
+import {
+  useContactsOptions,
+  usePrefetchContactDetails,
+} from "~/lib/contacts/hooks";
+import { LoadingOverlay } from "~/components/loading-overlay";
+import { useApiMutation } from "~/lib/http/use-api-mutation";
+import {
+  FileData,
+  UploadDocumentPayload,
+} from "~/lib/http/request-type/document";
+import { UploadDocumentResponse } from "~/lib/http/response-type/document";
+import { uploadDocument } from "~/lib/http/endpoints/document";
+import { useQueryClient } from "@tanstack/react-query";
+import { documentKeys } from "~/lib/http/keys/document";
+import { toast } from "sonner-native";
+
+interface PreviewData {
+  title: string;
+  description: string;
+  category: string;
+  type: string;
+  recipients: string; // JSON stringified array of IDs
+  userDocId: string;
+  reference_number: string;
+  remarks: string;
+  file: FileData;
+}
 
 export default function PreviewDocument() {
-  const { documentName, description, category, type, fileName } =
-    useLocalSearchParams<{
-      documentName: string;
-      description: string;
-      category: string;
-      type: string;
-      fileName: string;
-    }>();
+  const { previewData } = useLocalSearchParams<{ previewData: string }>();
+  const data: PreviewData = JSON.parse(String(previewData));
 
-  const { recipients } = useLocalSearchParams<{ recipients: string }>();
-  const [recipientContacts, setRecipientContacts] = useState<StoredContact[]>(
-    []
-  );
+  const title = data?.title;
+  const description = data?.description;
+  const category = data?.category;
+  const type = data?.type;
+  const userDocId = data?.userDocId;
+  const recipients = data?.recipients;
+  const reference_number = data?.reference_number;
+  const remarks = data?.remarks;
+  const fileName = data?.file.name;
 
   const ids = useMemo(() => {
     if (!recipients) return [];
@@ -44,195 +59,183 @@ export default function PreviewDocument() {
     }
   }, [recipients]);
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const results = await Promise.all(ids.map((id) => getContactById(id)));
-      if (!cancelled)
-        setRecipientContacts(results.filter(Boolean) as StoredContact[]);
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [ids]);
+  const { nameIndex } = useContactsOptions();
+  const recipientNames = ids
+    .map((id) => nameIndex[id])
+    .filter(Boolean)
+    .join(", ");
 
-  const [isUploading, setIsUploading] = useState(false);
+  usePrefetchContactDetails(ids);
 
-  const sleep = (ms: number) =>
-    new Promise((resolve) => setTimeout(resolve, ms));
+  const queryClient = useQueryClient();
 
-  const handleUpload = async () => {
-    setIsUploading(true);
-    try {
-      const fileExt =
-        String(fileName ?? "")
-          .split(".")
-          .pop()
-          ?.toLowerCase() ?? "";
-
-      const saved = await addDocument({
-        documentName: String(documentName ?? ""),
-        description: String(description ?? ""),
-        category: String(category ?? ""),
-        type: String(type ?? ""),
-        fileName: String(fileName ?? ""),
-        fileExtension: fileExt,
-        recipients: ids,
-      });
-
-      await sleep(4000);
-
+  const uploadDocumentMutation = useApiMutation<
+    UploadDocumentResponse,
+    UploadDocumentPayload
+  >({
+    mutationKey: ["document", "upload"],
+    mutationFn: uploadDocument,
+    onSuccess: ({ transactionId }) => {
+      queryClient.invalidateQueries({ queryKey: documentKeys.list() });
       router.replace({
         pathname: "/return-message",
         params: {
           mode: "success",
-          transactionId: saved.transactionId,
+          transactionId,
         },
       });
-    } catch {
+    },
+    onError: ({ status }) => {
+      if (status === 409) {
+        toast.error("You have already uploaded this document before.");
+        return;
+      }
+
       router.replace({
         pathname: "/return-message",
         params: { mode: "error" },
       });
-    } finally {
-      setIsUploading(false);
-    }
+    },
+  });
+
+  const handleUpload = () => {
+    uploadDocumentMutation.mutate({
+      file: data.file,
+      metadata: {
+        title: data.title,
+        description: data.description,
+        category: data.category,
+        type: data.type,
+        recipients: ids,
+        userDocId: data.userDocId,
+        referenceNo: data.reference_number,
+        remarks: data.remarks,
+      },
+    });
   };
-
-  function UploadingOverlay({ visible }: { visible: boolean }) {
-    const opacity = useRef(new Animated.Value(0)).current;
-
-    useEffect(() => {
-      Animated.timing(opacity, {
-        toValue: visible ? 0.7 : 0,
-        duration: 300,
-        useNativeDriver: true, // animates opacity on UI thread
-      }).start();
-    }, [visible]);
-
-    return (
-      <View
-        pointerEvents={visible ? "auto" : "none"}
-        style={[StyleSheet.absoluteFillObject, { zIndex: 50 }]}
-      >
-        {/* Dim-only layer */}
-        <Animated.View
-          pointerEvents="none"
-          style={[
-            StyleSheet.absoluteFillObject,
-            { backgroundColor: "black", opacity },
-          ]}
-        />
-        {/* Foreground content (not dimmed) */}
-        <View
-          style={[StyleSheet.absoluteFillObject]}
-          className="items-center justify-center"
-        >
-          <ActivityIndicator size="large" color="#438BF7" />
-          <Text className="text-white font-bold text-2xl">Uploading...</Text>
-        </View>
-      </View>
-    );
-  }
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-      {isUploading && <UploadingOverlay visible={isUploading} />}
-      <KeyboardAvoidingView
-        style={{ flexGrow: 1 }}
-        behavior={Platform.select({ ios: "padding", android: "height" })}
-      >
-        <ScrollView
-          className="bg-white"
-          contentContainerClassName="items-center"
+      {uploadDocumentMutation.isPending && (
+        <LoadingOverlay
+          visible={uploadDocumentMutation.isPending}
+          label="Uploading..."
+          onDismiss={() => {}}
+        />
+      )}
+      <ScrollView className="bg-white" contentContainerClassName="items-center">
+        {/* Header */}
+        <View className="flex-row items-center justify-start gap-2 w-full px-4 ">
+          <BackButton />
+          <Text className="text-2xl font-bold py-4">
+            Preview Document Details
+          </Text>
+        </View>
+
+        {/* Form preview */}
+        <View className="flex-col gap-4 w-[80%]">
+          {/* Category */}
+          <View className="flex-col gap-1">
+            <Label className="text-black">Category</Label>
+            <Input
+              className="text-black bg-gray-300 opacity-100 border-0"
+              value={category}
+              editable={false}
+            />
+          </View>
+
+          {/* Type */}
+          <View className="flex-col gap-1">
+            <Label className="text-black">Type</Label>
+            <Input
+              className="text-black bg-gray-300 opacity-100 border-0"
+              value={type}
+              editable={false}
+            />
+          </View>
+
+          {/* Title */}
+          <View className="flex-col gap-1">
+            <Label className="text-black">Title</Label>
+            <Input
+              className="text-black bg-gray-300 opacity-100 border-0"
+              value={title}
+              editable={false}
+            />
+          </View>
+
+          {/* User Doc ID */}
+          <View className="flex-col gap-1">
+            <Label className="text-black">ID</Label>
+            <Input
+              className="text-black bg-gray-300 opacity-100 border-0"
+              value={userDocId}
+              editable={false}
+            />
+          </View>
+
+          {/* Reference Number */}
+          <View className="flex-col gap-1">
+            <Label className="text-black">Reference Number</Label>
+            <Input
+              className="text-black bg-gray-300 opacity-100 border-0"
+              value={reference_number}
+              editable={false}
+            />
+          </View>
+
+          {/* Recipients */}
+          <View className="flex-col gap-1">
+            <Label className="text-black">Recipients</Label>
+            <Textarea
+              className="text-black bg-gray-300 opacity-100 border-0"
+              value={recipientNames}
+              editable={false}
+            />
+          </View>
+
+          {/* Description */}
+          <View className="flex-col gap-1">
+            <Label className="text-black">Description</Label>
+            <Textarea
+              className="text-black bg-gray-300 opacity-100 border-0"
+              value={description}
+              editable={false}
+            />
+          </View>
+
+          {/* Remarks */}
+          <View className="flex-col gap-1">
+            <Label className="text-black">Remarks</Label>
+            <Textarea
+              className="text-black bg-gray-300 opacity-100 border-0"
+              value={remarks}
+              editable={false}
+            />
+          </View>
+        </View>
+
+        {/* Selected document */}
+        <View className="mt-12 mb-4 w-[80%] flex items-center justify-center">
+          <Text className="text-black font-bold text-2xl">
+            Selected document
+          </Text>
+
+          <View className="flex-row gap-2 items-center bg-gray-100 p-3 w-full my-2">
+            <AntDesign name="file" size={20} color="#438BF7" />
+            <Text className="text-black font-bold text-lg">{fileName}</Text>
+          </View>
+        </View>
+
+        {/* Footer */}
+        <Button
+          className="w-[80%] self-center bg-button mb-8"
+          onPress={handleUpload}
+          disabled={uploadDocumentMutation.isPending}
         >
-          {/* Header */}
-          <View className="flex-row items-center justify-start gap-2 w-full px-4 ">
-            <BackButton />
-            <Text className="text-2xl font-bold py-4">
-              Preview Document Details
-            </Text>
-          </View>
-
-          {/* Form preview */}
-          <View className="flex-col gap-4 w-[80%]">
-            {/* Category */}
-            <View className="flex-col gap-1">
-              <Label className="text-black">Category</Label>
-              <Input
-                className="text-black bg-gray-300 opacity-100 border-0"
-                placeholder="Enter Category"
-                value={category as string}
-                editable={false}
-              />
-            </View>
-
-            {/* Type */}
-            <View className="flex-col gap-1">
-              <Label className="text-black">Type</Label>
-              <Input
-                className="text-black bg-gray-300 opacity-100 border-0"
-                placeholder="Enter Type"
-                value={type as string}
-                editable={false}
-              />
-            </View>
-
-            {/* Document Name */}
-            <View className="flex-col gap-1">
-              <Label className="text-black">Document Name</Label>
-              <Input
-                className="text-black bg-gray-300 opacity-100 border-0"
-                placeholder="Enter Document Name"
-                value={documentName as string}
-                editable={false}
-              />
-            </View>
-
-            {/* Recipients */}
-            <View className="flex-col gap-1">
-              <Label className="text-black">Recipients</Label>
-              <Textarea
-                className="text-black bg-gray-300 opacity-100 border-0"
-                placeholder="Enter Recipients"
-                value={recipientContacts.map((c) => c.fullName).join(", ")}
-                editable={false}
-              />
-            </View>
-
-            {/* Description */}
-            <View className="flex-col gap-1">
-              <Label className="text-black">Description</Label>
-              <Textarea
-                className="text-black bg-gray-300 opacity-100 border-0"
-                value={description as string}
-                editable={false}
-              />
-            </View>
-          </View>
-
-          {/* Selected document */}
-          <View className="mt-12 mb-4 w-[80%] flex items-center justify-center">
-            <Text className="text-black font-bold text-2xl">
-              Selected document
-            </Text>
-
-            <View className="flex-row gap-2 items-center bg-gray-100 p-3 w-full my-2">
-              <AntDesign name="file1" size={20} color="#438BF7" />
-              <Text className="text-black font-bold text-lg">{fileName}</Text>
-            </View>
-          </View>
-
-          {/* Footer */}
-          <Button
-            className="w-[80%] self-center bg-button"
-            onPress={handleUpload}
-            disabled={isUploading}
-          >
-            <Text className="font-bold text-white">Confirm & Upload</Text>
-          </Button>
-        </ScrollView>
-      </KeyboardAvoidingView>
+          <Text className="font-bold text-white">Confirm & Upload</Text>
+        </Button>
+      </ScrollView>
     </SafeAreaView>
   );
 }

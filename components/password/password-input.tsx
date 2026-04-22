@@ -40,10 +40,12 @@ export function PasswordInput<TFieldValues extends FieldValues>({
           onChangeText={onChange}
           onBlur={onBlur}
           value={(value as string) ?? ""}
+          autoCapitalize="none"
           className="pr-12 bg-textfield border-0 text-black"
           placeholderClassName="text-placeholder"
           placeholder={placeholder}
           secureTextEntry={!isPasswordVisible}
+          returnKeyType="default"
         />
         <Pressable
           onPress={togglePasswordVisibility}

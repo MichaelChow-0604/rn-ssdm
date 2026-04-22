@@ -10,6 +10,7 @@ import {
 } from "~/components/ui/select";
 import { AntDesign } from "@expo/vector-icons";
 import { RELATIONSHIP_OPTIONS } from "~/constants/select-data";
+import { ScrollView } from "react-native-gesture-handler";
 
 interface RelationshipSelectProps {
   selectedRelationship?: Option;
@@ -27,6 +28,7 @@ export function RelationshipSelect({
       <AntDesign name="team" size={24} color="#438BF7" />
 
       <Select
+        key={selectedRelationship?.value ?? "none"}
         value={selectedRelationship}
         onValueChange={setSelectedRelationship}
       >
@@ -40,16 +42,18 @@ export function RelationshipSelect({
           />
         </SelectTrigger>
 
-        <SelectContent className="w-[160px] bg-white border-gray-200">
-          <SelectGroup>
-            {RELATIONSHIP_OPTIONS.map((option) => (
-              <RelationshipSelectItem
-                key={option.value}
-                label={option.label}
-                value={option.value}
-              />
-            ))}
-          </SelectGroup>
+        <SelectContent className="w-[160px] max-h-[175px] bg-white border-gray-200">
+          <ScrollView>
+            <SelectGroup>
+              {RELATIONSHIP_OPTIONS.map((option) => (
+                <RelationshipSelectItem
+                  key={option.value}
+                  label={option.label}
+                  value={option.value}
+                />
+              ))}
+            </SelectGroup>
+          </ScrollView>
         </SelectContent>
       </Select>
     </View>

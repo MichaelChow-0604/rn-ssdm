@@ -4,11 +4,11 @@ import { BackButton } from "~/components/back-button";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Feather from "@expo/vector-icons/Feather";
 import { Switch } from "~/components/ui/switch";
-import { useState } from "react";
 import { Input } from "~/components/ui/input";
+import { useSettings } from "~/context/setting-context";
 
 export default function NotificationRule() {
-  const [notificationEnabled, setNotificationEnabled] = useState(true);
+  const { notificationEnabled, setNotificationEnabled } = useSettings();
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -37,8 +37,7 @@ export default function NotificationRule() {
 
             <Switch
               checked={notificationEnabled}
-              onCheckedChange={setNotificationEnabled}
-              disabled={true}
+              onCheckedChange={(checked) => setNotificationEnabled(checked)}
             />
           </View>
 

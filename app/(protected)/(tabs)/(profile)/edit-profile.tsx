@@ -1,59 +1,39 @@
 import {
   View,
   Text,
-  SafeAreaView,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  TouchableOpacity,
-  Image,
 } from "react-native";
-import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
-import { useState } from "react";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Card } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { BackButton } from "~/components/back-button";
-import { useProfile } from "~/context/profile-context";
-import { router } from "expo-router";
-import { profileSchema } from "~/schema/profile-schema";
-import { z } from "zod";
-import { Controller, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { Controller } from "react-hook-form";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { pickImage } from "~/lib/pick-image";
-
-type ProfileFormFields = z.infer<typeof profileSchema>;
+import { useEditProfileForm } from "~/hooks/use-edit-profile-form";
+import { GetProfileResponse } from "~/lib/http/response-type/profile";
+import { useQuery } from "@tanstack/react-query";
+import { getProfile } from "~/lib/http/endpoints/profile";
+import { LoadingOverlay } from "~/components/loading-overlay";
+import { ProfileAvatar } from "~/components/profile-avatar";
 
 export default function EditProfile() {
-  const { profile, updateProfile } = useProfile();
-  const [localPic, setLocalPic] = useState<string | null>(profile.profilePic);
-
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-    watch,
-  } = useForm<ProfileFormFields>({
-    resolver: zodResolver(profileSchema),
-    defaultValues: {
-      firstName: profile.firstName,
-      lastName: profile.lastName,
-    },
+  const { data: profile } = useQuery<GetProfileResponse>({
+    queryKey: ["profile", "get"],
+    queryFn: getProfile,
   });
 
-  const handlePickImage = async () => {
-    const uri = await pickImage();
-    if (uri) setLocalPic(uri);
-  };
-
-  const handleSave = handleSubmit((data) => {
-    updateProfile({
-      profilePic: localPic ?? null,
-      firstName: data.firstName,
-      lastName: data.lastName,
-    });
-    router.back();
+  const {
+    form,
+    profilePic,
+    handlePickImage,
+    onSave,
+    isUpdatingProfile,
+    setProfilePic,
+  } = useEditProfileForm({
+    profile,
   });
 
   return (
@@ -63,36 +43,32 @@ export default function EditProfile() {
 
       <KeyboardAvoidingView
         className="flex-1 items-start px-4"
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        keyboardVerticalOffset={0}
       >
         <BackButton className="absolute top-4 left-4 z-50" />
 
         <ScrollView className="w-full" showsVerticalScrollIndicator={false}>
+          <LoadingOverlay
+            visible={isUpdatingProfile}
+            label="Updating profile..."
+            onDismiss={() => {}}
+          />
+
           {/* Profile pic */}
           <View className="flex items-center justify-center w-full gap-1 flex-col pt-20 pb-10">
-            <View className="w-24 h-24 relative">
-              <TouchableOpacity
-                className="rounded-full"
-                activeOpacity={0.8}
-                onPress={handlePickImage}
-              >
-                <Image
-                  source={
-                    localPic
-                      ? { uri: localPic }
-                      : require("~/assets/images/default_icon.png")
-                  }
-                  className="w-24 h-24 rounded-full text-black"
-                />
-                <View className="bg-white rounded-full absolute p-1 bottom-0 right-[-2]">
-                  <FontAwesome6 name="pen" size={12} color="black" />
-                </View>
-              </TouchableOpacity>
-            </View>
+            <ProfileAvatar
+              source={profilePic}
+              isEditable={true}
+              onSelectImage={handlePickImage}
+              onRemoveImage={() => setProfilePic(null)}
+            />
 
             {/* Preview current name while editing */}
             <Text className="text-xl font-bold text-white">
-              {`${watch("firstName") || ""} ${watch("lastName") || ""}`.trim()}
+              {`${form.watch("firstName") || ""} ${
+                form.watch("lastName") || ""
+              }`.trim()}
             </Text>
           </View>
 
@@ -114,7 +90,7 @@ export default function EditProfile() {
                 </View>
                 <Controller
                   name="firstName"
-                  control={control}
+                  control={form.control}
                   render={({ field: { onChange, onBlur, value } }) => (
                     <Input
                       className="bg-white text-black border-gray-200"
@@ -126,9 +102,9 @@ export default function EditProfile() {
                     />
                   )}
                 />
-                {errors.firstName && (
+                {form.formState.errors.firstName && (
                   <Text className="text-red-500">
-                    {errors.firstName.message}
+                    {form.formState.errors.firstName.message}
                   </Text>
                 )}
               </View>
@@ -141,7 +117,7 @@ export default function EditProfile() {
                 </View>
                 <Controller
                   name="lastName"
-                  control={control}
+                  control={form.control}
                   render={({ field: { onChange, onBlur, value } }) => (
                     <Input
                       className="bg-white text-black border-gray-200"
@@ -153,18 +129,15 @@ export default function EditProfile() {
                     />
                   )}
                 />
-                {errors.lastName && (
+                {form.formState.errors.lastName && (
                   <Text className="text-red-500">
-                    {errors.lastName.message}
+                    {form.formState.errors.lastName.message}
                   </Text>
                 )}
               </View>
             </View>
 
-            <Button
-              className="bg-button w-[40%] mx-auto my-4"
-              onPress={handleSave}
-            >
+            <Button className="bg-button w-[40%] mx-auto my-4" onPress={onSave}>
               <Text className="text-white font-bold">SAVE</Text>
             </Button>
           </Card>

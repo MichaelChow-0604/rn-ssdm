@@ -1,11 +1,12 @@
-import AntDesign from "@expo/vector-icons/AntDesign";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Feather from "@expo/vector-icons/Feather";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
 export const accountItems = [
   {
-    icon: <AntDesign name="user" size={24} color="#4b5563" />,
+    icon: <Feather name="user" size={24} color="#4b5563" />,
     label: "Profile",
     to: "/edit-profile",
   },
@@ -23,19 +24,32 @@ export const accountItems = [
 
 export const supportItems = [
   {
-    icon: <AntDesign name="questioncircleo" size={24} color="#4b5563" />,
+    icon: <FontAwesome name="question-circle-o" size={24} color="#4b5563" />,
     label: "Help & Support",
     to: "/help-support",
   },
   {
-    icon: <AntDesign name="exclamationcircleo" size={24} color="#4b5563" />,
-    label: "Terms and Disclaimer",
-    to: "/terms-disclaimer",
+    icon: (
+      <MaterialCommunityIcons
+        name="file-document-multiple-outline"
+        size={24}
+        color="#4b5563"
+      />
+    ),
+    label: "Terms and Conditions",
+    to: "/p-terms-and-conditions",
   },
   {
-    icon: <AntDesign name="lock" size={24} color="#4b5563" />,
+    icon: <FontAwesome name="exclamation-triangle" size={24} color="#4b5563" />,
+    label: "Disclaimer",
+    to: "/disclaimer",
+  },
+  {
+    icon: (
+      <MaterialCommunityIcons name="shield-lock" size={24} color="#4b5563" />
+    ),
     label: "Privacy Policy",
-    to: "/privacy",
+    to: "/privacy-policy",
   },
 ];
 
@@ -46,7 +60,9 @@ export const moreItems = [
     to: "/language",
   },
   {
-    icon: <AntDesign name="deleteuser" size={24} color="#E42D2D" />,
+    icon: (
+      <MaterialCommunityIcons name="delete-circle" size={24} color="#E42D2D" />
+    ),
     label: "Delete Account",
     to: "/delete-account",
     labelClassName: "text-red-500",

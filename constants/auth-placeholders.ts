@@ -6,14 +6,14 @@ export const SIGN_UP_DESCRIPTION = `I understood the`;
 // OTP Verification (Forget Password)
 export const OTP_VERIFICATION_FORGET_TITLE = `Check your email`;
 export const OTP_VERIFICATION_FORGET_DESC_1 = `One time password has been sent to your email:`;
-export const OTP_VERIFICATION_FORGET_DESC_2 = `Enter the 4-digit code mentioned in the email`;
+export const OTP_VERIFICATION_FORGET_DESC_2 = `Enter the 6-digit code mentioned in the email`;
 
 // New Password
 export const NEW_PASSWORD_TITLE = `Set a new password`;
 export const NEW_CREDENTIALS = `New Credentials`;
 export const NEW_PASSWORD_REQUIREMENTS_1 = `Password must be at least 8 characters long`;
 export const NEW_PASSWORD_REQUIREMENTS_2 = `Password must contain at least 1 uppercase letter`;
-export const NEW_PASSWORD_REQUIREMENTS_3 = `Password must contain at least one number or special character`;
+export const NEW_PASSWORD_REQUIREMENTS_3 = `Password must contain at least one number and special character`;
 export const NEW_PASSWORD_DESCRIPTION = `Create a new password. Ensure it differs from previous ones for security`;
 export const NEW_PASSWORD_PLACEHOLDER = `Enter your new password`;
 export const NEW_PASSWORD_CONFIRM_PLACEHOLDER = `Re-enter password`;
@@ -28,7 +28,8 @@ export const OTP_VERIFICATION_DESC = `OTP code has been sent to your email:`;
 export const DIDNT_GET_CODE = `Didn't get the code?`;
 
 // Return Message (Sign up and Sign in)
-export const RETURN_MESSAGE_DESC = `Congratulations! You have been successfully authenticated.`;
+export const RETURN_MESSAGE_DESC_SIGN_IN = `Congratulations! You have been successfully authenticated.`;
+export const RETURN_MESSAGE_DESC_SIGN_UP = `Congratulations! You have been successfully registered.`;
 
 // Global
 export const SIGN_IN = `SIGN IN`;

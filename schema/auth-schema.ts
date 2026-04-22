@@ -7,8 +7,8 @@ export const signInSchema = z.object({
 
 export const signUpSchema = z
   .object({
-    firstName: z.string().min(1, { message: "First name is required" }),
-    lastName: z.string().min(1, { message: "Last name is required" }),
+    firstName: z.string().trim().min(1, { message: "First name is required" }),
+    lastName: z.string().trim().min(1, { message: "Last name is required" }),
     email: z.email({ message: "Invalid email address" }),
     password: z
       .string()
@@ -16,9 +16,11 @@ export const signUpSchema = z
       .regex(/[A-Z]/, {
         message: "Password must contain at least 1 uppercase letter",
       })
-      .regex(/[0-9!@#$%^&*(),.?":{}|<>]/, {
-        message:
-          "Password must contain at least one number or special character",
+      .regex(/[0-9]/, {
+        message: "Password must contain at least 1 number",
+      })
+      .regex(/[!@#$%^&*(),.?":{}|<>]/, {
+        message: "Password must contain at least 1 special character",
       }),
     confirmPassword: z.string().min(1, {
       message: "Confirm password is required",
@@ -54,9 +56,11 @@ export const newPasswordSchema = z
       .regex(/[A-Z]/, {
         message: "Password must contain at least 1 uppercase letter",
       })
-      .regex(/[0-9!@#$%^&*(),.?":{}|<>]/, {
-        message:
-          "Password must contain at least one number or special character",
+      .regex(/[0-9]/, {
+        message: "Password must contain at least 1 number",
+      })
+      .regex(/[!@#$%^&*(),.?":{}|<>]/, {
+        message: "Password must contain at least 1 special character",
       }),
     confirmPassword: z
       .string()
@@ -76,9 +80,11 @@ export const changePasswordSchema = z
       .regex(/[A-Z]/, {
         message: "Password must contain at least 1 uppercase letter",
       })
-      .regex(/[0-9!@#$%^&*(),.?":{}|<>]/, {
-        message:
-          "Password must contain at least one number or special character",
+      .regex(/[0-9]/, {
+        message: "Password must contain at least 1 number",
+      })
+      .regex(/[!@#$%^&*(),.?":{}|<>]/, {
+        message: "Password must contain at least 1 special character",
       }),
     confirmPassword: z
       .string()

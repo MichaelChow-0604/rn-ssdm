@@ -7,27 +7,106 @@ import {
 import Feather from "@expo/vector-icons/Feather";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Text } from "react-native";
-import { moveToTrash } from "~/lib/storage/trash";
 import { router } from "expo-router";
 import { useState } from "react";
 import { MoveToTrashAlert } from "~/components/pop-up/move-to-trash-alert";
+import { useQueryClient } from "@tanstack/react-query";
+import { documentKeys } from "~/lib/http/keys/document";
+import {
+  deleteDocument,
+  getDocumentById,
+  updateDocumentStatus,
+} from "~/lib/http/endpoints/document";
+import { useApiMutation } from "~/lib/http/use-api-mutation";
+import {
+  DeleteDocumentResponse,
+  DocumentStatus,
+  UpdateDocumentStatusResponse,
+} from "~/lib/http/response-type/document";
+import {
+  DeleteDocumentPayload,
+  UpdateDocumentStatusPayload,
+} from "~/lib/http/request-type/document";
+import { toast } from "sonner-native";
+import { DirectDeleteAlert } from "../pop-up/direct-delete-alert";
 
 interface DotDropdownProps {
   documentId: string;
-  onDeleted?: () => void;
+  status: DocumentStatus;
 }
 
-export default function DotDropdown({
-  documentId,
-  onDeleted,
-}: DotDropdownProps) {
+export default function DotDropdown({ documentId, status }: DotDropdownProps) {
+  const queryClient = useQueryClient();
   const [isMoveToTrashAlertOpen, setIsMoveToTrashAlertOpen] = useState(false);
+  const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
 
-  const handleMoveToTrash = async () => {
-    await moveToTrash(documentId);
-    onDeleted?.();
-    setIsMoveToTrashAlertOpen(false);
+  const moveToTrashMutation = useApiMutation<
+    UpdateDocumentStatusResponse,
+    UpdateDocumentStatusPayload
+  >({
+    mutationKey: ["document", "updateStatus"],
+    mutationFn: updateDocumentStatus,
+    onSuccess: () => {
+      setIsMoveToTrashAlertOpen(false);
+      toast.success("Document moved to trash successfully.", {
+        position: "bottom-center",
+      });
+      queryClient.invalidateQueries({ queryKey: documentKeys.list() });
+    },
+    onError: ({ status }) => {
+      // User try to move the document to trash when the document is still processing
+      if (status === 400) {
+        toast.error(
+          "Please wait for the document to be processed before moving it to trash."
+        );
+        return;
+      }
+      toast.error("Failed to move document to trash. Please try again later.");
+    },
+  });
+
+  const onConfirmMoveToTrash = () => {
+    moveToTrashMutation.mutate({ id: documentId, status: "TRASH" });
   };
+
+  const isMoveToTrashLoading = moveToTrashMutation.isPending;
+
+  // Direct delete for FAILED documents
+  const deleteMutation = useApiMutation<
+    DeleteDocumentResponse,
+    DeleteDocumentPayload
+  >({
+    mutationKey: ["document", "delete"],
+    mutationFn: deleteDocument,
+    onSuccess: () => {
+      setIsDeleteAlertOpen(false);
+      toast.success("Document deleted successfully.", {
+        position: "bottom-center",
+      });
+      queryClient.invalidateQueries({ queryKey: documentKeys.list() });
+    },
+    onError: (err) => {
+      toast.error("Failed to delete document. Please try again later.");
+    },
+  });
+
+  const onConfirmDelete = () => {
+    deleteMutation.mutate({ id: documentId as string, password: "" });
+  };
+
+  const isDeleteLoading =
+    moveToTrashMutation.isPending || deleteMutation.isPending;
+
+  // If the document's status is UPLOADED or PROCESSING, show the move to trash alert
+  // If the document's status is FAILED, show the direct delete alert
+  function handleMoveToTrashOrDelete() {
+    if (status === "FAILED") {
+      setIsDeleteAlertOpen(true);
+      return;
+    }
+
+    setIsMoveToTrashAlertOpen(true);
+  }
 
   return (
     <>
@@ -42,12 +121,17 @@ export default function DotDropdown({
         >
           <DropdownMenuItem
             className="flex-row items-center gap-2 active:bg-gray-100"
-            onPress={() =>
+            onPress={() => {
+              queryClient.prefetchQuery({
+                queryKey: documentKeys.detail(documentId),
+                queryFn: () => getDocumentById(documentId),
+              });
+
               router.push({
                 pathname: "/edit-document",
                 params: { documentId },
-              })
-            }
+              });
+            }}
           >
             <Feather name="edit" size={20} color="black" />
             <Text className="font-medium">View & edit details</Text>
@@ -55,7 +139,7 @@ export default function DotDropdown({
 
           <DropdownMenuItem
             className="flex-row items-center gap-2 active:bg-gray-100"
-            onPress={() => setIsMoveToTrashAlertOpen(true)}
+            onPress={handleMoveToTrashOrDelete}
           >
             <Feather name="trash-2" size={20} color="#E42D2D" />
             <Text className="font-medium text-[#E42D2D]">Move to trash</Text>
@@ -66,8 +150,16 @@ export default function DotDropdown({
       {/* Pop up alert */}
       <MoveToTrashAlert
         visible={isMoveToTrashAlertOpen}
-        onConfirm={handleMoveToTrash}
+        isLoading={isMoveToTrashLoading}
+        onConfirm={onConfirmMoveToTrash}
         onCancel={() => setIsMoveToTrashAlertOpen(false)}
+      />
+
+      <DirectDeleteAlert
+        visible={isDeleteAlertOpen}
+        isLoading={isDeleteLoading}
+        onConfirm={onConfirmDelete}
+        onCancel={() => setIsDeleteAlertOpen(false)}
       />
     </>
   );

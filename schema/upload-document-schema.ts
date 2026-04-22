@@ -1,0 +1,23 @@
+import * as z from "zod";
+
+export const uploadDocumentSchema = z.object({
+  title: z.string().trim().min(1, { message: "Title is required" }),
+  description: z.string().optional(),
+  id: z
+    .string()
+    .trim()
+    .min(1, { message: "ID is required" })
+    .regex(/^[a-zA-Z0-9]+$/, { message: "ID must be alphanumeric" }),
+  reference_number: z
+    .string()
+    .trim()
+    .regex(/^[a-zA-Z0-9]+$/, {
+      message: "Reference Number must be alphanumeric",
+    })
+    .optional()
+    .or(z.literal("")),
+  remarks: z.string().optional(),
+  recipients: z
+    .array(z.string())
+    .min(1, { message: "Please select at least one recipient" }),
+});

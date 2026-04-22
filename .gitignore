@@ -24,6 +24,9 @@ npm-debug.*
 yarn-debug.*
 yarn-error.*
 
+# Firebase
+ssdm-keyslink-firebase-adminsdk-fbsvc-6a5764535c.json
+
 # macOS
 .DS_Store
 *.pem

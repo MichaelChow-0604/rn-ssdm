@@ -1,26 +1,34 @@
 import { useEffect, useRef, useState } from "react";
 import {
-  ensureLocalFromAsset,
+  ensureLocalFromBlob,
   openFile,
   resolveFileMeta,
 } from "~/lib/open-file";
 
 export type DialogStatus = "pending" | "success";
 
-interface Options {
-  requestMs?: number;
-  openDelayMs?: number;
+function wait(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export function useShareUnlock(options: Options = {}) {
-  const requestMs = options.requestMs ?? 5000;
-  const openDelayMs = options.openDelayMs ?? 2000;
+function nextFrame(): Promise<void> {
+  return new Promise((resolve) => requestAnimationFrame(() => resolve()));
+}
+
+export function useShareUnlock() {
+  const OPEN_DELAY_MS = 2000;
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogText, setDialogText] = useState("");
   const [dialogStatus, setDialogStatus] = useState<DialogStatus>("pending");
 
   const timers = useRef<number[]>([]);
+  const pendingOpenRef = useRef<{
+    localUri: string;
+    mimeType: string;
+    iosUTI?: string;
+    armed: boolean;
+  } | null>(null);
 
   function clearTimers() {
     timers.current.forEach((t) => clearTimeout(t));
@@ -29,33 +37,71 @@ export function useShareUnlock(options: Options = {}) {
 
   useEffect(() => clearTimers, []);
 
-  async function begin(localAssetModule: number, fileName: string) {
-    const localUri = await ensureLocalFromAsset(localAssetModule, fileName);
-    const { mimeType, iosUTI } = resolveFileMeta(fileName);
+  async function onDialogDismiss() {
+    // only open if armed
+    const payload = pendingOpenRef.current;
+    if (!payload?.armed) return;
 
+    // wait for a couple frames to ensure the modal is fully gone
+    await nextFrame();
+    await nextFrame();
+    await wait(120);
+
+    console.log("Starting to open file...");
+
+    await openFile({
+      localUri: payload.localUri,
+      mimeType: payload.mimeType,
+      iosUTI: payload.iosUTI,
+    });
+
+    console.log("File opened successfully");
+
+    pendingOpenRef.current = null;
+  }
+
+  function beginPending() {
+    clearTimers();
+    pendingOpenRef.current = null; // target not ready yet
     setDialogOpen(true);
     setDialogStatus("pending");
     setDialogText("Requesting for access");
+  }
+
+  async function completeWithBlob(blob: Blob, fileName: string) {
+    // Do not close; just transition to success and schedule open
+    clearTimers();
+
+    const localUri = await ensureLocalFromBlob(blob, fileName);
+    console.log("completeWithBlob", localUri, fileName);
+    const { mimeType, iosUTI } = resolveFileMeta(fileName);
+    console.log("completeWithBlob", mimeType, iosUTI);
+    pendingOpenRef.current = { localUri, mimeType, iosUTI, armed: false };
+
+    setDialogText("Unlock successful!");
+    setDialogStatus("success");
 
     timers.current.push(
       setTimeout(() => {
-        setDialogText("Unlock successful!");
-        setDialogStatus("success");
-      }, requestMs)
-    );
-
-    timers.current.push(
-      setTimeout(async () => {
+        if (pendingOpenRef.current) pendingOpenRef.current.armed = true;
         setDialogOpen(false);
-        await openFile({ localUri, mimeType, iosUTI });
-      }, requestMs + openDelayMs)
+      }, OPEN_DELAY_MS)
     );
+  }
+
+  function cancel() {
+    clearTimers();
+    pendingOpenRef.current = null;
+    setDialogOpen(false);
   }
 
   return {
     dialogOpen,
     dialogText,
     dialogStatus,
-    begin,
+    onDialogDismiss,
+    beginPending,
+    completeWithBlob,
+    cancel,
   };
 }

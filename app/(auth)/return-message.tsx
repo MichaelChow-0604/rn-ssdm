@@ -4,7 +4,8 @@ import Feather from "@expo/vector-icons/Feather";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect } from "react";
 import {
-  RETURN_MESSAGE_DESC,
+  RETURN_MESSAGE_DESC_SIGN_IN,
+  RETURN_MESSAGE_DESC_SIGN_UP,
   RETURN_SUCCESS,
   SIGN_IN,
 } from "~/constants/auth-placeholders";
@@ -40,7 +41,11 @@ export default function ReturnMessagePage() {
         <Text className="text-3xl font-bold my-4">{RETURN_SUCCESS}</Text>
 
         {/* Description */}
-        <Text className="text-lg text-center">{RETURN_MESSAGE_DESC}</Text>
+        <Text className="text-lg text-center">
+          {mode === "signup"
+            ? RETURN_MESSAGE_DESC_SIGN_UP
+            : RETURN_MESSAGE_DESC_SIGN_IN}
+        </Text>
 
         {/* Back to sign in button */}
         {mode === "signup" && (

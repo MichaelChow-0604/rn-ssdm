@@ -1,5 +1,6 @@
 import { useRouter } from "expo-router";
 import {
+  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -8,11 +9,10 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button } from "~/components/ui/button";
-import { FormProvider, useForm } from "react-hook-form";
+import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { changePasswordSchema } from "~/schema/auth-schema";
-import { useCallback, useMemo, useState } from "react";
 import {
   NEW_PASSWORD_DESCRIPTION,
   NEW_PASSWORD_PLACEHOLDER,
@@ -22,20 +22,52 @@ import {
   NEW_PASSWORD_CONFIRM_PLACEHOLDER,
 } from "~/constants/auth-placeholders";
 import { BackButton } from "~/components/back-button";
-import { IncorrectPassword } from "~/components/pop-up/incorrect-password";
-import {
-  validatePasswordLength,
-  validatePasswordSpecialChar,
-  validatePasswordUppercase,
-} from "~/lib/password-validation";
 import { PasswordInput } from "~/components/password/password-input";
 import { PasswordRequirements } from "~/components/password/password-requirement";
+import { useApiMutation } from "~/lib/http/use-api-mutation";
+import { ChangePasswordResponse } from "~/lib/http/response-type/auth";
+import { ChangePasswordPayload } from "~/lib/http/request-type/auth";
+import { changePassword } from "~/lib/http/endpoints/auth";
+import { toast } from "sonner-native";
+import { usePasswordValidation } from "~/hooks/use-password-validation";
+import { useRateLimit } from "~/hooks/use-rate-limit";
 
 type ChangePasswordFormFields = z.infer<typeof changePasswordSchema>;
 
 export default function ChangePassword() {
   const router = useRouter();
-  const [open, setOpen] = useState(false);
+
+  const { isLocked, remainingTime, triggerLockout, clearLockout } =
+    useRateLimit("change-password");
+
+  const changePasswordMutation = useApiMutation<
+    ChangePasswordResponse,
+    ChangePasswordPayload
+  >({
+    mutationKey: ["auth", "sign-up"],
+    mutationFn: changePassword,
+    onSuccess: () => {
+      clearLockout();
+      router.replace("/return-message-reset");
+    },
+    onError: ({ status }) => {
+      switch (status) {
+        case 400:
+          toast.error("Old password does not match.");
+          break;
+        case 429:
+          triggerLockout();
+          toast.error(
+            "You have reached the maximum number of attempts. Please try again in 15 minutes."
+          );
+          break;
+        default:
+          toast.error("Something went wrong. Please try again later.");
+      }
+    },
+  });
+
+  const isResettingPassword = changePasswordMutation.isPending;
 
   const methods = useForm<ChangePasswordFormFields>({
     resolver: zodResolver(changePasswordSchema),
@@ -47,72 +79,35 @@ export default function ChangePassword() {
     mode: "onChange",
   });
 
-  const { handleSubmit, watch } = methods;
+  const { handleSubmit } = methods;
 
-  const watchedPassword = watch("password");
-  const watchedConfirmPassword = watch("confirmPassword");
-  const watchedOldPassword = watch("oldPassword");
+  const watchedPassword = useWatch({
+    control: methods.control,
+    name: "password",
+    defaultValue: "",
+  });
+  const validationResults = usePasswordValidation(watchedPassword);
 
-  const tempCheck = useCallback(() => {
-    if (watchedOldPassword === "12345678") {
-      router.replace("/return-message-reset");
-    } else {
-      setOpen(true);
-    }
-  }, [watchedOldPassword, router]);
-
-  // Memoized validation results
-  const validationResults = useMemo(() => {
-    if (!watchedPassword) {
-      return {
-        length: false,
-        uppercase: false,
-        specialChar: false,
-        allValid: false,
-      };
+  const onSubmit = (data: ChangePasswordFormFields) => {
+    if (isLocked) {
+      toast.info(`Please wait ${remainingTime} seconds before trying again.`);
+      return;
     }
 
-    const length = validatePasswordLength(watchedPassword);
-    const uppercase = validatePasswordUppercase(watchedPassword);
-    const specialChar = validatePasswordSpecialChar(watchedPassword);
-    const allValid = length && uppercase && specialChar;
-
-    return { length, uppercase, specialChar, allValid };
-  }, [watchedPassword]);
-
-  // Memoized password match check
-  const doPasswordsMatch = useMemo(() => {
-    return (
-      watchedPassword &&
-      watchedConfirmPassword &&
-      watchedPassword === watchedConfirmPassword
-    );
-  }, [watchedPassword, watchedConfirmPassword]);
-
-  // Memoized form validity
-  const isFormValid = useMemo(() => {
-    return (
-      validationResults.allValid &&
-      doPasswordsMatch &&
-      watchedOldPassword.trim().length > 0
-    );
-  }, [validationResults.allValid, doPasswordsMatch, watchedOldPassword]);
-
-  // Memoized submit handler
-  const onSubmit = useCallback(
-    (data: ChangePasswordFormFields) => {
-      console.log("Form data:", data);
-      tempCheck();
-    },
-    [tempCheck]
-  );
+    changePasswordMutation.mutate({
+      old_password: data.oldPassword,
+      confirm_password: data.confirmPassword,
+      password: data.password,
+    });
+  };
 
   return (
     <FormProvider {...methods}>
       <SafeAreaView className="flex-1 bg-white">
         <KeyboardAvoidingView
-          style={{ flexGrow: 1 }}
-          behavior={Platform.select({ ios: "padding", android: "height" })}
+          style={{ flex: 1 }}
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          keyboardVerticalOffset={0}
         >
           {/* Header */}
           <View className="flex-row items-center gap-2 px-4 pt-4 pb-8">
@@ -168,12 +163,16 @@ export default function ChangePassword() {
             <View className="flex flex-col pt-8 pb-4 w-full">
               <Button
                 className="bg-button text-buttontext"
-                disabled={!isFormValid}
+                disabled={isResettingPassword}
                 onPress={handleSubmit(onSubmit)}
               >
-                <Text className="text-white text-lg font-bold">
-                  {UPDATE_PASSWORD}
-                </Text>
+                {isResettingPassword ? (
+                  <ActivityIndicator size="small" color="white" />
+                ) : (
+                  <Text className="text-white text-lg font-bold">
+                    {UPDATE_PASSWORD}
+                  </Text>
+                )}
               </Button>
             </View>
 
@@ -189,8 +188,6 @@ export default function ChangePassword() {
             </View>
           </ScrollView>
         </KeyboardAvoidingView>
-
-        <IncorrectPassword visible={open} setOpen={setOpen} />
       </SafeAreaView>
     </FormProvider>
   );

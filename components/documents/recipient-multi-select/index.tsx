@@ -1,12 +1,12 @@
 import { useRef } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { IMultiSelectRef, MultiSelect } from "react-native-element-dropdown";
-import AntDesign from "@expo/vector-icons/AntDesign";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { styles } from "~/components/documents/recipient-multi-select/style";
 import { MultiOption } from "~/lib/types";
+import { Feather } from "@expo/vector-icons";
 
 interface RecipientsMultiSelectProps {
   options: MultiOption[];
@@ -46,7 +46,7 @@ export function RecipientsMultiSelect({
       searchPlaceholder={searchPlaceholder}
       onChange={(vals: any) => onChange(vals)}
       renderLeftIcon={() => (
-        <AntDesign style={styles.icon} color="black" name="user" size={20} />
+        <Feather style={styles.icon} color="black" name="user" size={20} />
       )}
       renderItem={(item: MultiOption) => (
         <View style={styles.item}>

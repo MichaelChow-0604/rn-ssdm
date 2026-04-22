@@ -16,8 +16,9 @@ export default function AuthPage() {
   return (
     <SafeAreaView className="flex-1 bg-white">
       <KeyboardAvoidingView
-        style={{ flexGrow: 1 }}
-        behavior={Platform.select({ ios: "padding", android: "height" })}
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        keyboardVerticalOffset={0}
       >
         <View className="bg-white items-center">
           {/* Form */}

@@ -1,80 +1,43 @@
 import {
-  Image,
-  SafeAreaView,
   Text,
-  TouchableOpacity,
   View,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { BackButton } from "~/components/back-button";
-import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { Card, CardHeader } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { Option } from "~/components/ui/select";
-import { useState } from "react";
-import { newContactSchema } from "~/schema/new-contact-schema";
-import * as z from "zod";
-import { Controller, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { Controller } from "react-hook-form";
 import { Button } from "~/components/ui/button";
-import { router } from "expo-router";
-import { addContact } from "~/lib/storage/contact";
 import { RelationshipSelect } from "~/components/contact/relationship-select";
 import { DistributionCheckbox } from "~/components/contact/distribution-checkbox";
-import { pickImage } from "~/lib/pick-image";
-
-type NewContactFormFields = z.infer<typeof newContactSchema>;
+import PhoneInput from "react-native-international-phone-number";
+import { useCreateContactForm } from "~/hooks/contact/use-create-contact-form";
+import { ProfileAvatar } from "~/components/profile-avatar";
 
 export default function CreateContactPage() {
-  const [profilePic, setProfilePic] = useState<string | null>(null);
-  const [isWhatsappChecked, setIsWhatsappChecked] = useState(false);
-  const [isSMSChecked, setIsSMSChecked] = useState(false);
-  const [selectedRelationship, setSelectedRelationship] = useState<Option>({
-    label: "Family",
-    value: "family",
-  });
-
-  const handlePickImage = async () => {
-    const uri = await pickImage();
-    if (uri) setProfilePic(uri);
-  };
-
   const {
     control,
+    errors,
+    profilePic,
+    setProfilePic,
+    handlePickImage,
+    isWhatsappChecked,
+    setIsWhatsappChecked,
+    isSMSChecked,
+    setIsSMSChecked,
+    selectedRelationship,
+    setSelectedRelationship,
+    selectedCountry,
+    handleSelectedCountry,
     handleSubmit,
-    formState: { errors },
-  } = useForm({
-    defaultValues: {
-      firstName: "",
-      lastName: "",
-      mobileNumber: "",
-      email: "",
-    },
-    resolver: zodResolver(newContactSchema),
-  });
-
-  const onSubmit = (data: NewContactFormFields) => {
-    const distributions: ("email" | "whatsapp" | "sms")[] = ["email"];
-    if (isWhatsappChecked) distributions.push("whatsapp");
-    if (isSMSChecked) distributions.push("sms");
-
-    void (async () => {
-      await addContact({
-        firstName: data.firstName.trim(),
-        lastName: data.lastName.trim(),
-        fullName: `${data.firstName.trim()} ${data.lastName.trim()}`,
-        mobileNumber: data.mobileNumber.trim(),
-        email: data.email.trim(),
-        profilePicUri: profilePic,
-        relationship: selectedRelationship?.value ?? null,
-        distributions,
-      });
-      router.back();
-    })();
-  };
+    onSubmit,
+    isCreatingContact,
+  } = useCreateContactForm();
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -83,7 +46,8 @@ export default function CreateContactPage() {
 
       <KeyboardAvoidingView
         className="flex-1 items-start px-4"
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        keyboardVerticalOffset={0}
       >
         {/* Header */}
         <View className="flex-row gap-4 items-center my-8 justify-start w-full">
@@ -97,25 +61,12 @@ export default function CreateContactPage() {
           {/* Profile pic */}
           <View className="h-[15%] flex items-center justify-center w-full gap-1 flex-col">
             {/* Profile pic box */}
-            <View className="w-24 h-24 relative">
-              <TouchableOpacity
-                className="rounded-full"
-                activeOpacity={0.8}
-                onPress={handlePickImage}
-              >
-                <Image
-                  source={
-                    profilePic
-                      ? { uri: profilePic }
-                      : require("~/assets/images/default_icon.png")
-                  }
-                  className="w-24 h-24 rounded-full text-black"
-                />
-                <View className="bg-white rounded-full absolute p-1 bottom-0 right-[-2]">
-                  <FontAwesome6 name="pen" size={12} color="black" />
-                </View>
-              </TouchableOpacity>
-            </View>
+            <ProfileAvatar
+              source={profilePic}
+              isEditable={true}
+              onSelectImage={handlePickImage}
+              onRemoveImage={() => setProfilePic(null)}
+            />
           </View>
 
           {/* Form section */}
@@ -138,7 +89,6 @@ export default function CreateContactPage() {
                     rules={{ required: true }}
                     render={({ field: { onChange, onBlur, value } }) => (
                       <Input
-                        onScroll={() => console.log("gg")}
                         scrollEnabled={false}
                         onChangeText={onChange}
                         onBlur={onBlur}
@@ -192,25 +142,32 @@ export default function CreateContactPage() {
               <AntDesign name="phone" size={24} color="#438BF7" />
               <View className="flex-col gap-1 flex-1">
                 <Controller
-                  name="mobileNumber"
+                  name="phone"
                   control={control}
                   rules={{ required: true }}
-                  render={({ field: { onChange, onBlur, value } }) => (
-                    <Input
-                      keyboardType="number-pad"
-                      onChangeText={onChange}
-                      onBlur={onBlur}
+                  render={({ field: { onChange, value } }) => (
+                    <PhoneInput
+                      phoneInputStyles={{
+                        container: {
+                          flex: 1,
+                          borderColor: "#e5e7eb",
+                        },
+                        input: {
+                          color: "black",
+                        },
+                      }}
+                      defaultCountry="HK"
+                      placeholder="Mobile no."
                       value={value}
-                      className="bg-white text-black border-gray-200"
-                      placeholder="Mobile number"
+                      onChangePhoneNumber={onChange}
+                      selectedCountry={selectedCountry}
+                      onChangeSelectedCountry={handleSelectedCountry}
                     />
                   )}
                 />
-
-                {/* Mobile number validation error */}
-                {errors.mobileNumber && (
+                {errors.phone && (
                   <Text className="text-redtext text-sm">
-                    {errors.mobileNumber.message}
+                    {errors.phone.message}
                   </Text>
                 )}
               </View>
@@ -230,6 +187,7 @@ export default function CreateContactPage() {
                       onBlur={onBlur}
                       value={value}
                       autoCorrect={false}
+                      autoCapitalize="none"
                       placeholder="Email"
                       className="bg-white text-black border-gray-200"
                     />
@@ -265,8 +223,13 @@ export default function CreateContactPage() {
             <Button
               className="w-[80%] self-center bg-button text-white"
               onPress={handleSubmit(onSubmit)}
+              disabled={isCreatingContact}
             >
-              <Text className="font-bold text-white">SAVE</Text>
+              {isCreatingContact ? (
+                <ActivityIndicator size="small" color="white" />
+              ) : (
+                <Text className="font-bold text-white">SAVE</Text>
+              )}
             </Button>
           </View>
         </ScrollView>
